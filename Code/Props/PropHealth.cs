@@ -4,7 +4,7 @@ using System;
 
 public sealed class PropHealth : Component, Component.IDamageable
 {
-    [Sync] public float CurrentHealth { get; set; }
+    [Property] public float CurrentHealth { get; set; }
     [Property] public float TotalValue { get; set; }
     [Property] public int FinalGibCount { get; set; }
     [Property] public float ValuePerGib { get; set; }
@@ -135,8 +135,9 @@ public sealed class PropHealth : Component, Component.IDamageable
             var scrapItem = gib.Components.Get<ResourceGib>(FindMode.EverythingInSelfAndDescendants);
             if (scrapItem == null) continue;
 
-            scrapItem.Initialize(ResourceType.Scrap, ValuePerGib, randomDir);
+            var randomResourceType = Data.Types.Count > 0 ? Data.Types[Game.Random.Int(0, Data.Types.Count - 1)] : ResourceType.Wood;
 
+            scrapItem.Initialize(randomResourceType, ValuePerGib, randomDir);
         }
 
         GameObject.Destroy();

@@ -2,9 +2,10 @@ using Sandbox;
 
 public enum ResourceType
 {
-    Scrap,
-    Energy,
+    Wood,
+    Metal,
     Plastic,
+    Glass,
     Battery
 }
 

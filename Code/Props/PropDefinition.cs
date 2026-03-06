@@ -7,6 +7,7 @@ public partial class PropDefinition : GameResource
     [Property, Group("Identity")] public string PropID { get; set; } = "Item";
     [Property, Group("Identity")] public int Tier { get; set; } = 1;
     [Property, Group("Identity")] public Model Model { get; set; }
+    [Property, Group("Identity")] public List<ResourceType> Types { get; set; } = new();
 
     [Property, Group("Stats"), Range(1, 5)] public int RarityMod { get; set; } = 1;
 

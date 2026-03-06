@@ -1,10 +1,8 @@
 using Sandbox;
 
-// On hérite de Component, on écoute IPressable (pour le joueur), ET on signe IWorldItem
 public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
 {
-    [Property] public ResourceType Type { get; set; } = ResourceType.Scrap;
-    [Property] public float Value { get; set; }
+    [Property] public ItemData ItemData { get; private set; }
     [Property] public Vector3 LaunchVelocity { get; set; }
     [Property] public Vector3 LaunchAngularVelocity { get; set; }
 
@@ -12,7 +10,7 @@ public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
 
     public ItemData GetItemData()
     {
-        return new ItemData { Type = this.Type, Value = this.Value };
+        return ItemData;
     }
 
     public void Consume()
@@ -22,9 +20,12 @@ public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
 
     public void Initialize(ResourceType type, float value, Vector3 randomDir)
     {
-        Type = type;
-        Value = value;
         RandomizeLaunch(randomDir);
+        ItemData = new ItemData
+        {
+            Type = type,
+            Value = value
+        };
     }
 
     private void RandomizeLaunch(Vector3 randomDir)
