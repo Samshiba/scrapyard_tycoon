@@ -1,0 +1,42 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits PanelComponent
+@using System.Linq
+@using System.Collections.Generic
+
+<root>
+	<div class="tooltip-anchor">
+		@foreach (var tip in ActiveTooltips)
+		{
+			<div class="tooltip-row">
+				<span class="tooltip-key">@GetKeyLabel(tip.InputAction)</span>
+				<span class="tooltip-desc">@tip.Description</span>
+			</div>
+		}
+	</div>
+</root>
+
+@code {
+	List<TooltipEntry> ActiveTooltips = new();
+
+	string GetKeyLabel(string action)
+	{
+		return Input.GetButtonOrigin(action) ?? action;
+	}
+
+	protected override void OnUpdate()
+	{
+		ActiveTooltips = TooltipManager.Local?.ActiveTooltips ?? new();
+	}
+
+	protected override int BuildHash()
+	{
+		var hash = new System.HashCode();
+		foreach (var t in ActiveTooltips)
+		{
+			hash.Add(t.InputAction);
+			hash.Add(t.Description);
+		}
+		return hash.ToHashCode();
+	}
+}

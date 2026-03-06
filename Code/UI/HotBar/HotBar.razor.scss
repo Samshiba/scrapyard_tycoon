@@ -1,0 +1,65 @@
+.hotbar {
+	position: absolute;
+	bottom: 32px;
+	left: 50%;
+	transform: translateX(-50%);
+
+	display: flex;
+	flex-direction: row;
+	gap: 8px;
+	align-items: flex-end;
+}
+
+.hotbar-slot {
+	position: relative;
+	width: 64px;
+	height: 64px;
+	border-radius: 10px;
+
+	background-color: rgba(0, 0, 0, 0.5);
+	border: 2px solid rgba(255, 255, 255, 0.15);
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	transition: border-color 0.1s ease, background-color 0.1s ease, transform 0.1s ease;
+}
+
+/* Slot actif */
+.hotbar-slot.active {
+	border-color: rgba(255, 255, 255, 0.85);
+	background-color: rgba(255, 255, 255, 0.12);
+	transform: translateY(-4px);
+	/* remonte légèrement */
+}
+
+/* Slot vide, un peu plus discret */
+.hotbar-slot.empty {
+	opacity: 0.4;
+}
+
+/* Numéro de slot en haut à gauche */
+.slot-number {
+	position: absolute;
+	top: 4px;
+	left: 7px;
+	font-size: 10px;
+	color: rgba(255, 255, 255, 0.5);
+	font-weight: bold;
+}
+
+.slot-icon {
+	width: 40px;
+	height: 40px;
+	object-fit: contain;
+}
+
+/* Fallback si pas d'icône */
+.slot-name {
+	font-size: 9px;
+	color: rgba(255, 255, 255, 0.7);
+	text-align: center;
+	padding: 4px;
+	word-break: break-word;
+}

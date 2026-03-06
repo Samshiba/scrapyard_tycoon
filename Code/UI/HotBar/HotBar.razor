@@ -1,0 +1,61 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits PanelComponent
+@using System.Linq
+
+<root>
+	<div class="hotbar">
+		@for (int i = 0; i < 4; i++)
+		{
+			var index = i;
+			var weapon = Inventory?.EquippedWeapons.Length > index
+				? Inventory.EquippedWeapons[index]
+				: null;
+			var isActive = Inventory?.ActiveSlotIndex == index && ActiveWeaponObject != null;
+
+			<div class="hotbar-slot @(isActive ? "active" : "") @(weapon == null ? "empty" : "")">
+				<span class="slot-number">@(index + 1)</span>
+
+				@if (weapon != null)
+				{
+					@if (!string.IsNullOrEmpty(weapon.IconPath))
+					{
+						<img src="@weapon.IconPath" class="slot-icon" />
+					}
+					else
+					{
+						<span class="slot-name">@weapon.WeaponName</span>
+					}
+				}
+			</div>
+		}
+	</div>
+</root>
+
+@code {
+	PlayerInventory Inventory;
+	GameObject ActiveWeaponObject => Inventory?.ActiveWeapon?.GameObject;
+
+	protected override void OnStart()
+	{
+		Inventory = Scene.GetAllComponents<PlayerInventory>()
+			.FirstOrDefault(x => !x.IsProxy);
+	}
+
+	protected override void OnUpdate()
+	{
+		if (Inventory == null)
+		{
+			Inventory = Scene.GetAllComponents<PlayerInventory>()
+				.FirstOrDefault(x => !x.IsProxy);
+		}
+	}
+
+	protected override int BuildHash()
+	{
+		return System.HashCode.Combine(
+			Inventory?.ActiveSlotIndex,
+			Inventory?.ActiveWeapon
+		);
+	}
+}

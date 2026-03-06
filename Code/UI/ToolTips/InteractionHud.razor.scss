@@ -1,0 +1,64 @@
+.tooltip-anchor {
+	position: absolute;
+	left: 32px;
+	bottom: 48px;
+
+	display: flex;
+	flex-direction: column-reverse;
+	/* les nouveaux éléments poussent vers le haut */
+	align-items: flex-start;
+	gap: 6px;
+}
+
+.tooltip-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+
+	background-color: rgba(0, 0, 0, 0.45);
+	border-radius: 4px;
+	padding: 5px 12px 5px 6px;
+
+	/* slide-in depuis la gauche */
+	animation: tooltip-in 0.15s ease-out;
+}
+
+.tooltip-key {
+	min-width: 28px;
+	height: 28px;
+	padding: 0 6px;
+
+	background-color: rgba(255, 255, 255, 0.15);
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	border-radius: 3px;
+	border-bottom-width: 2px;
+	/* effet "keycap" */
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	font-size: 13px;
+	font-weight: bold;
+	color: white;
+	text-transform: uppercase;
+}
+
+.tooltip-desc {
+	font-size: 13px;
+	color: rgba(255, 255, 255, 0.85);
+	text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes tooltip-in {
+	from {
+		opacity: 0;
+		transform: translateX(-8px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
