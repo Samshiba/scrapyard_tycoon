@@ -13,11 +13,16 @@ public sealed class BayComponent : Component
     {
         Owner = channel;
         Log.Info( $"Baie {BayId} assignée à {channel.DisplayName}" );
-        // TODO: Add loading of player visual upgrades
+        
+        // TODO: Apply visual upgrades from SaveData.Prestige.UnlockedPrestigeUpgrades
     }
 
     public void ClearOwner()
     {
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.Save();
+        }
         Owner = null;
     }
 }

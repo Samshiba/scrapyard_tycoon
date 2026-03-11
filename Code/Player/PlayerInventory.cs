@@ -7,6 +7,16 @@ public sealed class PlayerInventory : Component
 
     private GameObject _activeWeaponObject;
 
+    protected override void OnAwake()
+    {
+        if (!IsProxy && SaveManager.Instance?.Data?.Inventory != null)
+        {
+            EquippedWeapons = SaveManager.Instance.Data.Inventory.EquippedWeapons ?? new WeaponDefinition[4];
+            ActiveSlotIndex = SaveManager.Instance.Data.Inventory.ActiveWeaponIndex;
+            Log.Info($"🎯 Inventaire chargé : {ActiveSlotIndex}");
+        }
+    }
+
     [Property] public SkinnedModelRenderer PlayerBody { get; set; }
 
     protected override void OnUpdate()
@@ -40,6 +50,7 @@ public sealed class PlayerInventory : Component
         {
             UnequipCurrentWeapon();
             ActiveSlotIndex = index;
+            SaveChanges();
             return;
         }
         if (ActiveSlotIndex == index && _activeWeaponObject != null)
@@ -50,6 +61,17 @@ public sealed class PlayerInventory : Component
 
         ActiveSlotIndex = index;
         SpawnWeaponInHand();
+        SaveChanges();
+    }
+
+    private void SaveChanges()
+    {
+        if (!IsProxy && SaveManager.Instance != null)
+        {
+            SaveManager.Instance.Data.Inventory.EquippedWeapons = EquippedWeapons;
+            SaveManager.Instance.Data.Inventory.ActiveWeaponIndex = ActiveSlotIndex;
+            SaveManager.Instance.Save();
+        }
     }
 
     private void UnequipCurrentWeapon()

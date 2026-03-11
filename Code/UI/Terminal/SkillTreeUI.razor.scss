@@ -1,0 +1,287 @@
+// --- CSS REFONT : STYLE CARRÉ & ÉPURÉ ---
+
+.skill-tree-bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(8, 10, 15, 0.85);
+    /* Plus sombre */
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+}
+
+.skill-tree-window {
+    background: #0f131a;
+    border: 2px solid #2d3542;
+    /* Bordure plus assumée */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.skt-header {
+    display: flex;
+    align-items: center;
+    padding: 16px 32px;
+    background: #141922;
+    /* Fond uni, pas de gradient */
+    border-bottom: 2px solid #2d3542;
+    gap: 24px;
+    z-index: 10;
+
+    .skt-title {
+        flex: 1;
+        font-size: 20px;
+        color: #f0f4f8;
+        font-weight: 700;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+    }
+
+    .skt-wallet {
+        color: #e2b740;
+        font-size: 16px;
+        font-weight: 800;
+        background: #1e1d17;
+        padding: 8px 16px;
+        border-radius: 4px;
+        /* Plus carré */
+        border: 1px solid #4a3e20;
+    }
+
+    .skt-close {
+        color: #64748b;
+        cursor: pointer;
+        font-size: 24px;
+        padding: 4px 8px;
+        transition: color 0.15s;
+
+        &:hover {
+            color: #ef4444;
+        }
+    }
+}
+
+.skt-graph {
+    flex: 1;
+    position: relative;
+    background-color: #0b0e14;
+    /* Grille plus discrète et technique */
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1%, transparent 1%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1%, transparent 1%);
+    cursor: grab;
+    // user-select: none; error
+
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+.skt-canvas {
+    position: absolute;
+    transform-origin: 0 0;
+    // will-change: transform; error
+}
+
+// Lignes CSS
+.skt-line {
+    position: absolute;
+    transform-origin: 0 0;
+    pointer-events: none;
+    z-index: 1;
+    /* Force l'affichage au-dessus du fond */
+    transition: background-color 0.2s, box-shadow 0.2s;
+
+    &.line-active {
+        background-color: #f8fafc;
+        /* Blanc éclatant */
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+        z-index: 2;
+        /* La ligne active passe par-dessus les lignes éteintes */
+    }
+
+    &.line-locked {
+        background-color: #334155 !important;
+        /* Force le gris sombre */
+        background-image: none !important;
+        /* S'assure qu'il n'y a plus de vieux gradient cassé */
+        opacity: 0.6;
+    }
+}
+
+// Noeuds
+.skt-node {
+    position: absolute;
+    border-radius: 8px;
+    /* Carré avec coins légèrement arrondis */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease-out, border-color 0.15s, box-shadow 0.15s;
+    border: 2px solid transparent;
+    z-index: 2;
+
+    .node-icon {
+        margin-bottom: 4px;
+        pointer-events: none;
+    }
+
+    .node-lvl {
+        color: #94a3b8;
+        background-color: rgba(0, 0, 0, 0.6);
+        font-weight: 700;
+        border-radius: 4px;
+        pointer-events: none;
+        letter-spacing: 1px;
+    }
+
+    &.node-locked {
+        background-color: #141922;
+        border-color: #2d3542;
+        color: #475569;
+        cursor: not-allowed;
+    }
+
+    &.node-unlocked {
+        background-color: #1e293b;
+        border-color: #475569;
+        /* Gris bleuté très sobre */
+    }
+
+    &.node-buyable {
+        background-color: #082f49;
+        /* Bleu nuit */
+        border-color: #0ea5e9;
+        /* Bleu Cyan vif */
+
+        &:hover {
+            transform: scale(1.08);
+            border-color: #38bdf8;
+            /* Cyan plus clair */
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+            /* Glow cyan */
+            background-color: #0c4a6e;
+        }
+    }
+
+    &.node-maxed {
+        background-color: #431407;
+        /* Fond marron très sombre */
+        border-color: #f97316;
+        /* Orange vif */
+        box-shadow: 0 0 15px rgba(249, 115, 22, 0.2);
+        /* Glow orange */
+    }
+
+    &.node-unknown {
+        background-color: #0f131a;
+        border-color: #334155;
+        cursor: default;
+        /* Enlève la petite main pour signifier qu'on ne peut pas cliquer */
+
+        .node-icon {
+            color: #94a3b8;
+            /* Gris clair pour que le "?" soit enfin bien visible ! */
+            font-weight: bold;
+        }
+
+        .node-lvl {
+            background-color: transparent;
+            color: #64748b;
+            /* Gris moyen pour le cadenas */
+        }
+    }
+}
+
+// Tooltip - Tailles ajustées et fix de coupure
+.skt-tooltip {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    background-color: #0f131a;
+    border: 1px solid #2d3542;
+    border-left: 5px solid #3b82f6;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9);
+    border-radius: 6px;
+    padding: 20px 24px;
+    /* Légèrement affiné */
+    min-width: 320px;
+    max-width: 450px;
+    /* On donne plus de place pour éviter les retours à la ligne */
+    pointer-events: none;
+    z-index: 100;
+
+    .tt-name {
+        color: #f8fafc;
+        font-size: 18px;
+        /* Titre plus raisonnable */
+        font-weight: 800;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        /* Espacement réduit */
+        white-space: nowrap;
+        /* Force le titre à rester sur une seule ligne */
+    }
+
+    .tt-desc {
+        color: #94a3b8;
+        font-size: 15px;
+        /* Description ajustée */
+        line-height: 24px;
+        /* FIX: Utiliser des pixels fixes empêche s&box de couper le haut des lettres */
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #1e293b;
+        white-space: normal;
+        /* La description, elle, a le droit de revenir à la ligne */
+    }
+
+    .tt-level {
+        color: #cbd5e1;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .tt-cost {
+        color: #e2b740;
+        font-size: 15px;
+        font-weight: 800;
+        margin-top: 14px;
+        background-color: #1e1d17;
+        border: 1px solid #4a3e20;
+        padding: 8px 16px;
+        border-radius: 4px;
+        align-self: flex-start;
+    }
+
+    .tt-maxed {
+        color: #f97316;
+        /* Assorti à la bordure Orange du noeud maxé */
+        font-size: 14px;
+        font-weight: 800;
+        margin-top: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .tt-locked {
+        color: #ef4444;
+        font-size: 14px;
+        font-weight: 800;
+        margin-top: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+}

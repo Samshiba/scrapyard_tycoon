@@ -1,0 +1,64 @@
+root {
+    justify-content: center;
+    align-items: center;
+    font-family: Poppins, sans-serif;
+}
+
+.seller-panel {
+    background-color: rgba(0, 0, 0, 0.55);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 20px 24px;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 12px;
+}
+
+.seller-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.seller-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.seller-counter-group {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 2px;
+}
+
+.seller-count {
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.seller-max {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.seller-separator {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.seller-bar-track {
+    height: 6px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.seller-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.2s ease-out;
+}

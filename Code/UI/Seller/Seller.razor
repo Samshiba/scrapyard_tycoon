@@ -1,0 +1,47 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+	<div class="seller-panel">
+
+		<div class="seller-header">
+			<label class="seller-title">Traitement</label>
+			<div class="seller-counter-group">
+				<label class="seller-count" style="color: @FillColor;">@(Machine?.ProcessingQueue.Count ?? 0)</label>
+				<label class="seller-max">/@(Machine?.MaxQueueSize ?? 50)</label>
+			</div>
+		</div>
+
+		<div class="seller-separator"></div>
+
+		<div class="seller-bar-track">
+			<div class="seller-bar-fill" style="width: @FillPercentage%; background-color: @FillColor;"></div>
+		</div>
+
+	</div>
+</root>
+@code {
+	[Property] public SellerMachine Machine { get; set; }
+
+	public float FillPercentage => Machine != null && Machine.MaxQueueSize > 0
+		? ((float)Machine.ProcessingQueue.Count / Machine.MaxQueueSize) * 100f
+		: 0f;
+
+	string FillColor
+	{
+		get
+		{
+			var pct = FillPercentage;
+			if (pct < 50f) return "#6ecf81";
+			if (pct < 80f) return "#f0c040";
+			return "#e8503a";
+		}
+	}
+
+	protected override int BuildHash() =>
+		Machine != null
+			? System.HashCode.Combine(Machine.ProcessingQueue.Count, Machine.MaxQueueSize)
+			: 0;
+}
