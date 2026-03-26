@@ -102,6 +102,6 @@ public sealed class SemiAutomaticWeapon : RangedWeapon
 
     public override IEnumerable<TooltipEntry> GetTooltips()
     {
-        yield return new TooltipEntry { InputAction = "attack1", Description = "Fire" };
+        yield return new TooltipEntry { InputAction = "attack1", Description = LocalizationManager.GetText( "tooltip.weapon.fire" ) };
     }
 }

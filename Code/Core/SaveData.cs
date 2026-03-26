@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 public class GameSaveData
 {
     public string Version { get; set; } = "1.0";
+    public string CurrentLanguage { get; set; } = "en";
     public PlayerSaveData Player { get; set; } = new();
     public InventorySaveData Inventory { get; set; } = new();
     public FactorySaveData Factory { get; set; } = new();

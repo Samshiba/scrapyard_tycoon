@@ -13,12 +13,18 @@ public sealed class SaveManager : Component
     {
         Instance = this;
         Load();
+        
+        // Initialiser le système de localisation avec la langue sauvegardée
+        LocalizationManager.Initialize( Data.CurrentLanguage );
     }
 
     public void Save()
     {
         try
         {
+            // Sauvegarder la langue actuelle
+            Data.CurrentLanguage = LocalizationManager.GetLanguage();
+            
             FileSystem.Data.WriteJson( SaveFileName, Data );
             Log.Info( "💾 Partie sauvegardée avec succès !" );
         }

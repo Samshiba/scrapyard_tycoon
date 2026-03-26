@@ -161,7 +161,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
 
     public bool ShouldShowEnergyBar()
     {
-        if (_playerStats == null) return false;
+        if ( _playerStats == null ) return false;
         return Data != null && Data.UsesEnergy &&
             (_playerStats.CurrentEnergy < _playerStats.MaxEnergy ||
              _playerStats.CurrentEnergy <= 0 ||
@@ -172,7 +172,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
 
     public virtual IEnumerable<TooltipEntry> GetTooltips()
     {
-        yield return new TooltipEntry { InputAction = "attack1", Description = "Attack" };
+        yield return new TooltipEntry { InputAction = "attack1", Description = LocalizationManager.GetText( "tooltip.weapon.attack" ) };
     }
 
     protected abstract void PerformAttack();

@@ -13,16 +13,16 @@
         <div class="shop-window">
 
             <div class="shop-header">
-                <span class="shop-title">🔫 ARMURERIE</span>
-                <span class="shop-wallet">💰 @GetScrap() Scrap</span>
-                <div class="shop-close" onclick=@CloseMenu>✖</div>
+                <span class="shop-title">@LocalizationManager.GetText("ui.shop.title")</span>
+                <span class="shop-wallet">💰 @GetScrap() @LocalizationManager.GetText("common.currency.scrap")</span>
+                <div class="shop-close" onclick=@CloseMenu>@LocalizationManager.GetText("ui.shop.button.close")</div>
             </div>
 
             <div class="shop-body">
                 
                 <div class="col-filters">
-                    <div class="filter-section">CATÉGORIE</div>
-                    <div class="filter-btn @(ActiveCategory == null ? "active" : "")" onclick=@(() => ActiveCategory = null)>TOUTES</div>
+                    <div class="filter-section">@LocalizationManager.GetText("ui.shop.filter.category")</div>
+                    <div class="filter-btn @(ActiveCategory == null ? "active" : "")" onclick=@(() => ActiveCategory = null)>@LocalizationManager.GetText("ui.shop.filter.allweapons")</div>
                     @foreach ( WeaponCategory cat in Enum.GetValues(typeof(WeaponCategory)) )
                     {
                         <div class="filter-btn @(ActiveCategory == cat ? "active" : "")" 
@@ -31,8 +31,8 @@
                         </div>
                     }
 
-                    <div class="filter-section" style="margin-top: 24px;">ÉLÉMENT</div>
-                    <div class="filter-btn @(ActiveElement == null ? "active" : "")" onclick=@(() => ActiveElement = null)>TOUS</div>
+                    <div class="filter-section" style="margin-top: 24px;">@LocalizationManager.GetText("ui.shop.filter.element")</div>
+                    <div class="filter-btn @(ActiveElement == null ? "active" : "")" onclick=@(() => ActiveElement = null)>@LocalizationManager.GetText("ui.shop.filter.all")</div>
                     @foreach ( DamageType dmg in Enum.GetValues(typeof(DamageType)) )
                     {
                         @* On ajoute "elem-nom" (ex: elem-magical) dans les classes *@
@@ -63,7 +63,7 @@
                                         }
                                     </div>
                                     <div class="item-name">@weapon.WeaponName</div>
-                                    <div class="item-teaser-lock">🔒 TIER @weapon.RequiredSpawnerTier</div>
+                                    <div class="item-teaser-lock">@LocalizationManager.GetText("ui.shop.weapon.tier") @weapon.RequiredSpawnerTier</div>
                                 </div>
                                 continue;
                             }
@@ -86,7 +86,7 @@
                                 <div class="item-name">@weapon.WeaponName</div>
                                 @if(!isUnlocked)
                                 {
-                                    <div class="item-price">@weapon.UnlockCost SCRAP</div>
+                                    <div class="item-price">@weapon.UnlockCost @LocalizationManager.GetText("common.currency.scrap")</div>
                                 }
                             </div>
                         }
@@ -146,12 +146,12 @@
                             {
                                 <div class="btn-buy @(canAfford ? "active" : "disabled")" 
                                      onclick=@(() => BuyWeapon(SelectedWeapon))>
-                                    ACHETER (@SelectedWeapon.UnlockCost SCRAP)
+                                    @LocalizationManager.GetText("ui.shop.button.buy") (@SelectedWeapon.UnlockCost @LocalizationManager.GetText("common.currency.scrap"))
                                 </div>
                             }
                             else
                             {
-                                <div class="equip-label">ASSIGNER À LA HOTBAR</div>
+                                <div class="equip-label">@LocalizationManager.GetText("ui.shop.button.equip")</div>
                                 <div class="slot-row">
                                     @for ( int i = 0; i < 4; i++ )
                                     {
@@ -170,7 +170,7 @@
                     else
                     {
                         <div class="inspect-empty">
-                            SÉLECTIONNEZ UNE ARME<br/>POUR VOIR LES DÉTAILS
+                            @LocalizationManager.GetText("ui.shop.empty.select")<br/>@LocalizationManager.GetText("ui.shop.empty.details")
                         </div>
                     }
                 </div>

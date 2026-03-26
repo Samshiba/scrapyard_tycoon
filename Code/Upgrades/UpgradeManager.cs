@@ -35,6 +35,38 @@ public sealed class UpgradeManager : Component
 
     // --- FONCTION UTILITAIRE POUR TON FUTUR TERMINAL ---
 
+    // Récupérer le nom localisé d'un upgrade depuis Localization files
+    public string GetUpgradeName( string upgradeId )
+    {
+        if ( !Database.TryGetValue( upgradeId, out var node ) ) return "[UNKNOWN]";
+
+        // Format de clé dans Localization files: "{upgradeId}.name"
+        string nameKey = $"upgrade.{upgradeId}.name";
+        string localizedName = LocalizationManager.GetText( nameKey, null );
+
+        if ( localizedName == null || localizedName.StartsWith( "[MISSING" ) )
+        {
+            return node.Name; // Fallback à la valeur en dur du JSON
+        }
+        return localizedName;
+    }
+
+    // Récupérer la description localisée d'un upgrade depuis Localization files
+    public string GetUpgradeDescription( string upgradeId )
+    {
+        if ( !Database.TryGetValue( upgradeId, out var node ) ) return "[UNKNOWN]";
+
+        // Format de clé dans Localization files: "{upgradeId}.description"
+        string descKey = $"upgrade.{upgradeId}.description";
+        string localizedDesc = LocalizationManager.GetText( descKey, null );
+
+        if ( localizedDesc == null || localizedDesc.StartsWith( "[MISSING" ) )
+        {
+            return node.Description; // Fallback à la valeur en dur du JSON
+        }
+        return localizedDesc;
+    }
+
     // Vérifie si un upgrade est débloquable (si le joueur a les bons parents)
     public bool IsNodeUnlocked( string upgradeId, GameSaveData playerSave )
     {

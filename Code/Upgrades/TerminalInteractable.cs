@@ -24,9 +24,7 @@ public sealed class TerminalInteractable : Component, Component.IPressable
     {
         return new IPressable.Tooltip
         {
-            Title = "Terminal Principal",
-            Description = "Ouvrir le réseau (E)",
-            Icon = "computer"
+            Description = LocalizationManager.GetText( "tooltip.terminal.description" ),
         };
     }
 }

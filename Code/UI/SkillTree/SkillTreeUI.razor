@@ -13,9 +13,9 @@
         <div class="skill-tree-window">
 
             <div class="skt-header">
-                <span class="skt-title">⚙ RÉSEAU D'AMÉLIORATIONS</span>
-                <span class="skt-wallet">💰 @GetScrap() Scrap</span>
-                <div class="skt-close" onclick=@CloseMenu>✖</div>
+                <span class="skt-title">@LocalizationManager.GetText("ui.skilltree.title")</span>
+                <span class="skt-wallet">💰 @GetScrap() @LocalizationManager.GetText("common.currency.scrap")</span>
+                <div class="skt-close" onclick=@CloseMenu>@LocalizationManager.GetText("ui.skilltree.button.close")</div>
             </div>
 
             <zoomgraphpanel @ref="GraphPanel" class="skt-graph"
@@ -106,20 +106,20 @@
                         float ttY = (GetPos( hNode.Id ).y * Zoom) + PanOffset.y;
 
                         <div class="skt-tooltip" style="left: @(ttX)px; top: @(ttY)px;">
-                            <div class="tt-name">@hNode.Icon @hNode.Name</div>
-                            <div class="tt-desc">@hNode.Description</div>
-                            <div class="tt-level">Niveau @hLvl / @hNode.MaxLevel</div>
+                            <div class="tt-name">@hNode.Icon @UpgradeManager.Instance.GetUpgradeName(hNode.Id)</div>
+                            <div class="tt-desc">@UpgradeManager.Instance.GetUpgradeDescription(hNode.Id)</div>
+                            <div class="tt-level">@LocalizationManager.GetText("ui.skilltree.tooltip.level") @hLvl @LocalizationManager.GetText("ui.skilltree.tooltip.maxlevel") @hNode.MaxLevel</div>
                             @if ( !hMaxed )
                             {
-                                <div class="tt-cost">@hNode.GetCostForLevel( hLvl ) Scrap</div>
+                                <div class="tt-cost">@hNode.GetCostForLevel( hLvl ) @LocalizationManager.GetText("common.currency.scrap")</div>
                             }
                             else
                             {
-                                <div class="tt-maxed">Débloqué au maximum</div>
+                                <div class="tt-maxed">@LocalizationManager.GetText("ui.skilltree.tooltip.maxed")</div>
                             }
                             @if ( !IsUnlocked( hNode.Id ) )
                             {
-                                <div class="tt-locked">Prérequis manquants</div>
+                                <div class="tt-locked">@LocalizationManager.GetText("ui.skilltree.tooltip.locked")</div>
                             }
                         </div>
                     }

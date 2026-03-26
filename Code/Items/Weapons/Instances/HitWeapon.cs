@@ -65,7 +65,7 @@ public sealed class HitWeapon : MeleeWeapon
 
     public override IEnumerable<TooltipEntry> GetTooltips()
     {
-        yield return new TooltipEntry { InputAction = "attack1", Description = "Hit" };
+        yield return new TooltipEntry { InputAction = "attack1", Description = LocalizationManager.GetText( "tooltip.weapon.hit" ) };
     }
 
 }

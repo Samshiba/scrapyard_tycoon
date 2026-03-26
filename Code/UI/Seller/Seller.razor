@@ -7,7 +7,7 @@
 	<div class="seller-panel">
 
 		<div class="seller-header">
-			<label class="seller-title">Traitement</label>
+			<label class="seller-title">@LocalizationManager.GetText("ui.seller.title")</label>
 			<div class="seller-counter-group">
 				<label class="seller-count" style="color: @FillColor;">@(Machine?.ProcessingQueue.Count ?? 0)</label>
 				<label class="seller-max">/@(Machine?.MaxQueueSize ?? 50)</label>

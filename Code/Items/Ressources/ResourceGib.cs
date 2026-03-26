@@ -18,9 +18,9 @@ public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
         GameObject.Destroy();
     }
 
-    public void Initialize(ResourceType type, float value, Vector3 randomDir)
+    public void Initialize( ResourceType type, float value, Vector3 randomDir )
     {
-        RandomizeLaunch(randomDir);
+        RandomizeLaunch( randomDir );
         ItemData = new ItemData
         {
             Type = type,
@@ -28,35 +28,35 @@ public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
         };
     }
 
-    private void RandomizeLaunch(Vector3 randomDir)
+    private void RandomizeLaunch( Vector3 randomDir )
     {
-        LaunchVelocity = randomDir * Game.Random.Float(150f, 350f) + Vector3.Up * Game.Random.Float(80f, 220f);
+        LaunchVelocity = randomDir * Game.Random.Float( 150f, 350f ) + Vector3.Up * Game.Random.Float( 80f, 220f );
         LaunchAngularVelocity = new Vector3(
-            Game.Random.Float(-5f, 5f),
-            Game.Random.Float(-5f, 5f),
-            Game.Random.Float(-5f, 5f)
+            Game.Random.Float( -5f, 5f ),
+            Game.Random.Float( -5f, 5f ),
+            Game.Random.Float( -5f, 5f )
         );
     }
 
     protected override void OnFixedUpdate()
     {
-        if (_launched) return;
+        if ( _launched ) return;
         _launched = true;
 
-        if (LaunchVelocity == Vector3.Zero) return;
+        if ( LaunchVelocity == Vector3.Zero ) return;
 
         var rb = Components.Get<Rigidbody>();
-        if (rb == null) return;
+        if ( rb == null ) return;
 
         rb.Velocity = LaunchVelocity;
         rb.AngularVelocity = LaunchAngularVelocity;
     }
 
-    public bool Press(IPressable.Event e)
+    public bool Press( IPressable.Event e )
     {
         var backpack = e.Source?.Components.Get<PlayerBackpack>();
 
-        if (backpack != null && backpack.TryAddItem(GetItemData()))
+        if ( backpack != null && backpack.TryAddItem( GetItemData() ) )
         {
             Consume();
             return true;
@@ -64,15 +64,13 @@ public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
         return false;
     }
 
-    public bool CanPress(IPressable.Event e) => true;
-    public void Release(IPressable.Event e) { }
-    public System.Nullable<IPressable.Tooltip> GetTooltip(IPressable.Event e)
+    public bool CanPress( IPressable.Event e ) => true;
+    public void Release( IPressable.Event e ) { }
+    public System.Nullable<IPressable.Tooltip> GetTooltip( IPressable.Event e )
     {
         return new IPressable.Tooltip
         {
-            Title = "Scrap Gib",
-            Description = "collect scrap",
-            Icon = "scrap_icon"
+            Description = LocalizationManager.GetText( "tooltip.gib.description" ),
         };
     }
 }
