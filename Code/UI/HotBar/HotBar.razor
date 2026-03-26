@@ -55,7 +55,8 @@
 	{
 		return System.HashCode.Combine(
 			Inventory?.ActiveSlotIndex,
-			Inventory?.ActiveWeapon
+			Inventory?.ActiveWeapon,
+			Inventory?.EquippedWeapons != null ? string.Join(",", Inventory.EquippedWeapons.Select(w => w?.Id ?? "null")) : "null"
 		);
 	}
 }

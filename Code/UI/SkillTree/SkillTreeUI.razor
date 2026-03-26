@@ -135,7 +135,7 @@
 
     const float NodeRadius = 48f;
 
-    bool IsOpen = false;
+    public bool IsOpen { get; set; } = false;
     string HoveredId = null;
 
     // --- Caméra : Zoom & Pan ---
@@ -167,6 +167,10 @@
     {
         if ( IsOpen ) return;
         if ( TimeSinceClosed < 0.2f ) return;
+
+        // Fermer le shop si ouvert
+        if ( WeaponShopUI.Local != null )
+            WeaponShopUI.Local.CloseMenu();
 
         IsOpen = true;
         Mouse.Position = new Vector2( Screen.Width / 2f, Screen.Height / 2f );
@@ -272,8 +276,13 @@
             GraphPanel.OnZoomScroll = OnScroll;
         }
 
-        Mouse.Visibility = IsOpen ? MouseVisibility.Visible : MouseVisibility.Hidden;
-        Panel.Style.PointerEvents = IsOpen ? PointerEvents.All : PointerEvents.None;
+        // Ne contrôler la souris que si l'autre panel n'est pas ouvert
+        bool otherPanelOpen = WeaponShopUI.Local != null && WeaponShopUI.Local.IsOpen;
+        if ( !otherPanelOpen )
+        {
+            Mouse.Visibility = IsOpen ? MouseVisibility.Visible : MouseVisibility.Hidden;
+            Panel.Style.PointerEvents = IsOpen ? PointerEvents.All : PointerEvents.None;
+        }
 
         if ( !IsOpen ) return;
 

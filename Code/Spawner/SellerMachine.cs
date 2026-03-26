@@ -6,9 +6,60 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
 {
     private PlayerStats _linkedBank;
 
-    [Property, Group( "Stats Tycoon" )] public float ProcessRate { get; set; } = 0.5f;
-    [Property, Group( "Stats Tycoon" )] public float ValueMultiplier { get; set; } = 1.0f;
-    [Property, Group( "Stats Tycoon" )] public int MaxQueueSize { get; set; } = 10;
+    [Property, Group( "Stats Tycoon" )] public float ProcessRateBase { get; set; } = 0.4f;
+    [Property, Group( "Stats Tycoon" )] public float ValueMultiplierBase { get; set; } = 1.0f;
+    [Property, Group( "Stats Tycoon" )] public int MaxQueueSizeBase { get; set; } = 10;
+
+    public int MaxQueueSize
+    {
+        get
+        {
+            int total = MaxQueueSizeBase;
+
+            int upgradeLevel1 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "seller_queue_1", 0 );
+            total += (upgradeLevel1 * 5);
+
+            int upgradeLevel2 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "seller_queue_2", 0 );
+            total += (upgradeLevel2 * 50);
+
+            return total;
+        }
+    }
+
+    public float ProcessRate
+    {
+        get
+        {
+            float total = ProcessRateBase;
+
+            int upgradeLevel1 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "seller_speed_1", 0 );
+            total += (upgradeLevel1 * 0.1f);
+
+            int upgradeLevel2 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "seller_speed_2", 0 );
+            total += (upgradeLevel2 * 0.5f);
+
+            return total;
+        }
+    }
+
+    public float ValueMultiplier
+    {
+        get
+        {
+            float total = ValueMultiplierBase;
+
+            int upgradeLevel1 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "seller_value_1", 0 );
+            total += (upgradeLevel1 * 0.05f);
+
+            int upgradeLevel2 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "seller_value_2", 0 );
+            total += (upgradeLevel2 * 0.25f);
+
+            int upgradeLevel3 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "seller_value_3", 0 );
+            total += (upgradeLevel3 * 1.0f);
+
+            return total;
+        }
+    }
 
     public Queue<ItemData> ProcessingQueue { get; private set; } = new();
     private TimeSince _timeSinceLastProcess;

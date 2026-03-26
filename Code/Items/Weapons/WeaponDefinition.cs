@@ -1,24 +1,85 @@
 using Sandbox;
 
+public enum DamageType
+{
+    Physical,
+    Magical,
+    Electric,
+    Poison
+}
+
+public enum WeaponCategory
+{
+    Melee,
+    Pistol,
+    Rifle,
+    Heavy,
+    Special
+}
+
+public enum WeaponHoldType
+{
+    None = 0,
+    Pistol = 1,
+    Rifle = 2,
+    Shotgun = 3,
+    RPG = 4,
+    Melee = 5
+}
+
+
 [AssetType( Name = "Weapon Definition", Extension = "weapon", Category = "ScrapYard" )]
 public partial class WeaponDefinition : GameResource
 {
-    [Property, Group( "Identity" )] public string Id { get; set; } = "bat";
-    [Property, Group( "Identity" )] public string WeaponName { get; set; } = "Batte en bois";
-    [Property, Group( "Identity" )] public string Description { get; set; } = "Ça tape dur.";
+    // --- Identity ---
+    [Property, Group( "Identity" )] public string Id { get; set; }
+    [Property, Group( "Identity" )] public string WeaponName { get; set; }
+    [Property, Group( "Identity" )] public string Description { get; set; }
     [Property, Group( "Identity" )] public GameObject WeaponPrefab { get; set; }
 
     private string _iconPath;
     [Property, Group( "Identity" )]
     public string IconPath
     {
-        get => string.IsNullOrEmpty( _iconPath ) ? $"Resources/Weapons/Textures/{Id}.png" : _iconPath;
+        get => string.IsNullOrEmpty( _iconPath ) ? $"Resources/Weapons/Textures/{Id}.prefab.png" : _iconPath;
         set => _iconPath = value;
     }
 
-    [Property, Group( "Stats" )] public float BaseDamage { get; set; } = 5f;
-    [Property, Group( "Stats" )] public float AttackRate { get; set; } = 1.5f;
-    [Property, Group( "Stats" )] public float Range { get; set; } = 130;
+    // --- Filters ---
+    [Property, Group( "Filters" )] public DamageType DamageType { get; set; }
+    [Property, Group( "Filters" )] public WeaponCategory Category { get; set; }
 
-    [Property, Group( "Economy" )] public int UnlockCost { get; set; } = 100;
+    // --- Stats ---
+    [Property, Group( "Stats" )] public float DamageBase { get; set; }
+    [Property, Group( "Stats" )] public float AttackRateBase { get; set; }
+    [Property, Group( "Stats" )] public float Range { get; set; }
+
+    // --- Energy System ---
+    [Property, Group( "Energy" )] public bool UsesEnergy { get; set; } = true;
+    [Property, Group( "Energy" )] public float EnergyCost { get; set; } = 10f;
+
+    // --- Collision & Wall Avoidance ---
+    [Property, Group( "Collision" )] public float WeaponLength { get; set; } = 40f;
+    [Property, Group( "Collision" )] public float LiftMultiplier { get; set; } = 1.5f;
+
+    // --- AudioVisual ---
+    [Property, Group( "Feedback" )] public SoundEvent AttackSound { get; set; }
+    [Property, Group( "Feedback" )] public SoundEvent ExhaustionSound { get; set; }
+    [Property, Group( "Feedback" )] public GameObject HitEffectPrefab { get; set; }
+    [Property, Group( "Feedback" )] public GameObject ProjectilePrefab { get; set; }
+
+    // --- Animation (3rd Person) ---
+    [Property, Group( "Animation" )] public string AnimationTriggerName { get; set; }
+    [Property, Group( "Animation" )] public WeaponHoldType HoldType { get; set; } = WeaponHoldType.Melee;
+    [Property, Group( "Animation" )] public int Handedness { get; set; } = 1; // 1 = Droite, 2 = Deux mains
+
+    // --- Viewmodel (1st Person) ---
+    [Property, Group( "Viewmodel" )] public Vector3 LocalHandPosition { get; set; } = Vector3.Zero;
+    [Property, Group( "Viewmodel" )] public Angles LocalHandRotation { get; set; } = Angles.Zero;
+    [Property, Group( "Viewmodel" )] public string ViewmodelIdleAnim { get; set; } = "idle";
+    [Property, Group( "Viewmodel" )] public string ViewmodelFireAnim { get; set; } = "b_fire";
+
+    // --- Economy ---
+    [Property, Group( "Economy" )] public int UnlockCost { get; set; }
+    [Property, Group( "Economy" )] public int RequiredSpawnerTier { get; set; }
 }

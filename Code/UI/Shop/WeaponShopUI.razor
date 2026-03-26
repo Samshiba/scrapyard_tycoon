@@ -1,0 +1,333 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+@if ( IsOpen )
+{
+    <div class="shop-bg">
+        <div class="shop-window">
+
+            <div class="shop-header">
+                <span class="shop-title">🔫 ARMURERIE</span>
+                <span class="shop-wallet">💰 @GetScrap() Scrap</span>
+                <div class="shop-close" onclick=@CloseMenu>✖</div>
+            </div>
+
+            <div class="shop-body">
+                
+                <div class="col-filters">
+                    <div class="filter-section">CATÉGORIE</div>
+                    <div class="filter-btn @(ActiveCategory == null ? "active" : "")" onclick=@(() => ActiveCategory = null)>TOUTES</div>
+                    @foreach ( WeaponCategory cat in Enum.GetValues(typeof(WeaponCategory)) )
+                    {
+                        <div class="filter-btn @(ActiveCategory == cat ? "active" : "")" 
+                             onclick=@(() => ActiveCategory = cat)>
+                            @cat.ToString().ToUpper()
+                        </div>
+                    }
+
+                    <div class="filter-section" style="margin-top: 24px;">ÉLÉMENT</div>
+                    <div class="filter-btn @(ActiveElement == null ? "active" : "")" onclick=@(() => ActiveElement = null)>TOUS</div>
+                    @foreach ( DamageType dmg in Enum.GetValues(typeof(DamageType)) )
+                    {
+                        @* On ajoute "elem-nom" (ex: elem-magical) dans les classes *@
+                        <div class="filter-btn elem-@dmg.ToString().ToLower() @(ActiveElement == dmg ? "active" : "")" 
+                             onclick=@(() => ActiveElement = dmg)>
+                            @dmg.ToString().ToUpper()
+                        </div>
+                    }
+                </div>
+
+                <div class="col-grid">
+                    <div class="grid-container">
+                        @foreach ( var weapon in FilteredWeapons )
+                        {
+                            int currentTier = GetCurrentSpawnerTier();
+
+                            // Règle 1 : Trop haut niveau = on cache
+                            if ( weapon.RequiredSpawnerTier > currentTier + 1 ) continue;
+
+                            // Règle 2 : Le palier N+1 (Le Teasing)
+                            if ( weapon.RequiredSpawnerTier == currentTier + 1 )
+                            {
+                                <div class="grid-item item-teaser">
+                                    <div class="item-img-box">
+                                        @if ( !string.IsNullOrEmpty(weapon.IconPath) )
+                                        {
+                                            <img src="@weapon.IconPath" alt="icon" />
+                                        }
+                                    </div>
+                                    <div class="item-name">@weapon.WeaponName</div>
+                                    <div class="item-teaser-lock">🔒 TIER @weapon.RequiredSpawnerTier</div>
+                                </div>
+                                continue;
+                            }
+
+                            // Règle 3 : Armes accessibles (Tier <= N)
+                            bool isUnlocked = SaveManager.Instance.Data.Inventory.UnlockedWeapons.Contains( weapon.Id );
+                            bool isSelected = SelectedWeapon == weapon;
+                            
+                            string itemClass = "grid-item item-accessible";
+                            if ( isUnlocked ) itemClass += " item-owned";
+                            if ( isSelected ) itemClass += " item-selected";
+
+                            <div class="@itemClass" onclick=@(() => SelectWeapon(weapon))>
+                                <div class="item-img-box">
+                                    @if ( !string.IsNullOrEmpty(weapon.IconPath) )
+                                    {
+                                        <img src="@weapon.IconPath" alt="icon" />
+                                    }
+                                </div>
+                                <div class="item-name">@weapon.WeaponName</div>
+                                @if(!isUnlocked)
+                                {
+                                    <div class="item-price">@weapon.UnlockCost SCRAP</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-inspect">
+                    @if ( SelectedWeapon != null )
+                    {
+                        bool isUnlocked = SaveManager.Instance.Data.Inventory.UnlockedWeapons.Contains( SelectedWeapon.Id );
+                        bool canAfford = GetScrap() >= SelectedWeapon.UnlockCost;
+
+                        <div class="inspect-header">
+                            <div class="inspect-name">@SelectedWeapon.WeaponName</div>
+                            <div class="inspect-tags">
+                                <span class="tag tag-cat">@SelectedWeapon.Category.ToString().ToUpper()</span>
+                                <span class="tag tag-dmg tag-@SelectedWeapon.DamageType.ToString().ToLower()">@SelectedWeapon.DamageType.ToString().ToUpper()</span>
+                            </div>
+                        </div>
+
+                        <div class="inspect-scroll">
+                            <div class="inspect-desc">@SelectedWeapon.Description</div>
+
+                            <div class="inspect-stats-box">
+                                <div>⚔️ BASE: <b>@SelectedWeapon.DamageBase</b></div>
+                                <div>⚡ VIT: <b>@SelectedWeapon.AttackRateBase</b></div>
+                                <div>📏 POR: <b>@SelectedWeapon.Range</b></div>
+                            </div>
+
+                           @*  <div class="inspect-attacks">
+                                @if ( !string.IsNullOrEmpty(SelectedWeapon.PrimaryAttack.Name) )
+                                {
+                                    <div class="atk-block">
+                                        <div class="atk-title">1️⃣ @SelectedWeapon.PrimaryAttack.Name <span class="atk-cd">(@SelectedWeapon.PrimaryAttack.Cooldown s)</span></div>
+                                        <div class="atk-desc">@SelectedWeapon.PrimaryAttack.Description (x@(SelectedWeapon.PrimaryAttack.DamageMultiplier) Dégâts)</div>
+                                    </div>
+                                }
+                                @if ( !string.IsNullOrEmpty(SelectedWeapon.SecondaryAttack.Name) )
+                                {
+                                    <div class="atk-block">
+                                        <div class="atk-title">2️⃣ @SelectedWeapon.SecondaryAttack.Name <span class="atk-cd">(@SelectedWeapon.SecondaryAttack.Cooldown s)</span></div>
+                                        <div class="atk-desc">@SelectedWeapon.SecondaryAttack.Description (x@(SelectedWeapon.SecondaryAttack.DamageMultiplier) Dégâts)</div>
+                                    </div>
+                                }
+                                @if ( !string.IsNullOrEmpty(SelectedWeapon.SpecialAttack.Name) )
+                                {
+                                    <div class="atk-block">
+                                        <div class="atk-title">🌟 @SelectedWeapon.SpecialAttack.Name <span class="atk-cd">(@SelectedWeapon.SpecialAttack.Cooldown s)</span></div>
+                                        <div class="atk-desc">@SelectedWeapon.SpecialAttack.Description (x@(SelectedWeapon.SpecialAttack.DamageMultiplier) Dégâts)</div>
+                                    </div>
+                                }
+                            </div> *@
+                        </div>
+
+                        <div class="inspect-action">
+                            @if ( !isUnlocked )
+                            {
+                                <div class="btn-buy @(canAfford ? "active" : "disabled")" 
+                                     onclick=@(() => BuyWeapon(SelectedWeapon))>
+                                    ACHETER (@SelectedWeapon.UnlockCost SCRAP)
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="equip-label">ASSIGNER À LA HOTBAR</div>
+                                <div class="slot-row">
+                                    @for ( int i = 0; i < 4; i++ )
+                                    {
+                                        int slotIndex = i;
+                                        bool isEquippedHere = SaveManager.Instance.Data.Inventory.EquippedWeapons[slotIndex] == SelectedWeapon.Id;
+                                        
+                                        <div class="btn-slot @(isEquippedHere ? "equipped" : "")" 
+                                             onclick=@(() => EquipToSlot(SelectedWeapon.Id, slotIndex))>
+                                            @(slotIndex + 1)
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="inspect-empty">
+                            SÉLECTIONNEZ UNE ARME<br/>POUR VOIR LES DÉTAILS
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+</root>
+
+@code {
+    public static WeaponShopUI Local { get; private set; }
+    
+    public List<WeaponDefinition> AllWeapons { get; set; } = new();
+
+    // --- États de l'UI ---
+    public bool IsOpen { get; set; } = false;
+    TimeSince TimeSinceOpened;
+    TimeSince TimeSinceClosed = 10f;
+    
+    WeaponDefinition SelectedWeapon;
+    WeaponCategory? ActiveCategory = null;
+    DamageType? ActiveElement = null;
+
+    protected override void OnAwake()
+    {
+        Local = this;
+        LoadWeapons();
+    }
+
+    private void LoadWeapons()
+    {
+        AllWeapons = ResourceLibrary.GetAll<WeaponDefinition>()
+            .OrderBy(w => w.RequiredSpawnerTier)
+            .ThenBy(w => w.UnlockCost)
+            .ToList();
+    }
+
+    // --- LIEN AVEC TON SYSTÈME DE JEU ---
+    int GetScrap() => (int)MathF.Floor(PlayerStats.Local?.TotalScrap ?? 0);
+    
+    int GetCurrentSpawnerTier() 
+    {
+        return SaveManager.Instance.Data.Factory.Tier;
+    }
+
+    // --- Logique de filtrage ---
+    IEnumerable<WeaponDefinition> FilteredWeapons => AllWeapons.Where(w => 
+        (ActiveCategory == null || w.Category == ActiveCategory) &&
+        (ActiveElement == null || w.DamageType == ActiveElement)
+    );
+
+    // --- Actions ---
+    public void OpenMenu()
+    {
+        if ( IsOpen || TimeSinceClosed < 0.2f ) return;
+        
+        // Fermer le skill tree si ouvert
+        if ( SkillTreeUI.Local != null )
+            SkillTreeUI.Local.CloseMenu();
+        
+        IsOpen = true;
+        TimeSinceOpened = 0;
+        // On sélectionne la première arme dispo par défaut si rien n'est sélectionné
+        if (SelectedWeapon == null && FilteredWeapons.Any())
+        {
+            SelectedWeapon = FilteredWeapons.FirstOrDefault(w => w.RequiredSpawnerTier <= GetCurrentSpawnerTier());
+        }
+        StateHasChanged();
+    }
+
+    public void CloseMenu()
+    {
+        IsOpen = false;
+        TimeSinceClosed = 0;
+        StateHasChanged();
+    }
+
+    void SelectWeapon(WeaponDefinition w)
+    {
+        SelectedWeapon = w;
+        StateHasChanged();
+    }
+
+    private void BuyWeapon(WeaponDefinition weapon)
+    {
+        if ( weapon == null ) return;
+        if ( PlayerStats.Local.SpendScrap( weapon.UnlockCost ) )
+        {
+            SaveManager.Instance.Data.Inventory.UnlockedWeapons.Add( weapon.Id );
+            SaveManager.Instance.Save();
+            StateHasChanged();
+        }
+    }
+
+    private void EquipToSlot(string weaponId, int slotIndex)
+    {
+        var weaponDef = AllWeapons.FirstOrDefault(w => w.Id == weaponId);
+        if ( weaponDef == null ) return;
+
+        PlayerInventory.Local?.EquipWeapon(weaponDef, slotIndex);
+        StateHasChanged();
+    }
+
+    protected override void OnUpdate()
+    {
+        base.OnUpdate();
+        if ( IsOpen && TimeSinceOpened > 0.1f )
+        {
+            // Handle Close
+            if ( Input.Pressed( "use" ) || Input.EscapePressed )
+            {
+                Input.EscapePressed = false; 
+                CloseMenu();
+            }
+
+            // Handle hotbar equip
+            if ( SelectedWeapon != null )
+            {
+                bool isUnlocked = SaveManager.Instance.Data.Inventory.UnlockedWeapons.Contains( SelectedWeapon.Id );
+                
+                if ( isUnlocked )
+                {
+
+                    if ( Input.Pressed( "Slot1" ) || Input.Pressed( "slot1" ) ) EquipToSlot( SelectedWeapon.Id, 0 );
+                    if ( Input.Pressed( "Slot2" ) || Input.Pressed( "slot2" ) ) EquipToSlot( SelectedWeapon.Id, 1 );
+                    if ( Input.Pressed( "Slot3" ) || Input.Pressed( "slot3" ) ) EquipToSlot( SelectedWeapon.Id, 2 );
+                    if ( Input.Pressed( "Slot4" ) || Input.Pressed( "slot4" ) ) EquipToSlot( SelectedWeapon.Id, 3 );
+                }
+            }
+        }
+        
+        // Ne contrôler la souris que si l'autre panel n'est pas ouvert
+        bool otherPanelOpen = SkillTreeUI.Local != null && SkillTreeUI.Local.IsOpen;
+        if ( !otherPanelOpen )
+        {
+            Mouse.Visibility = IsOpen ? MouseVisibility.Visible : MouseVisibility.Hidden;
+            Panel.Style.PointerEvents = IsOpen ? PointerEvents.All : PointerEvents.None;
+        }
+    }
+
+    protected override int BuildHash()
+    {
+        var h = new System.HashCode();
+        h.Add( IsOpen );
+        h.Add( GetScrap() );
+        h.Add( SelectedWeapon );
+        h.Add( ActiveCategory );
+        h.Add( ActiveElement );
+        h.Add( GetCurrentSpawnerTier() );
+
+        if ( SaveManager.Instance?.Data?.Inventory != null )
+        {
+            h.Add( SaveManager.Instance.Data.Inventory.UnlockedWeapons.Count );
+            foreach ( var w in SaveManager.Instance.Data.Inventory.EquippedWeapons ) h.Add( w );
+        }
+        return h.ToHashCode();
+    }
+}
+

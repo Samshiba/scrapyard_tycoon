@@ -45,7 +45,7 @@ public sealed class PropHealth : Component, Component.IDamageable
 
     public void OnDamage(in DamageInfo damage)
     {
-        if (!damage.Tags.Has("player") && !damage.Tags.Has("machine"))
+        if ( !damage.Tags.Has( "player" ) && !damage.Tags.Has( "machine" ) && !damage.Tags.Has( "explosion" ) )
         {
             return;
         }

@@ -26,10 +26,10 @@ public class InventorySaveData
 {
     public List<ItemData> CollectedItems { get; set; } = new();
 
-    public List<string> UnlockedWeapons { get; set; } = new() { "bat" };
+    public List<string> UnlockedWeapons { get; set; } = new();
     public List<string> UnlockedUtilities { get; set; } = new();
 
-    public WeaponDefinition[] EquippedWeapons { get; set; } = new WeaponDefinition[4];
+    public string[] EquippedWeapons { get; set; } = new string[4];
     public int ActiveWeaponIndex { get; set; } = 0;
 }
 
@@ -38,4 +38,6 @@ public class FactorySaveData
     public Dictionary<string, int> MachineUpgrades { get; set; } = new();
 
     public Queue<ItemData> SellerQueue { get; set; } = new();
+
+    public int Tier { get; set; } = 1;
 }

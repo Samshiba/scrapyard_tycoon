@@ -5,6 +5,12 @@ public sealed class PlayerStats : Component
     public static PlayerStats Local { get; private set; }
     [Property] public float TotalScrap { get; private set; } = 0;
 
+    // --- Energy System ---
+    [Property, Group( "Energy" )] public float MaxEnergy { get; set; } = 100f;
+    [Property, Group( "Energy" )] public float RechargeRate { get; set; } = 10f;
+    [Property, Group( "Energy" )] public float ExhaustionPenalty { get; set; } = 5.0f;
+    [Property, ReadOnly, Group( "Energy" )] public float CurrentEnergy { get; set; } = 100f;
+
     protected override void OnAwake()
     {
         if ( !IsProxy )

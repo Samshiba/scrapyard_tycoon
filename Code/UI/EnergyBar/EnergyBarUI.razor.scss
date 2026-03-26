@@ -1,0 +1,94 @@
+root {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+}
+
+.energy-container {
+    position: absolute;
+    top: 50%;
+    /* On part exactement du même point que ton crosshair */
+    left: 50%;
+    /* LA MAGIE EST ICI : -50% pour centrer en X, et 60px pour descendre en Y, juste au-dessus de la hotbar */
+    transform: translate(-50%, 60px);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Apparition instantanée, disparition douce */
+    opacity: 1;
+    transition: opacity 0.15s ease-in;
+
+    &.hidden {
+        opacity: 0;
+        transition: opacity 0.4s ease-out;
+    }
+
+    /* ---- ÉTAT ÉPUISÉ (ROUGE) ---- */
+    &.exhausted {
+        .energy-track {
+            /* On remplace le fond noir par un fond rouge très transparent */
+            background-color: rgba(239, 68, 68, 0.15);
+            /* La bordure blanche devient rouge vif */
+            border-color: rgba(239, 68, 68, 0.85);
+            animation: energy-pulse 0.5s ease-in-out infinite;
+        }
+
+        .energy-fill {
+            background-color: transparent;
+        }
+    }
+}
+
+/* ---- LE FOND DE LA BARRE (Plus large, plus fin, plus transparent) ---- */
+.energy-track {
+    width: 280px;
+    /* Plus grande, prend une bonne largeur d'écran */
+    height: 4px;
+    /* Plus fine, style BF2 */
+
+    /* Design repris de ta DA, mais plus discret */
+    background-color: rgba(0, 0, 0, 0.3);
+    /* Plus transparent */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+
+    /* Pour que la barre se vide vers le centre */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ---- LA JAUGE D'ÉNERGIE (Très transparente, "non agressive") ---- */
+.energy-fill {
+    height: 100%;
+    /* Un blanc pur TRÈS transparent pour le côté ghost/non agressif */
+    background-color: rgba(255, 255, 255, 0.35);
+    /* Beaucoup plus transparent */
+    border-radius: 2px;
+    transition: width 0.1s ease-out;
+}
+
+@keyframes energy-pulse {
+    0% {
+        opacity: 1.0;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(1.05);
+        /* Un très léger zoom pour l'alarme */
+    }
+
+    100% {
+        opacity: 1.0;
+        transform: scale(1);
+    }
+}
