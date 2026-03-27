@@ -6,4 +6,6 @@ centrer la souris dans le shop
 
 fix collision arme recule cassé quand on passe a la bat (distance mal reset je crois)
 
-pas de muzzle falsh sur le submachine gun
+pas de muzzle falsh sur le submachine gun (prefab rigle cassé)
+
+arme auto la barre d'enrgie ne devient pas rouge

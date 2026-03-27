@@ -13,7 +13,6 @@ public sealed class SemiAutomaticWeapon : RangedWeapon
     [Property, Group( "Animation" )] public float RecoilPushback { get; set; } = 3f;
     [Property, Group( "Animation" )] public float RecoilRecovery { get; set; } = 10f;
     [Property, Group( "Animation" )] public bool InvertRecoilPitch { get; set; } = false;
-    [Property, Group( "Animation" )] public bool InvertRecoilRoll { get; set; } = false;
 
     [Property, Group( "Burst" )] public int RoundsBurst { get; set; } = 3;
     [Property, Group( "Burst" )] public float TimeBetweenShots { get; set; } = 0.1f;

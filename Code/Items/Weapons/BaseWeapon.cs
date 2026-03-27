@@ -6,17 +6,11 @@ public abstract class BaseWeapon : Component, ITooltipProvider
     // --- Data & References ---
     [Property] public WeaponDefinition Data { get; set; }
 
-    [Property, ReadOnly, Group( "State" )] public bool IsExhausted { get; private set; } = false;
-
     public SkinnedModelRenderer PlayerBody { get; set; }
     public SkinnedModelRenderer ViewmodelArms { get; set; }
     private PlayerStats _playerStats;
 
     protected virtual bool IsAutomatic => false;
-
-    protected TimeSince TimeSinceLastAttack;
-
-    protected RealTimeSince _timeSinceExhausted;
 
     public float Damage
     {
@@ -79,11 +73,11 @@ public abstract class BaseWeapon : Component, ITooltipProvider
         if ( IsProxy || Data == null || _playerStats == null ) return;
 
         // 1. Energy Management (Exhaustion Recovery)
-        if ( IsExhausted )
+        if ( _playerStats.IsExhausted )
         {
-            if ( _timeSinceExhausted >= _playerStats.ExhaustionPenalty )
+            if ( _playerStats.TimeSinceExhausted >= _playerStats.ExhaustionPenalty )
             {
-                IsExhausted = false;
+                _playerStats.IsExhausted = false;
                 _playerStats.CurrentEnergy = _playerStats.MaxEnergy;
                 Log.Info( "Énergie restaurée, prête à tirer !" );
             }
@@ -94,7 +88,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
         }
 
         // 2. Energy Recharge
-        if ( _playerStats.CurrentEnergy < _playerStats.MaxEnergy && TimeSinceLastAttack > (1f / AttackRate) + 0.5f )
+        if ( _playerStats.CurrentEnergy < _playerStats.MaxEnergy && _playerStats.TimeSinceLastAttack > (1f / AttackRate) + 0.5f )
         {
             _playerStats.CurrentEnergy += _playerStats.RechargeRate * Time.Delta;
 
@@ -106,7 +100,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
             ? Input.Down( "attack1" )
             : Input.Pressed( "attack1" );
 
-        if ( shouldAttack && TimeSinceLastAttack >= (1f / AttackRate) )
+        if ( shouldAttack && _playerStats.TimeSinceLastAttack >= (1f / AttackRate) )
         {
             ExecuteAttack();
         }
@@ -116,7 +110,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
 
     protected void ExecuteAttack()
     {
-        if ( IsExhausted ) return;
+        if ( _playerStats.IsExhausted ) return;
 
         // Sound
         if ( Data.AttackSound != null )
@@ -130,7 +124,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
         if ( ViewmodelArms != null && !string.IsNullOrEmpty( Data.ViewmodelFireAnim ) )
             ViewmodelArms.Set( Data.ViewmodelFireAnim, true );
 
-        TimeSinceLastAttack = 0;
+        _playerStats.TimeSinceLastAttack = 0;
         PerformAttack();
     }
 
@@ -143,8 +137,8 @@ public abstract class BaseWeapon : Component, ITooltipProvider
         if ( _playerStats.CurrentEnergy <= 0 )
         {
             _playerStats.CurrentEnergy = 0;
-            IsExhausted = true;
-            _timeSinceExhausted = 0;
+            _playerStats.IsExhausted = true;
+            _playerStats.TimeSinceExhausted = 0;
 
             if ( Data.ExhaustionSound != null )
                 Sound.Play( Data.ExhaustionSound, WorldPosition );
@@ -165,7 +159,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
         return Data != null && Data.UsesEnergy &&
             (_playerStats.CurrentEnergy < _playerStats.MaxEnergy ||
              _playerStats.CurrentEnergy <= 0 ||
-             TimeSinceLastAttack < 1f);
+             _playerStats.TimeSinceLastAttack < 1f);
     }
 
     // --- Abstract & Virtual Methods ---

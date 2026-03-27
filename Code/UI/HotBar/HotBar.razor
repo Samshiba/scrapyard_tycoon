@@ -38,16 +38,14 @@
 
 	protected override void OnStart()
 	{
-		Inventory = Scene.GetAllComponents<PlayerInventory>()
-			.FirstOrDefault(x => !x.IsProxy);
+		Inventory = PlayerInventory.Local;
 	}
 
 	protected override void OnUpdate()
 	{
 		if (Inventory == null)
 		{
-			Inventory = Scene.GetAllComponents<PlayerInventory>()
-				.FirstOrDefault(x => !x.IsProxy);
+			Inventory = PlayerInventory.Local;
 		}
 	}
 

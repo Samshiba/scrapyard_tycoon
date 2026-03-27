@@ -12,6 +12,7 @@ public sealed class AutomaticWeapon : RangedWeapon
     [Property, Group( "Animation" )] public float RecoilKick { get; set; } = 15f;
     [Property, Group( "Animation" )] public float RecoilPushback { get; set; } = 3f;
     [Property, Group( "Animation" )] public float RecoilRecovery { get; set; } = 10f;
+    [Property, Group( "Animation" )] public bool InvertRecoilPitch { get; set; } = false;
 
     protected override bool IsAutomatic => true;
 
@@ -44,7 +45,8 @@ public sealed class AutomaticWeapon : RangedWeapon
                 return;
             }
 
-            LocalRotation = _baseRotation * Rotation.FromPitch( _currentRecoil );
+            float recoilAmount = InvertRecoilPitch ? -_currentRecoil : _currentRecoil;
+            LocalRotation = _baseRotation * Rotation.FromPitch( recoilAmount );
 
             float kickback = _currentRecoil * (-RecoilPushback / 10f);
             LocalPosition = _basePosition + new Vector3( kickback, 0, 0 );

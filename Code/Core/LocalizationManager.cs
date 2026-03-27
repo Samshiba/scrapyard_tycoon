@@ -6,7 +6,7 @@ using System.IO;
 
 /// <summary>
 /// Conteneur pour les traductions d'un domaine.
-/// Explorable dans l'inspecteur S&Box.
+/// Explorable dans l'inspecteur.
 /// </summary>
 [AssetType( Name = "translation_domain" )]
 public class TranslationDomain
