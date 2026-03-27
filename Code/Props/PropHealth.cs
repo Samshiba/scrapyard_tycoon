@@ -20,7 +20,7 @@ public sealed class PropHealth : Component, Component.IDamageable
         config = BalanceConfig.Instance;
         if (config == null)
         {
-            Log.Error("Aucun fichier BalanceConfig trouvé dans les assets !");
+            Log.Error("[PropHealth] ERROR: BalanceConfig not found. Ensure BalanceConfig.asset is in your project and loaded.");
             return;
         }
         Data = data;
@@ -49,7 +49,7 @@ public sealed class PropHealth : Component, Component.IDamageable
         {
             return;
         }
-        Log.Info($"PropHealth: Received {damage.Damage} damage. Tags = {string.Join(", ", damage.Tags)}");
+        Log.Info($"[PropHealth] Damage received: {damage.Damage} from tags: {string.Join(", ", damage.Tags)}");
         CurrentHealth -= damage.Damage;
         FlashWhite();
         if (CurrentHealth <= 0) OnBreak();
@@ -117,7 +117,7 @@ public sealed class PropHealth : Component, Component.IDamageable
     {
         if (GibPrefab == null)
         {
-            Log.Warning($"PropHealth: GibPrefab is not set on {GameObject.Name}, skipping gib spawn.");
+            Log.Warning($"[PropHealth] WARNING: GibPrefab not set on {GameObject.Name}. Gib spawning disabled.");
             return;
         }
 

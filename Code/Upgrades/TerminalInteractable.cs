@@ -6,14 +6,14 @@ public sealed class TerminalInteractable : Component, Component.IPressable
     {
         if ( e.Source == null ) return false;
 
-        // ✅ SkillTreeUI maintenant
+        // Show skill tree UI
         if ( SkillTreeUI.Local != null )
         {
             SkillTreeUI.Local.OpenMenu();
             return true;
         }
 
-        Log.Warning( "SkillTreeUI introuvable !" );
+        Log.Warning( "[TerminalInteractable] ERROR: SkillTreeUI component not found in scene" );
         return false;
     }
 

@@ -28,7 +28,7 @@ public sealed class ItemUnlockSystem : Component
         {
             _unlockedWeapons = SaveManager.Instance.Data.Inventory.UnlockedWeapons ?? new();
             _unlockedUtilities = SaveManager.Instance.Data.Inventory.UnlockedUtilities ?? new();
-            Log.Info($"🔓 {_unlockedWeapons.Count} armes et {_unlockedUtilities.Count} outils débloqués");
+            Log.Info($"[ItemUnlockSystem] Loaded: {_unlockedWeapons.Count} weapons and {_unlockedUtilities.Count} utilities unlocked");
         }
     }
 
@@ -48,7 +48,7 @@ public sealed class ItemUnlockSystem : Component
         {
             _unlockedWeapons.Add(weaponId);
             SaveChanges();
-            Log.Info($"🔓 Arme débloquée : {weaponId}");
+            Log.Info($"[ItemUnlockSystem] Weapon unlocked: {weaponId}");
         }
     }
 
@@ -58,7 +58,7 @@ public sealed class ItemUnlockSystem : Component
         {
             _unlockedUtilities.Add(utilityId);
             SaveChanges();
-            Log.Info($"🔓 Outil débloqué : {utilityId}");
+            Log.Info($"[ItemUnlockSystem] Utility tool unlocked: {utilityId}");
         }
     }
 

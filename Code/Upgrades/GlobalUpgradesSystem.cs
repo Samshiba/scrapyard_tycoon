@@ -13,67 +13,58 @@ public sealed class GlobalUpgradesSystem : Component
         Instance = this;
     }
 
-    // Un "raccourci" propre pour pointer directement vers la vraie sauvegarde
     private Dictionary<string, int> PlayerUpgrades => SaveManager.Instance?.Data?.Player?.GlobalUpgrades;
 
     public int GetUpgradeLevel( string upgradeId )
     {
         if ( PlayerUpgrades == null ) return 0;
 
-        // S'il n'a pas l'upgrade, on renvoie 0. Sinon, on renvoie son niveau.
         return PlayerUpgrades.GetValueOrDefault( upgradeId, 0 );
     }
 
-    /// <summary>
-    /// Tente d'acheter le prochain niveau d'une amélioration.
-    /// Ne prend plus le prix en paramètre : il le calcule tout seul via le JSON !
-    /// </summary>
     public bool TryPurchaseUpgrade( string upgradeId )
     {
-        // 1. Sécurité : Vérifier que tous nos systèmes sont bien chargés
+        // 1. Validate presence of necessary systems and data
         if ( PlayerUpgrades == null || UpgradeManager.Instance == null || PlayerStats.Local == null )
             return false;
 
-        // 2. Vérifier si l'amélioration existe dans notre fichier JSON
+        // 2. Verify upgrade exists in the JSON database
         if ( !UpgradeManager.Instance.Database.TryGetValue( upgradeId, out var node ) )
         {
-            Log.Warning( $"Tentative d'achat d'un upgrade inconnu : {upgradeId}" );
+            Log.Warning( $"[GlobalUpgradesSystem] Attempted purchase of unknown upgrade: {upgradeId}" );
             return false;
         }
 
         int currentLevel = GetUpgradeLevel( upgradeId );
 
-        // 3. Vérifier si on n'a pas déjà maxé cette compétence
+        // 3. Check if upgrade is already at max level
         if ( currentLevel >= node.MaxLevel )
         {
-            Log.Info( $"❌ Niveau maximum déjà atteint pour {node.Name}." );
+            Log.Info( $"[GlobalUpgradesSystem] WARNING: {node.Name} is already at maximum level {node.MaxLevel}" );
             return false;
         }
 
-        // 4. Vérifier les dépendances (L'arbre de compétences)
+        // 4. Verify all parent upgrade requirements are met
         if ( !UpgradeManager.Instance.IsNodeUnlocked( upgradeId, SaveManager.Instance.Data ) )
         {
-            Log.Info( $"❌ Compétences parentes requises pour débloquer {node.Name}." );
+            Log.Info( $"[GlobalUpgradesSystem] WARNING: Cannot unlock {node.Name}. Parent upgrades required." );
             return false;
         }
 
-        // 5. Calculer le prix du PROCHAIN niveau via la formule du JSON
+        // 5. Calculate cost for the next level
         float cost = node.GetCostForLevel( currentLevel );
 
-        // 6. Tenter de payer
+        // 6. Attempt payment
         if ( PlayerStats.Local.SpendScrap( cost ) )
         {
-            // On incrémente le niveau directement dans la sauvegarde globale
             PlayerUpgrades[upgradeId] = currentLevel + 1;
-
-            // On sauvegarde la partie sur le disque !
             SaveManager.Instance.Save();
 
-            Log.Info( $"✅ Achat réussi : {node.Name} (Niveau {currentLevel + 1}) pour {cost} Scrap." );
+            Log.Info( $"[GlobalUpgradesSystem] Upgrade purchased: {node.Name} (Level {currentLevel + 1}) for {cost} scrap" );
             return true;
         }
 
-        Log.Info( $"❌ Fonds insuffisants pour {node.Name}. Requis: {cost} Scrap." );
+        Log.Warning( $"[GlobalUpgradesSystem] WARNING: Insufficient funds for {node.Name}. Cost: {cost} scrap, Available: {PlayerStats.Local.TotalScrap} scrap" );
         return false;
     }
 }

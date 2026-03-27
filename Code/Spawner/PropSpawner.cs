@@ -33,7 +33,7 @@ public sealed class PropSpawner : Component
     protected override void OnStart()
     {
         _allProps = ResourceLibrary.GetAll<PropDefinition>().ToList();
-        Log.Info($"PropSpawner: {_allProps.Count} prop(s) trouvé(s).");
+        Log.Info($"[PropSpawner] Loaded {_allProps.Count} prop definition(s)");
         SpawnProp();
     }
 
@@ -78,6 +78,6 @@ public sealed class PropSpawner : Component
         var health = go.AddComponent<PropHealth>();
         health.Initialize(data);
 
-        Log.Info($"Spawned: {data.PropID} (Tier {data.Tier})");
+        Log.Info($"[PropSpawner] Spawned prop: {data.PropID} (Tier {data.Tier})");
     }
 }

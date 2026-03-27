@@ -86,11 +86,11 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
 
             if ( itemsTransferred > 0 )
             {
-                Log.Info( $"Sac vidé ! {itemsTransferred} objets ajoutés à la machine." );
+                Log.Info( $"[SellerMachine] Backpack emptied: {itemsTransferred} items transferred to machine" );
             }
             if ( backpack.CollectedItems.Count > 0 )
             {
-                Log.Warning( "La machine est pleine ! Le reste reste dans votre sac." );
+                Log.Warning( "[SellerMachine] WARNING: Processing queue is full. Some items remain in backpack." );
             }
             return; // On a géré le joueur, on s'arrête là.
         }
@@ -132,7 +132,7 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
             float finalValue = item.Value * ValueMultiplier;
 
             _linkedBank.AddScrap( finalValue );
-            Log.Info( $"⚙️ Traitement terminé : +{finalValue} Scrap." );
+            Log.Info( $"[SellerMachine] Processing complete: +{finalValue} scrap earned" );
         }
         if ( ProcessingQueue.Count != 0 )
         {
@@ -154,7 +154,7 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
         if ( !IsProxy && SaveManager.Instance?.Data?.Factory != null )
         {
             ProcessingQueue = new Queue<ItemData>( SaveManager.Instance.Data.Factory.SellerQueue );
-            Log.Info( $"SellerMachine : {ProcessingQueue.Count} items chargés dans la file d'attente." );
+            Log.Info( $"[SellerMachine] Loaded {ProcessingQueue.Count} item(s) in processing queue" );
         }
     }
 }

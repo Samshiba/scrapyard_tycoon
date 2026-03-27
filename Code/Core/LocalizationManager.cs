@@ -31,7 +31,6 @@ public sealed class LocalizationManager : Component
         Instance = this;
     }
 
-    // Fichiers de traduction par domaine
     private static readonly string[] _translationDomains =
     {
         "common",
@@ -41,7 +40,6 @@ public sealed class LocalizationManager : Component
         "tooltip"
     };
 
-    // Chemin racine des fichiers de localisation
     private static readonly string _localizationPath = "Localization";
 
     public LocalizationManager()
@@ -79,7 +77,7 @@ public sealed class LocalizationManager : Component
             LoadDomainFile( domain, filePath );
         }
 
-        Log.Info( $"📚 Localization: Langue '{_currentLanguage}' chargée ({_translations.Count} domaines)." );
+        Log.Info( $"[LocalizationManager] Language '{_currentLanguage}' loaded with {_translations.Count} domain(s)" );
     }
 
     /// <summary>
@@ -91,7 +89,7 @@ public sealed class LocalizationManager : Component
         {
             if ( !FileSystem.Mounted.FileExists( filePath ) )
             {
-                Log.Warning( $"⚠️  Localization: Fichier manquant '{filePath}'" );
+                Log.Warning( $"[LocalizationManager] WARNING: Missing translation file '{filePath}'" );
                 _translations[domain] = new TranslationDomain { Translations = new Dictionary<string, string>() };
                 return;
             }
@@ -110,11 +108,11 @@ public sealed class LocalizationManager : Component
             Log.Info( domainDict );
 
             _translations[domain] = new TranslationDomain { Translations = domainDict };
-            Log.Info( $"  ✓ {domain}.json: {domainDict.Count} clés chargées" );
+            Log.Info( $"[LocalizationManager] Loaded domain '{domain}.json': {domainDict.Count} key(s)" );
         }
         catch ( System.Exception e )
         {
-            Log.Error( $"❌ Erreur chargement '{filePath}': {e.Message}" );
+            Log.Error( $"[LocalizationManager] ERROR: Failed to load translation file '{filePath}' - {e.Message}" );
             _translations[domain] = new TranslationDomain { Translations = new Dictionary<string, string>() };
         }
     }
@@ -127,7 +125,7 @@ public sealed class LocalizationManager : Component
     {
         if ( Instance == null )
         {
-            Log.Warning( "❌ LocalizationManager: Non initialisé. Appeler Initialize() au démarrage." );
+            Log.Warning( "[LocalizationManager] WARNING: Not initialized. Call Initialize() at startup." );
             return $"[MISSING: {key}]";
         }
 
@@ -136,7 +134,7 @@ public sealed class LocalizationManager : Component
         // Null-safety check
         if ( text == null )
         {
-            Log.Warning( $"⚠️  GetTextInternal retourné null pour clé: '{key}'" );
+            Log.Warning( $"[LocalizationManager] WARNING: GetTextInternal returned null for key '{key}'" );
             return $"[NULL_RESULT: {key}]";
         }
 
@@ -149,7 +147,7 @@ public sealed class LocalizationManager : Component
             }
             catch ( System.Exception e )
             {
-                Log.Warning( $"⚠️  Erreur formatage clé '{key}': {e.Message}" );
+                Log.Warning( $"[LocalizationManager] WARNING: Failed to format localization key '{key}' - {e.Message}" );
                 return text;
             }
         }
@@ -164,7 +162,7 @@ public sealed class LocalizationManager : Component
 
         if ( parts.Length < 2 )
         {
-            Log.Warning( $"⚠️  Clé de localisation invalide: '{key}' (format: 'domain.key')" );
+            Log.Warning( $"[LocalizationManager] WARNING: Invalid localization key format '{key}'. Expected format: 'domain.key'" );
             return fallback ?? $"[INVALID_KEY: {key}]";
         }
 
@@ -172,7 +170,7 @@ public sealed class LocalizationManager : Component
 
         if ( !_translations.ContainsKey( domain ) )
         {
-            Log.Warning( $"⚠️  Domaine inconnu: '{domain}'" );
+            Log.Warning( $"[LocalizationManager] WARNING: Unknown localization domain '{domain}'" );
             return fallback ?? $"[MISSING_DOMAIN: {key}]";
         }
 
@@ -184,7 +182,7 @@ public sealed class LocalizationManager : Component
             return domainDict[textKey];
         }
 
-        Log.Warning( $"⚠️  Clé manquante: '{textKey}' dans domaine '{domain}'" );
+        Log.Warning( $"[LocalizationManager] WARNING: Missing translation key '{textKey}' in domain '{domain}'" );
         return fallback ?? $"[MISSING: {textKey}]";
     }
 
@@ -195,12 +193,12 @@ public sealed class LocalizationManager : Component
     {
         if ( Instance == null )
         {
-            Log.Error( "❌ LocalizationManager: Non initialisé." );
+            Log.Error( "[LocalizationManager] ERROR: Not initialized." );
             return;
         }
 
         Instance.LoadLanguage( language );
-        Log.Info( $"🌐 Langue changée à: {language}" );
+        Log.Info( $"[LocalizationManager] Language changed to '{language}'" );
     }
 
     /// <summary>

@@ -6,7 +6,6 @@ public sealed class UpgradeManager : Component
 {
     public static UpgradeManager Instance { get; private set; }
 
-    // On stocke ça dans un Dictionnaire pour trouver un upgrade en 0.001ms via son ID
     [Property] public Dictionary<string, UpgradeNode> Database { get; private set; } = new();
 
     protected override void OnAwake()
@@ -17,70 +16,60 @@ public sealed class UpgradeManager : Component
 
     private void LoadDatabase()
     {
-        // On lit le fichier depuis les assets montés du jeu
         if ( FileSystem.Mounted.FileExists( "data/upgrades.json" ) )
         {
             var graph = FileSystem.Mounted.ReadJson<UpgradeGraphData>( "data/upgrades.json" );
 
-            // On convertit la liste en dictionnaire pour la vitesse
             Database = graph.Nodes.ToDictionary( node => node.Id );
 
-            Log.Info( $"📚 Base de données chargée : {Database.Count} améliorations." );
+            Log.Info( $"[UpgradeManager] Upgrade database loaded: {Database.Count} upgrades available" );
         }
         else
         {
-            Log.Error( "Fichier data/upgrades.json introuvable !" );
+            Log.Error( "[UpgradeManager] CRITICAL ERROR: Upgrade database file 'data/upgrades.json' not found. Upgrades system will not function." );
         }
     }
 
-    // --- FONCTION UTILITAIRE POUR TON FUTUR TERMINAL ---
-
-    // Récupérer le nom localisé d'un upgrade depuis Localization files
     public string GetUpgradeName( string upgradeId )
     {
         if ( !Database.TryGetValue( upgradeId, out var node ) ) return "[UNKNOWN]";
 
-        // Format de clé dans Localization files: "{upgradeId}.name"
         string nameKey = $"upgrade.{upgradeId}.name";
         string localizedName = LocalizationManager.GetText( nameKey, null );
 
         if ( localizedName == null || localizedName.StartsWith( "[MISSING" ) )
         {
-            return node.Name; // Fallback à la valeur en dur du JSON
+            return node.Name;
         }
         return localizedName;
     }
 
-    // Récupérer la description localisée d'un upgrade depuis Localization files
     public string GetUpgradeDescription( string upgradeId )
     {
         if ( !Database.TryGetValue( upgradeId, out var node ) ) return "[UNKNOWN]";
 
-        // Format de clé dans Localization files: "{upgradeId}.description"
         string descKey = $"upgrade.{upgradeId}.description";
         string localizedDesc = LocalizationManager.GetText( descKey, null );
 
         if ( localizedDesc == null || localizedDesc.StartsWith( "[MISSING" ) )
         {
-            return node.Description; // Fallback à la valeur en dur du JSON
+            return node.Description;
         }
         return localizedDesc;
     }
 
-    // Vérifie si un upgrade est débloquable (si le joueur a les bons parents)
     public bool IsNodeUnlocked( string upgradeId, GameSaveData playerSave )
     {
         if ( !Database.TryGetValue( upgradeId, out var node ) ) return false;
 
         foreach ( var req in node.Requirements )
         {
-            // On vérifie dans la sauvegarde du joueur s'il a le niveau requis
             int playerLevel = playerSave.Player.GlobalUpgrades.GetValueOrDefault( req.RequiredId, 0 );
             if ( playerLevel < req.RequiredLevel )
             {
-                return false; // Il manque un parent !
+                return false;
             }
         }
-        return true; // Tous les parents sont validés
+        return true;
     }
 }

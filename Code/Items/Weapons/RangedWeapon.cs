@@ -62,7 +62,7 @@ public abstract class RangedWeapon : BaseWeapon
         }
         else
         {
-            Log.Warning( $"Le prefab {Data.ProjectilePrefab.Name} n'a pas de script héritant de BaseProjectile !" );
+            Log.Warning( $"[RangedWeapon] ERROR: Projectile prefab '{Data.ProjectilePrefab.Name}' does not have a script inheriting from BaseProjectile" );
         }
     }
 }

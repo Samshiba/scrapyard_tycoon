@@ -24,7 +24,7 @@ public sealed class PlayerStats : Component
         if ( !IsProxy && SaveManager.Instance?.Data?.Player != null )
         {
             TotalScrap = SaveManager.Instance.Data.Player.TotalScrap;
-            Log.Info( $"💰 TotalScrap chargé : {TotalScrap}" );
+            Log.Info( $"[PlayerStats] Total scrap loaded: {TotalScrap}" );
         }
     }
 
@@ -33,7 +33,7 @@ public sealed class PlayerStats : Component
         if ( amount <= 0 ) return;
 
         TotalScrap += amount;
-        Log.Info( $"Vente réussie ! +{amount} Scrap. Total en banque : {TotalScrap}" );
+        Log.Info( $"[PlayerStats] Transaction completed: +{amount} scrap. Total balance: {TotalScrap}" );
         SaveChanges();
     }
 

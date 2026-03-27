@@ -32,7 +32,7 @@ public sealed class PlayerInventory : Component
             if ( !string.IsNullOrEmpty( weapon.Id ) )
                 _weaponCache[weapon.Id] = weapon;
         }
-        Log.Info( $"✅ {_weaponCache.Count} arme(s) chargée(s)" );
+        Log.Info( $"[PlayerInventory] Weapon cache loaded: {_weaponCache.Count} weapon definition(s)" );
 
         LoadEquippedWeapons();
     }
@@ -60,7 +60,7 @@ public sealed class PlayerInventory : Component
                 }
                 else
                 {
-                    Log.Warning( "⚠️ OS NON TROUVÉ" );
+                    Log.Warning( "[PlayerInventory] WARNING: RightHand bone not found on viewmodel arms animation" );
                 }
             }
             // 2. Floating weapon holder
@@ -117,19 +117,19 @@ public sealed class PlayerInventory : Component
             if ( _weaponCache.TryGetValue( savedWeaponIds[i], out var weaponDef ) )
             { EquippedWeapons[i] = weaponDef; successCount++; }
             else
-            { Log.Warning( $"⚠️ Arme non trouvée : '{savedWeaponIds[i]}' slot {i}" ); failedCount++; }
+            { Log.Warning( $"[PlayerInventory] Weapon not found: '{savedWeaponIds[i]}' for slot {i}" ); failedCount++; }
         }
 
         if ( successCount > 0 )
         {
             ActiveSlotIndex = SaveManager.Instance.Data.Inventory.ActiveWeaponIndex;
-            Log.Info( $"✅ {successCount} armes OK, {failedCount} manquantes, slot actif {ActiveSlotIndex}" );
+            Log.Info( $"[PlayerInventory] Weapons loaded: {successCount} available, {failedCount} missing, active slot {ActiveSlotIndex}" );
             _weaponsLoaded = true;
             EquipSlot( ActiveSlotIndex );
         }
         else
         {
-            Log.Error( "❌ Aucune arme chargée" );
+            Log.Error( "[PlayerInventory] ERROR: No weapons loaded. Inventory is empty." );
             _weaponsLoaded = true;
         }
     }

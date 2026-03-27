@@ -22,15 +22,15 @@ public sealed class SaveManager : Component
     {
         try
         {
-            // Sauvegarder la langue actuelle
+            // Store current language setting
             Data.CurrentLanguage = LocalizationManager.GetLanguage();
             
             FileSystem.Data.WriteJson( SaveFileName, Data );
-            Log.Info( "💾 Partie sauvegardée avec succès !" );
+            Log.Info( "[SaveManager] Game saved successfully" );
         }
         catch ( Exception e )
         {
-            Log.Error( $"Erreur lors de la sauvegarde : {e.Message}" );
+            Log.Error( $"[SaveManager] ERROR: Failed to save game - {e.Message}" );
         }
     }
 
@@ -41,17 +41,17 @@ public sealed class SaveManager : Component
             try
             {
                 Data = FileSystem.Data.ReadJson<GameSaveData>( SaveFileName );
-                Log.Info( "📂 Partie chargée !" );
+                Log.Info( "[SaveManager] Save file loaded successfully" );
             }
             catch ( Exception e )
             {
-                Log.Error( $"Erreur de lecture de sauvegarde : {e.Message}. Création d'une nouvelle." );
+                Log.Error( $"[SaveManager] ERROR: Failed to read save file - {e.Message}. Creating new save." );
                 Data = new GameSaveData();
             }
         }
         else
         {
-            Log.Info( "🆕 Nouvelle partie." );
+            Log.Info( "[SaveManager] No existing save file found. Starting new game." );
             Data = new GameSaveData();
         }
     }

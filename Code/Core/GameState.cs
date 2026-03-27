@@ -20,12 +20,12 @@ public sealed class GameState : Component, Component.INetworkListener
         if ( AllBays.Count == 0 )
         {
             AllBays = Scene.GetAllComponents<BayComponent>().ToList();
-            Log.Info( $"GameState: {AllBays.Count} baie(s) trouvée(s) automatiquement." );
+            Log.Info( $"[GameState] Auto-discovered {AllBays.Count} bay(s) in scene" );
         }
 
         if ( !Networking.IsActive )
         {
-            Log.Info( "GameState: Mode offline détecté, spawn local." );
+            Log.Info( "[GameState] Offline mode detected. Spawning local player." );
             SpawnPlayerForConnection( Connection.Local );
         }
     }
@@ -35,13 +35,13 @@ public sealed class GameState : Component, Component.INetworkListener
     {
         if ( !Networking.IsHost ) return;
 
-        Log.Info( $"GameState.OnActive: {channel.DisplayName}" );
+        Log.Info( $"[GameState] Player connected: {channel.DisplayName}" );
 
         // Load player save data
         if ( SaveManager.Instance != null )
         {
             SaveManager.Instance.Load();
-            Log.Info( $"💾 Save chargée pour {channel.DisplayName}" );
+            Log.Info( $"[GameState] Save data loaded for player {channel.DisplayName}" );
         }
 
         SpawnPlayerForConnection( channel );
@@ -51,14 +51,14 @@ public sealed class GameState : Component, Component.INetworkListener
     {
         if ( PlayerPrefab == null )
         {
-            Log.Error( "GameState: PlayerPrefab non assigné !" );
+            Log.Error( "[GameState] ERROR: PlayerPrefab is not assigned in inspector. Player cannot be spawned." );
             return;
         }
 
         var freeBay = AllBays.FirstOrDefault( b => !b.IsOccupied );
         if ( freeBay == null )
         {
-            Log.Warning( $"Plus de baies libres pour {channel.DisplayName}" );
+            Log.Warning( $"[GameState] WARNING: No available bays for player {channel.DisplayName}. Server at capacity." );
             return;
         }
 
@@ -66,7 +66,7 @@ public sealed class GameState : Component, Component.INetworkListener
 
         if ( freeBay.PlayerStart == null )
         {
-            Log.Error( $"Baie {freeBay.BayId}: PlayerStart non assigné !" );
+            Log.Error( $"[GameState] ERROR: Bay {freeBay.BayId} has no PlayerStart GameObject assigned. Check inspector configuration." );
             return;
         }
 
@@ -74,7 +74,7 @@ public sealed class GameState : Component, Component.INetworkListener
         if ( sceneCam != null )
         {
             sceneCam.Enabled = false;
-            Log.Info( "GameState: Caméra de scène désactivée." );
+            Log.Info( "[GameState] Scene camera disabled. Using player camera." );
         }
 
         var spawnPos = freeBay.PlayerStart.WorldPosition;
@@ -83,7 +83,7 @@ public sealed class GameState : Component, Component.INetworkListener
         var player = PlayerPrefab.Clone( spawnPos, spawnRot );
         player.NetworkSpawn( channel );
 
-        Log.Info( $"Player spawné pour {channel.DisplayName} à {spawnPos}" );
+        Log.Info( $"[GameState] Player {channel.DisplayName} spawned at position {spawnPos}" );
     }
 
     public void OnDisconnected( Connection channel )
@@ -92,7 +92,7 @@ public sealed class GameState : Component, Component.INetworkListener
         if ( SaveManager.Instance != null )
         {
             SaveManager.Instance.Save();
-            Log.Info( $"💾 Save envoyée avant déconnexion de {channel.DisplayName}" );
+            Log.Info( $"[GameState] Player data saved for {channel.DisplayName} before disconnect" );
         }
 
         var playerBay = AllBays.FirstOrDefault( b => b.Owner == channel );

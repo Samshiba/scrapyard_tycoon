@@ -18,7 +18,7 @@ public sealed class PrestigeSystem : Component
         {
             _prestigeLevel = value;
             SaveChanges();
-            Log.Info($"⭐ Prestige augmenté au niveau {_prestigeLevel}!");
+            Log.Info($"[PrestigeSystem] Prestige increased to level {_prestigeLevel}");
         }
     }
 
@@ -39,7 +39,7 @@ public sealed class PrestigeSystem : Component
         {
             _prestigeLevel = SaveManager.Instance.Data.Prestige.PrestigeLevel;
             _unlockedUpgrades = SaveManager.Instance.Data.Prestige.UnlockedPrestigeUpgrades ?? new();
-            Log.Info($"⭐ Prestige chargé : niveau {_prestigeLevel}");
+            Log.Info($"[PrestigeSystem] Prestige loaded: level {_prestigeLevel}");
         }
     }
 
@@ -54,7 +54,7 @@ public sealed class PrestigeSystem : Component
         {
             _unlockedUpgrades[upgradeName] = true;
             SaveChanges();
-            Log.Info($"🔓 Upgrade prestige débloqué : {upgradeName}");
+            Log.Info($"[PrestigeSystem] Prestige upgrade unlocked: {upgradeName}");
         }
     }
 

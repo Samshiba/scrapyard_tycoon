@@ -35,7 +35,7 @@ public sealed class PlayerBackpack : Component
         if ( !IsProxy && SaveManager.Instance?.Data?.Inventory != null )
         {
             CollectedItems = SaveManager.Instance.Data.Inventory.CollectedItems ?? new();
-            Log.Info( $"🎒 Backpack chargé : {CollectedItems.Count} items" );
+            Log.Info( $"[PlayerBackpack] Backpack loaded with {CollectedItems.Count} items" );
         }
     }
 
@@ -48,7 +48,7 @@ public sealed class PlayerBackpack : Component
         if ( CollectedItems.Count >= MaxItems ) return false;
 
         CollectedItems.Add( item );
-        Log.Info( $"Ramassé : {item.Type} (+{item.Value}). Place : {CollectedItems.Count}/{MaxItems}" );
+        Log.Info( $"[PlayerBackpack] Item collected: {item.Type} (+{item.Value}). Inventory: {CollectedItems.Count}/{MaxItems}" );
         SaveChanges();
         return true;
     }

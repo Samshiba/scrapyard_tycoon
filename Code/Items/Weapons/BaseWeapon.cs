@@ -79,7 +79,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
             {
                 _playerStats.IsExhausted = false;
                 _playerStats.CurrentEnergy = _playerStats.MaxEnergy;
-                Log.Info( "Énergie restaurée, prête à tirer !" );
+                Log.Info( "[BaseWeapon] Energy restored. Weapon ready to fire." );
             }
             else
             {
@@ -143,7 +143,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
             if ( Data.ExhaustionSound != null )
                 Sound.Play( Data.ExhaustionSound, WorldPosition );
 
-            Log.Warning( "ÉPUISEMENT ÉNERGÉTIQUE !" );
+            Log.Warning( "[BaseWeapon] WARNING: Weapon energy depleted. Player exhausted." );
         }
     }
 

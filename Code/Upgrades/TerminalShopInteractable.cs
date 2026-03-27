@@ -6,14 +6,14 @@ public sealed class TerminalShopInteractable : Component, Component.IPressable
     {
         if ( e.Source == null ) return false;
 
-        // ✅ WeaponShopUI maintenant
+        // Show weapon shop UI
         if ( WeaponShopUI.Local != null )
         {
             WeaponShopUI.Local.OpenMenu();
             return true;
         }
 
-        Log.Warning( "WeaponShopUI introuvable !" );
+        Log.Warning( "[TerminalShopInteractable] ERROR: WeaponShopUI component not found in scene" );
         return false;
     }
 

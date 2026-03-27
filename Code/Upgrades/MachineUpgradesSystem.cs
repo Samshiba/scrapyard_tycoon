@@ -21,7 +21,7 @@ public sealed class MachineUpgradesSystem : Component
         if ( SaveManager.Instance?.Data?.Factory != null )
         {
             _machineUpgrades = SaveManager.Instance.Data.Factory.MachineUpgrades ?? new();
-            Log.Info( $"🏭 {_machineUpgrades.Count} upgrades machines chargés" );
+            Log.Info( $"[MachineUpgradesSystem] Loaded {_machineUpgrades.Count} machine upgrade(s)" );
         }
     }
 
@@ -37,7 +37,7 @@ public sealed class MachineUpgradesSystem : Component
 
         _machineUpgrades[machineId] += amount;
         SaveChanges();
-        Log.Info( $"🔧 Machine {machineId} → Niveau {_machineUpgrades[machineId]}" );
+        Log.Info( $"[MachineUpgradesSystem] Machine '{machineId}' upgraded to level {_machineUpgrades[machineId]}" );
     }
 
     public bool TryPurchaseMachineUpgrade( string machineId, float costInScrap )

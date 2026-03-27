@@ -12,7 +12,7 @@ public sealed class BayComponent : Component
     public void AssignOwner( Connection channel )
     {
         Owner = channel;
-        Log.Info( $"Baie {BayId} assignée à {channel.DisplayName}" );
+        Log.Info( $"[BayComponent] Bay {BayId} assigned to player {channel.DisplayName}" );
         
         // TODO: Apply visual upgrades from SaveData.Prestige.UnlockedPrestigeUpgrades
     }
