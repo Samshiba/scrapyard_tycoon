@@ -16,6 +16,9 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
         {
             int total = MaxQueueSizeBase;
 
+            if ( SaveManager.Instance?.Data?.Player?.GlobalUpgrades == null )
+                return total;
+
             int upgradeLevel1 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "seller_queue_1", 0 );
             total += (upgradeLevel1 * 5);
 
@@ -32,6 +35,9 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
         {
             float total = ProcessRateBase;
 
+            if ( SaveManager.Instance?.Data?.Player?.GlobalUpgrades == null )
+                return total;
+
             int upgradeLevel1 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "seller_speed_1", 0 );
             total += (upgradeLevel1 * 0.1f);
 
@@ -47,6 +53,9 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
         get
         {
             float total = ValueMultiplierBase;
+
+            if ( SaveManager.Instance?.Data?.Player?.GlobalUpgrades == null )
+                return total;
 
             int upgradeLevel1 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "seller_value_1", 0 );
             total += (upgradeLevel1 * 0.05f);
@@ -133,10 +142,14 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
 
             _linkedBank.AddScrap( finalValue );
             Log.Info( $"[SellerMachine] Processing complete: +{finalValue} scrap earned" );
-        }
-        if ( ProcessingQueue.Count != 0 )
-        {
-            SaveChanges();
+            
+            // FIXED: Only save when queue actually changed (item processed)
+            // instead of checking every frame with SaveChanges()
+            if ( ProcessingQueue.Count > 0 || ProcessingQueue.Count == 0 )
+            {
+                // Queue state changed - notify throttler for batched save
+                SaveEventBus.NotifyChange( SaveEventBus.SaveReason.SellerQueueChanged, $"Processed item: Queue now {ProcessingQueue.Count} items" );
+            }
         }
     }
 
@@ -144,8 +157,10 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
     {
         if ( !IsProxy && SaveManager.Instance != null )
         {
-            SaveManager.Instance.Data.Factory.SellerQueue = ProcessingQueue;
-            SaveManager.Instance.Save();
+            SaveManager.Instance.Data.Factory.SellerQueue = new System.Collections.Generic.List<ItemData>( ProcessingQueue );
+            
+            // Notify throttler (queue changes typically throttled)
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.SellerQueueChanged, $"Queue: {ProcessingQueue.Count} items" );
         }
     }
 

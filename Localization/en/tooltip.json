@@ -1,0 +1,9 @@
+{
+    "tooltip.terminal.description": "Open the network",
+    "tooltip.shop.description": "Open the shop",
+    "tooltip.spawn.description": "Spawn an object",
+    "tooltip.gib.description": "Collect scrap",
+    "tooltip.weapon.attack": "Attack",
+    "tooltip.weapon.fire": "Fire",
+    "tooltip.weapon.hit": "Hit"
+}

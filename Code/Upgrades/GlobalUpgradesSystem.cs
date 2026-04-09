@@ -26,7 +26,17 @@ public sealed class GlobalUpgradesSystem : Component
     {
         // 1. Validate presence of necessary systems and data
         if ( PlayerUpgrades == null || UpgradeManager.Instance == null || PlayerStats.Local == null )
+        {
+            if ( SaveConfig.DEBUG_SAVE_LOGGING )
+            {
+                Log.Error( $"[GlobalUpgradesSystem] PURCHASE FAILED - Null check failed for upgrade: {upgradeId}" );
+                Log.Error( $"  PlayerUpgrades: {(PlayerUpgrades == null ? "NULL" : "OK")}" );
+                Log.Error( $"  SaveManager: {(SaveManager.Instance == null ? "NULL" : "OK")}" );
+                Log.Error( $"  UpgradeManager: {(UpgradeManager.Instance == null ? "NULL" : "OK")}" );
+                Log.Error( $"  PlayerStats.Local: {(PlayerStats.Local == null ? "NULL" : "OK")}" );
+            }
             return false;
+        }
 
         // 2. Verify upgrade exists in the JSON database
         if ( !UpgradeManager.Instance.Database.TryGetValue( upgradeId, out var node ) )
@@ -58,11 +68,19 @@ public sealed class GlobalUpgradesSystem : Component
         if ( PlayerStats.Local.SpendScrap( cost ) )
         {
             PlayerUpgrades[upgradeId] = currentLevel + 1;
-            SaveManager.Instance.Save();
+            
+            // Notify throttler (save will be batched)
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.GlobalUpgradeChanged, $"{node.Name} → Level {currentLevel + 1}" );
+
+            if ( SaveConfig.DEBUG_SAVE_LOGGING )
+                Log.Info( $"[GlobalUpgradesSystem] Upgrade purchased: {node.Name} (Level {currentLevel + 1}) for {cost} scrap - SAVE EVENT EMITTED" );
 
             Log.Info( $"[GlobalUpgradesSystem] Upgrade purchased: {node.Name} (Level {currentLevel + 1}) for {cost} scrap" );
             return true;
         }
+
+        if ( SaveConfig.DEBUG_SAVE_LOGGING )
+            Log.Error( $"[GlobalUpgradesSystem] PURCHASE FAILED - SpendScrap returned false. Have: {PlayerStats.Local.TotalScrap}, Cost: {cost}" );
 
         Log.Warning( $"[GlobalUpgradesSystem] WARNING: Insufficient funds for {node.Name}. Cost: {cost} scrap, Available: {PlayerStats.Local.TotalScrap} scrap" );
         return false;

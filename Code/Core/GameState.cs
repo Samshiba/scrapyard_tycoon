@@ -1,6 +1,7 @@
 using Sandbox;
 using System.Linq;
 using System.Collections.Generic;
+using Sandbox.Network;
 
 public sealed class GameState : Component, Component.INetworkListener
 {
@@ -25,8 +26,12 @@ public sealed class GameState : Component, Component.INetworkListener
 
         if ( !Networking.IsActive )
         {
-            Log.Info( "[GameState] Offline mode detected. Spawning local player." );
-            SpawnPlayerForConnection( Connection.Local );
+            Log.Info( "[GameState] Offline mode detected. Host starting for dev." );
+            Networking.CreateLobby( new LobbyConfig()
+            {
+                MaxPlayers = 4,
+                Privacy = LobbyPrivacy.Private
+            } );
         }
     }
 
@@ -37,10 +42,10 @@ public sealed class GameState : Component, Component.INetworkListener
 
         Log.Info( $"[GameState] Player connected: {channel.DisplayName}" );
 
-        // Load player save data
+        // Load player-specific save data
         if ( SaveManager.Instance != null )
         {
-            SaveManager.Instance.Load();
+            SaveManager.Instance.SetPlayerConnection( channel );
             Log.Info( $"[GameState] Save data loaded for player {channel.DisplayName}" );
         }
 
@@ -88,9 +93,18 @@ public sealed class GameState : Component, Component.INetworkListener
 
     public void OnDisconnected( Connection channel )
     {
-        // Save player data before disconnect
+        // Save player data immediately before disconnect with proper shutdown save
         if ( SaveManager.Instance != null )
         {
+            // First, flush any pending changes from throttler (while FileSystem still available)
+            if ( SaveThrottler.Instance != null && SaveThrottler.Instance.GetPendingChangeCount() > 0 )
+            {
+                Log.Info( $"[GameState] OnDisconnected - Flushing {SaveThrottler.Instance.GetPendingChangeCount()} pending changes from throttler for {channel.DisplayName}" );
+                SaveThrottler.Instance.ForceFlush();
+            }
+
+            // Then save with major event flag (bypass throttle)
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerDisconnect, $"Player {channel.DisplayName} disconnecting" );
             SaveManager.Instance.Save();
             Log.Info( $"[GameState] Player data saved for {channel.DisplayName} before disconnect" );
         }

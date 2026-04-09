@@ -33,29 +33,13 @@ public sealed class UpgradeManager : Component
     public string GetUpgradeName( string upgradeId )
     {
         if ( !Database.TryGetValue( upgradeId, out var node ) ) return "[UNKNOWN]";
-
-        string nameKey = $"upgrade.{upgradeId}.name";
-        string localizedName = LocalizationManager.GetText( nameKey, null );
-
-        if ( localizedName == null || localizedName.StartsWith( "[MISSING" ) )
-        {
-            return node.Name;
-        }
-        return localizedName;
+        return $"#upgrade.{upgradeId}.name";
     }
 
     public string GetUpgradeDescription( string upgradeId )
     {
         if ( !Database.TryGetValue( upgradeId, out var node ) ) return "[UNKNOWN]";
-
-        string descKey = $"upgrade.{upgradeId}.description";
-        string localizedDesc = LocalizationManager.GetText( descKey, null );
-
-        if ( localizedDesc == null || localizedDesc.StartsWith( "[MISSING" ) )
-        {
-            return node.Description;
-        }
-        return localizedDesc;
+        return $"#upgrade.{upgradeId}.description";
     }
 
     public bool IsNodeUnlocked( string upgradeId, GameSaveData playerSave )

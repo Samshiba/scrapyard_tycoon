@@ -34,7 +34,15 @@ public sealed class PlayerInventory : Component
         }
         Log.Info( $"[PlayerInventory] Weapon cache loaded: {_weaponCache.Count} weapon definition(s)" );
 
-        LoadEquippedWeapons();
+        // Wait for SaveData to be ready before loading equipped weapons
+        if ( SaveManager.Instance?.IsDataReady == true )
+        {
+            LoadEquippedWeapons();
+        }
+        else
+        {
+            Log.Info( "[PlayerInventory] SaveData not ready yet, will load on next update" );
+        }
     }
 
     protected override void OnPreRender()
@@ -88,6 +96,12 @@ public sealed class PlayerInventory : Component
     {
         if ( IsProxy ) return;
 
+        // Retry loading weapons if SaveData wasn't ready on start
+        if ( !_weaponsLoaded && SaveManager.Instance?.IsDataReady == true )
+        {
+            LoadEquippedWeapons();
+        }
+
         if ( PlayerBody != null && Scene.Camera != null )
         {
             var lookPos = Scene.Camera.WorldPosition
@@ -136,15 +150,74 @@ public sealed class PlayerInventory : Component
 
     private void SaveChanges()
     {
-        if ( IsProxy || SaveManager.Instance == null ) return;
+        Log.Info( $"[PlayerInventory] SaveChanges() called, IsProxy={IsProxy}, SaveManager.Instance={SaveManager.Instance != null}" );
+        if ( IsProxy || SaveManager.Instance == null )
+        {
+            Log.Warning( $"[PlayerInventory] SaveChanges() aborted: IsProxy={IsProxy} or SaveManager null" );
+            return;
+        }
 
         var weaponIds = new string[EquippedWeapons.Length];
         for ( int i = 0; i < EquippedWeapons.Length; i++ )
             weaponIds[i] = EquippedWeapons[i]?.Id;
 
-        SaveManager.Instance.Data.Inventory.EquippedWeapons = weaponIds;
-        SaveManager.Instance.Data.Inventory.ActiveWeaponIndex = ActiveSlotIndex;
-        SaveManager.Instance.Save();
+        Log.Info( $"[PlayerInventory] SaveChanges() - Current EquippedWeapons local: [{string.Join( ", ", weaponIds.Select( w => w ?? "null" ) )}]" );
+
+        // Only server modifies SaveData directly
+        if ( Networking.IsHost )
+        {
+            Log.Info( $"[PlayerInventory] SaveChanges() - IsHost=true, writing to SaveManager.Data.Inventory" );
+            Log.Info( $"[PlayerInventory] SaveChanges() - SaveManager.Data.Inventory.EquippedWeapons BEFORE: [{string.Join( ", ", SaveManager.Instance.Data.Inventory.EquippedWeapons.Select( w => w ?? "null" ) )}]" );
+
+            SaveManager.Instance.Data.Inventory.EquippedWeapons = weaponIds;
+            SaveManager.Instance.Data.Inventory.ActiveWeaponIndex = ActiveSlotIndex;
+
+            Log.Info( $"[PlayerInventory] SaveChanges() - SaveManager.Data.Inventory.EquippedWeapons AFTER: [{string.Join( ", ", SaveManager.Instance.Data.Inventory.EquippedWeapons.Select( w => w ?? "null" ) )}]" );
+        }
+        else
+        {
+            // Client sends RPC to server with new equipment
+            Log.Info( $"[PlayerInventory] SaveChanges() - IsHost=false, sending RPC" );
+            RpcEquipWeapons( weaponIds, ActiveSlotIndex );
+        }
+
+        // Notify throttler (save will be batched)
+        var weaponName = EquippedWeapons[ActiveSlotIndex]?.WeaponName ?? "empty";
+        Log.Info( $"[PlayerInventory] SaveChanges() - Notifying SaveEventBus: Slot {ActiveSlotIndex} ({weaponName})" );
+        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.WeaponEquipped, $"Slot {ActiveSlotIndex}: {weaponName}" );
+    }
+
+    /// <summary>
+    /// RPC called by client to update equipment on server.
+    /// </summary>
+    private void RpcEquipWeapons( string[] weaponIds, int activeIndex )
+    {
+        if ( !Networking.IsHost ) return;
+
+        if ( SaveManager.Instance?.Data?.Inventory != null )
+        {
+            SaveManager.Instance.Data.Inventory.EquippedWeapons = weaponIds;
+            SaveManager.Instance.Data.Inventory.ActiveWeaponIndex = activeIndex;
+
+            if ( SaveConfig.DEBUG_SAVE_LOGGING )
+                Log.Info( $"[PlayerInventory] Equipment updated via RPC: slot {activeIndex}" );
+        }
+    }
+
+    /// <summary>
+    /// RPC: Client requests to unlock a weapon on server.
+    /// Must be called on the network player object to work properly.
+    /// </summary>
+    public void RpcRequestUnlockWeapon( string weaponId )
+    {
+        if ( !Networking.IsHost ) return;
+
+        if ( ItemUnlockSystem.Instance != null )
+        {
+            ItemUnlockSystem.Instance.UnlockWeapon( weaponId );
+            if ( SaveConfig.DEBUG_SAVE_LOGGING )
+                Log.Info( $"[PlayerInventory] Weapon unlock requested via RPC: {weaponId}" );
+        }
     }
 
     public void EquipWeapon( WeaponDefinition def, int slotIndex )
@@ -155,7 +228,8 @@ public sealed class PlayerInventory : Component
         if ( existing >= 0 ) EquippedWeapons[existing] = null;
 
         EquippedWeapons[slotIndex] = def;
-        EquipSlot( ActiveSlotIndex );
+        EquippedWeapons = EquippedWeapons;  // Force [Property] notification to SaveManager and Razor
+        EquipSlot( slotIndex );  // Activate the SLOT WE JUST EQUIPPED, not the previous active slot
     }
 
     private void UnequipCurrentWeapon()
@@ -178,12 +252,14 @@ public sealed class PlayerInventory : Component
         {
             UnequipCurrentWeapon();
             ActiveSlotIndex = index;
+            SaveChanges();  // Save when unequipping
             return;
         }
 
         if ( ActiveSlotIndex == index && _activeWeaponObject != null )
         {
             UnequipCurrentWeapon();
+            SaveChanges();  // Save when toggling off
             return;
         }
 

@@ -13,9 +13,9 @@
         <div class="skill-tree-window">
 
             <div class="skt-header">
-                <span class="skt-title">@LocalizationManager.GetText("ui.skilltree.title")</span>
-                <span class="skt-wallet">💰 @GetScrap() @LocalizationManager.GetText("common.currency.scrap")</span>
-                <div class="skt-close" onclick=@CloseMenu>@LocalizationManager.GetText("ui.skilltree.button.close")</div>
+                <span class="skt-title">#ui.skilltree.title</span>
+                <span class="skt-wallet">💰 @GetScrap() #common.currency.scrap</span>
+                <div class="skt-close" onclick=@CloseMenu>#ui.skilltree.button.close</div>
             </div>
 
             <zoomgraphpanel @ref="GraphPanel" class="skt-graph"
@@ -108,18 +108,18 @@
                         <div class="skt-tooltip" style="left: @(ttX)px; top: @(ttY)px;">
                             <div class="tt-name">@hNode.Icon @UpgradeManager.Instance.GetUpgradeName(hNode.Id)</div>
                             <div class="tt-desc">@UpgradeManager.Instance.GetUpgradeDescription(hNode.Id)</div>
-                            <div class="tt-level">@LocalizationManager.GetText("ui.skilltree.tooltip.level") @hLvl @LocalizationManager.GetText("ui.skilltree.tooltip.maxlevel") @hNode.MaxLevel</div>
+                            <div class="tt-level"><label>#ui.skilltree.tooltip.level</label> @hLvl <label>#ui.skilltree.tooltip.maxlevel</label> @hNode.MaxLevel</div>
                             @if ( !hMaxed )
                             {
-                                <div class="tt-cost">@hNode.GetCostForLevel( hLvl ) @LocalizationManager.GetText("common.currency.scrap")</div>
+                                <div class="tt-cost">@hNode.GetCostForLevel( hLvl ) <label>#common.currency.scrap</label></div>
                             }
                             else
                             {
-                                <div class="tt-maxed">@LocalizationManager.GetText("ui.skilltree.tooltip.maxed")</div>
+                                <label class="tt-maxed">#ui.skilltree.tooltip.maxed</label>
                             }
                             @if ( !IsUnlocked( hNode.Id ) )
                             {
-                                <div class="tt-locked">@LocalizationManager.GetText("ui.skilltree.tooltip.locked")</div>
+                                <label class="tt-locked">#ui.skilltree.tooltip.locked</label>
                             }
                         </div>
                     }
@@ -276,12 +276,15 @@
             GraphPanel.OnZoomScroll = OnScroll;
         }
 
-        // Ne contrôler la souris que si l'autre panel n'est pas ouvert
-        bool otherPanelOpen = WeaponShopUI.Local != null && WeaponShopUI.Local.IsOpen;
-        if ( !otherPanelOpen )
+        // Only control mouse if THIS panel is open - don't interfere if closed
+        if ( IsOpen )
         {
-            Mouse.Visibility = IsOpen ? MouseVisibility.Visible : MouseVisibility.Hidden;
-            Panel.Style.PointerEvents = IsOpen ? PointerEvents.All : PointerEvents.None;
+            Mouse.Visibility = MouseVisibility.Visible;
+            Panel.Style.PointerEvents = PointerEvents.All;
+        }
+        else
+        {
+            Panel.Style.PointerEvents = PointerEvents.None;
         }
 
         if ( !IsOpen ) return;

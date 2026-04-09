@@ -52,7 +52,7 @@ public sealed class SimpleButton : Component, Component.IPressable
     {
         return new IPressable.Tooltip
         {
-            Description = LocalizationManager.GetText( "tooltip.spawn.description" ),
+            Description = "#tooltip.spawn.description",
         };
     }
 }

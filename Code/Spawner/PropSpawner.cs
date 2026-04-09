@@ -10,6 +10,9 @@ public sealed class PropSpawner : Component
     {
         get
         {
+            if ( SaveManager.Instance?.Data?.Player?.GlobalUpgrades == null )
+                return -1.0f;
+
             if (SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault("auto_spawn_unlocked", 0) == 0)
                 return -1.0f;
 

@@ -24,7 +24,7 @@ public sealed class TerminalShopInteractable : Component, Component.IPressable
     {
         return new IPressable.Tooltip
         {
-            Description = LocalizationManager.GetText( "tooltip.shop.description" ),
+            Description = "#tooltip.shop.description",
         };
     }
 }

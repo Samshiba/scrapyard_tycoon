@@ -1,0 +1,23 @@
+{
+    "common.emoji.money": "💰",
+    "common.emoji.backpack": "🎒",
+    "common.emoji.scrap": "💠",
+    "common.emoji.package": "📦",
+    "common.emoji.speed": "⏩",
+    "common.emoji.damage": "⚔️",
+    "common.emoji.energy": "⚡",
+    "common.emoji.autospawn": "🤖",
+    "common.emoji.unlock": "🔓",
+    "common.emoji.locked": "🔒",
+    "common.emoji.shop": "🔫",
+    "common.emoji.settings": "⚙",
+    "common.emoji.save": "💾",
+    "common.emoji.load": "📂",
+    "common.emoji.prestige": "⭐",
+    "common.emoji.error": "❌",
+    "common.emoji.success": "✅",
+    "common.emoji.warning": "⚠️",
+    "common.emoji.factory": "🏭",
+    "common.emoji.wrench": "🔧",
+    "common.currency.scrap": "Scrap"
+}

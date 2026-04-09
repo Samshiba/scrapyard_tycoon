@@ -1,0 +1,20 @@
+{
+    "upgrade.root_node.name": "Central Core",
+    "upgrade.root_node.description": "The heart of your system. Unlocks the 4 main pathways.",
+    "upgrade.backpack_capacity_1.name": "Backpack Capacity I",
+    "upgrade.backpack_capacity_1.description": "Increases your backpack capacity by 5.",
+    "upgrade.seller_value_1.name": "Sell Value I",
+    "upgrade.seller_value_1.description": "Increases the sell value of all items by 5%.",
+    "upgrade.seller_queue_1.name": "Queue Size I",
+    "upgrade.seller_queue_1.description": "Increases the seller machine queue size by 5.",
+    "upgrade.seller_speed_1.name": "Sell Speed I",
+    "upgrade.seller_speed_1.description": "Increases the seller machine speed by 10%.",
+    "upgrade.physical_damage_1.name": "Physical Damage I",
+    "upgrade.physical_damage_1.description": "Increases physical damage by 5%.",
+    "upgrade.weapon_attack_rate_1.name": "Attack Speed I",
+    "upgrade.weapon_attack_rate_1.description": "Increases attack speed by 5%.",
+    "upgrade.auto_spawn_unlocked.name": "Auto Spawn I",
+    "upgrade.auto_spawn_unlocked.description": "Enables automatic spawning of objects.",
+    "upgrade.auto_spawn_1.name": "Auto Spawn II",
+    "upgrade.auto_spawn_1.description": "Increases spawn speed by 5%."
+}

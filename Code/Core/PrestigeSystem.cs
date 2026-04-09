@@ -64,7 +64,9 @@ public sealed class PrestigeSystem : Component
         {
             SaveManager.Instance.Data.Prestige.PrestigeLevel = _prestigeLevel;
             SaveManager.Instance.Data.Prestige.UnlockedPrestigeUpgrades = _unlockedUpgrades;
-            SaveManager.Instance.Save();
+            
+            // Notify throttler (major event: prestige change triggers immediate save despite throttle)
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PrestigeChanged, $"Prestige Level {_prestigeLevel}" );
         }
     }
 }

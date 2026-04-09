@@ -25,15 +25,33 @@ public sealed class DevController : PanelComponent
 
     void HandleMouseMode()
     {
-        if ( _freeMouse )
+        // Check if any UI panel needs to control the mouse
+        bool uiHasControl = false;
+
+        // WeaponShop takes priority
+        if ( WeaponShopUI.Local != null && WeaponShopUI.Local.IsOpen )
         {
-            Mouse.Visibility = MouseVisibility.Visible;
-            Panel.Style.PointerEvents = PointerEvents.All;
+            uiHasControl = true;
         }
-        else
+        // Also check SkillTree
+        else if ( SkillTreeUI.Local != null && SkillTreeUI.Local.IsOpen )
         {
-            Mouse.Visibility = MouseVisibility.Hidden;
-            Panel.Style.PointerEvents = PointerEvents.None;
+            uiHasControl = true;
+        }
+
+        // Only control mouse if no UI panel has it
+        if ( !uiHasControl )
+        {
+            if ( _freeMouse )
+            {
+                Mouse.Visibility = MouseVisibility.Visible;
+                Panel.Style.PointerEvents = PointerEvents.All;
+            }
+            else
+            {
+                Mouse.Visibility = MouseVisibility.Hidden;
+                Panel.Style.PointerEvents = PointerEvents.None;
+            }
         }
     }
 

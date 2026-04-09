@@ -14,6 +14,9 @@ public sealed class PlayerBackpack : Component
         {
             int total = BaseMaxItems;
 
+            if ( SaveManager.Instance?.Data?.Player?.GlobalUpgrades == null )
+                return total;
+
             int upgradeLevel1 = SaveManager.Instance.Data.Player.GlobalUpgrades.GetValueOrDefault( "backpack_capacity_1", 0 );
             total += (upgradeLevel1 * 5);
 
@@ -66,7 +69,9 @@ public sealed class PlayerBackpack : Component
         if ( !IsProxy && SaveManager.Instance != null )
         {
             SaveManager.Instance.Data.Inventory.CollectedItems = CollectedItems;
-            SaveManager.Instance.Save();
+
+            // Notify throttler (save will be batched)
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.InventoryChanged, $"{CollectedItems.Count} items" );
         }
     }
 }

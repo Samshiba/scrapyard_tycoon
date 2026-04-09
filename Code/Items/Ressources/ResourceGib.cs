@@ -70,7 +70,7 @@ public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
     {
         return new IPressable.Tooltip
         {
-            Description = LocalizationManager.GetText( "tooltip.gib.description" ),
+            Description = "#tooltip.gib.description",
         };
     }
 }

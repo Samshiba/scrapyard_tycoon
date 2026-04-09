@@ -53,7 +53,9 @@ public sealed class PlayerStats : Component
         if ( !IsProxy && SaveManager.Instance != null )
         {
             SaveManager.Instance.Data.Player.TotalScrap = TotalScrap;
-            SaveManager.Instance.Save();
+            
+            // Notify throttler about the change (save will be batched)
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.ScrapChanged, $"+{TotalScrap:F0} scrap" );
         }
     }
 }

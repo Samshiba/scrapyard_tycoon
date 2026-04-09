@@ -166,7 +166,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
 
     public virtual IEnumerable<TooltipEntry> GetTooltips()
     {
-        yield return new TooltipEntry { InputAction = "attack1", Description = LocalizationManager.GetText( "tooltip.weapon.attack" ) };
+        yield return new TooltipEntry { InputAction = "attack1", Description = "#tooltip.weapon.attack" };
     }
 
     protected abstract void PerformAttack();

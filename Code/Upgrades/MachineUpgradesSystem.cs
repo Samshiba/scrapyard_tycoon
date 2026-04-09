@@ -68,7 +68,9 @@ public sealed class MachineUpgradesSystem : Component
         if ( SaveManager.Instance != null )
         {
             SaveManager.Instance.Data.Factory.MachineUpgrades = _machineUpgrades;
-            SaveManager.Instance.Save();
+            
+            // Notify throttler (save will be batched)
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.MachineUpgradeChanged, "Factory machines upgraded" );
         }
     }
 }

@@ -8,10 +8,10 @@
 		@for (int i = 0; i < 4; i++)
 		{
 			var index = i;
-			var weapon = Inventory?.EquippedWeapons.Length > index
-				? Inventory.EquippedWeapons[index]
+			var weapon = PlayerInventory.Local?.EquippedWeapons.Length > index
+				? PlayerInventory.Local.EquippedWeapons[index]
 				: null;
-			var isActive = Inventory?.ActiveSlotIndex == index && ActiveWeaponObject != null;
+			var isActive = PlayerInventory.Local?.ActiveSlotIndex == index && ActiveWeaponObject != null;
 
 			<div class="hotbar-slot @(isActive ? "active" : "") @(weapon == null ? "empty" : "")">
 				<span class="slot-number">@(index + 1)</span>
@@ -33,28 +33,20 @@
 </root>
 
 @code {
-	PlayerInventory Inventory;
-	GameObject ActiveWeaponObject => Inventory?.ActiveWeapon?.GameObject;
-
-	protected override void OnStart()
-	{
-		Inventory = PlayerInventory.Local;
-	}
+	GameObject ActiveWeaponObject => PlayerInventory.Local?.ActiveWeapon?.GameObject;
 
 	protected override void OnUpdate()
 	{
-		if (Inventory == null)
-		{
-			Inventory = PlayerInventory.Local;
-		}
+		StateHasChanged();
 	}
 
 	protected override int BuildHash()
 	{
 		return System.HashCode.Combine(
-			Inventory?.ActiveSlotIndex,
-			Inventory?.ActiveWeapon,
-			Inventory?.EquippedWeapons != null ? string.Join(",", Inventory.EquippedWeapons.Select(w => w?.Id ?? "null")) : "null"
+			PlayerInventory.Local?.ActiveSlotIndex,
+			PlayerInventory.Local?.ActiveWeapon,
+			PlayerInventory.Local?.EquippedWeapons != null ? string.Join(",", PlayerInventory.Local.EquippedWeapons.Select(w =>
+w?.Id ?? "null")) : "null"
 		);
 	}
 }

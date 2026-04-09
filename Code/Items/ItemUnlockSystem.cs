@@ -13,7 +13,7 @@ public sealed class ItemUnlockSystem : Component
 
     protected override void OnAwake()
     {
-        if (Instance != null)
+        if ( Instance != null )
         {
             GameObject.Destroy();
             return;
@@ -24,51 +24,59 @@ public sealed class ItemUnlockSystem : Component
 
     private void Load()
     {
-        if (SaveManager.Instance?.Data?.Inventory != null)
+        if ( SaveManager.Instance?.Data?.Inventory != null )
         {
             _unlockedWeapons = SaveManager.Instance.Data.Inventory.UnlockedWeapons ?? new();
             _unlockedUtilities = SaveManager.Instance.Data.Inventory.UnlockedUtilities ?? new();
-            Log.Info($"[ItemUnlockSystem] Loaded: {_unlockedWeapons.Count} weapons and {_unlockedUtilities.Count} utilities unlocked");
+            Log.Info( $"[ItemUnlockSystem] Loaded: {_unlockedWeapons.Count} weapons and {_unlockedUtilities.Count} utilities unlocked" );
         }
     }
 
-    public bool IsWeaponUnlocked(string weaponId)
+    public bool IsWeaponUnlocked( string weaponId )
     {
-        return _unlockedWeapons.Contains(weaponId);
+        return _unlockedWeapons.Contains( weaponId );
     }
 
-    public bool IsUtilityUnlocked(string utilityId)
+    public bool IsUtilityUnlocked( string utilityId )
     {
-        return _unlockedUtilities.Contains(utilityId);
+        return _unlockedUtilities.Contains( utilityId );
     }
 
-    public void UnlockWeapon(string weaponId)
+    public void UnlockWeapon( string weaponId )
     {
-        if (!_unlockedWeapons.Contains(weaponId))
+        if ( !Networking.IsHost ) return; // Server-only
+
+        if ( !_unlockedWeapons.Contains( weaponId ) )
         {
-            _unlockedWeapons.Add(weaponId);
+            _unlockedWeapons.Add( weaponId );
             SaveChanges();
-            Log.Info($"[ItemUnlockSystem] Weapon unlocked: {weaponId}");
+            Log.Info( $"[ItemUnlockSystem] Weapon unlocked: {weaponId}" );
         }
     }
 
-    public void UnlockUtility(string utilityId)
+    public void UnlockUtility( string utilityId )
     {
-        if (!_unlockedUtilities.Contains(utilityId))
+        if ( !Networking.IsHost ) return; // Server-only
+
+        if ( !_unlockedUtilities.Contains( utilityId ) )
         {
-            _unlockedUtilities.Add(utilityId);
+            _unlockedUtilities.Add( utilityId );
             SaveChanges();
-            Log.Info($"[ItemUnlockSystem] Utility tool unlocked: {utilityId}");
+            Log.Info( $"[ItemUnlockSystem] Utility tool unlocked: {utilityId}" );
         }
     }
 
     private void SaveChanges()
     {
-        if (SaveManager.Instance != null)
+        if ( !Networking.IsHost ) return; // Server-only
+
+        if ( SaveManager.Instance != null )
         {
             SaveManager.Instance.Data.Inventory.UnlockedWeapons = _unlockedWeapons;
             SaveManager.Instance.Data.Inventory.UnlockedUtilities = _unlockedUtilities;
-            SaveManager.Instance.Save();
+
+            // Notify throttler (major event: unlock triggers immediate save despite throttle)
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.ItemUnlocked, $"Weapons: {_unlockedWeapons.Count}, Utilities: {_unlockedUtilities.Count}" );
         }
     }
 }
