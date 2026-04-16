@@ -33,16 +33,12 @@ public partial class WeaponDefinition : GameResource
 {
     // --- Identity ---
     [Property, Group( "Identity" )] public string Id { get; set; }
-    [Property, Group( "Identity" )] public string WeaponName { get; set; }
-    [Property, Group( "Identity" )] public string Description { get; set; }
     [Property, Group( "Identity" )] public GameObject WeaponPrefab { get; set; }
 
-    private string _iconPath;
-    [Property, Group( "Identity" )]
+    [Group( "Identity" )]
     public string IconPath
     {
-        get => string.IsNullOrEmpty( _iconPath ) ? $"Resources/Weapons/Textures/{Id}.prefab.png" : _iconPath;
-        set => _iconPath = value;
+        get => $"Resources/Weapons/Textures/{Id}.prefab.png";
     }
 
     // --- Filters ---
@@ -80,6 +76,18 @@ public partial class WeaponDefinition : GameResource
     [Property, Group( "Viewmodel" )] public string ViewmodelFireAnim { get; set; } = "b_fire";
 
     // --- Economy ---
-    [Property, Group( "Economy" )] public int UnlockCost { get; set; }
+    [Property, Group( "Economy" )] public double UnlockCost { get; set; }
     [Property, Group( "Economy" )] public int RequiredSpawnerTier { get; set; }
+
+    // --- Localization Keys ---
+    [Group( "Localization" )]
+    public string LocalizationKeyName
+    {
+        get => $"#weapon.{RequiredSpawnerTier}.{Category.ToString().ToLower()}.{Id}.name";
+    }
+    [Group( "Localization" )]
+    public string LocalizationKeyDescription
+    {
+        get => $"#weapon.{RequiredSpawnerTier}.{Category.ToString().ToLower()}.{Id}.description";
+    }
 }

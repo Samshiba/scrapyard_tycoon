@@ -56,8 +56,11 @@ public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
     {
         var backpack = e.Source?.Components.Get<PlayerBackpack>();
 
-        if ( backpack != null && backpack.TryAddItem( GetItemData() ) )
+        if ( backpack != null && backpack.CollectedItems.Count < backpack.MaxItems )
         {
+            var data = GetItemData();
+            backpack.RpcTryAddItem( data.Type, data.Value );
+
             Consume();
             return true;
         }

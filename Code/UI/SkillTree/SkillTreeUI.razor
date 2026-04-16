@@ -1,5 +1,6 @@
 @using Sandbox
 @using Sandbox.UI
+@using Sandbox.Utils
 @using System
 @using System.Collections.Generic
 @using System.Linq
@@ -14,7 +15,10 @@
 
             <div class="skt-header">
                 <span class="skt-title">#ui.skilltree.title</span>
-                <span class="skt-wallet">💰 @GetScrap() #common.currency.scrap</span>
+                <div class="skt-wallet">
+                    <label class="wallet-amount">@NumberFormatter.FormatWithSuffix(GetScrap())</label> 
+                    <label class="wallet-currency">#common.currency.scrap</label>
+                </div>
                 <div class="skt-close" onclick=@CloseMenu>#ui.skilltree.button.close</div>
             </div>
 
@@ -25,12 +29,13 @@
                 onmouseup=@EndDrag
                 style="background-position: @(PanOffset.x)px @(PanOffset.y)px; background-size: @(80 * Zoom)px @(80 * Zoom)px;">
 
-                <div class="skt-canvas" style="transform: translate(@(PanOffset.x)px, @(PanOffset.y)px);">
+                <div class="skt-canvas" style="position: absolute; width: 100%; height: 100%; left: 0; top: 0;">
 
                     @foreach ( var node in VisibleNodes() )
                     {
                         @foreach ( var req in node.Requirements )
                         {
+                            if ( UpgradeManager.Instance?.Database == null ) continue;
                             if ( !UpgradeManager.Instance.Database.TryGetValue( req.RequiredId, out var parent ) ) continue;
                             
                             // Sécurité : on ne dessine la ligne que si le parent est AUSSI visible
@@ -39,10 +44,10 @@
                             bool active = GetLevel( parent.Id ) >= req.RequiredLevel;
                             float zoomedRadius = NodeRadius * Zoom;
 
-                            float lx1 = (GetPos( parent.Id ).x * Zoom) + zoomedRadius;
-                            float ly1 = (GetPos( parent.Id ).y * Zoom) + zoomedRadius;
-                            float lx2 = (GetPos( node.Id ).x * Zoom) + zoomedRadius;
-                            float ly2 = (GetPos( node.Id ).y * Zoom) + zoomedRadius;
+                            float lx1 = (GetPos( parent.Id ).x * Zoom) + zoomedRadius + PanOffset.x;
+                            float ly1 = (GetPos( parent.Id ).y * Zoom) + zoomedRadius + PanOffset.y;
+                            float lx2 = (GetPos( node.Id ).x * Zoom) + zoomedRadius + PanOffset.x;
+                            float ly2 = (GetPos( node.Id ).y * Zoom) + zoomedRadius + PanOffset.y;
                             
                             float dx = lx2 - lx1;
                             float dy = ly2 - ly1;
@@ -50,7 +55,7 @@
                             float lineAngle = MathF.Atan2( dy, dx ) * (180f / MathF.PI);
 
                             <div class="skt-line @( active ? "line-active" : "line-locked" )"
-                                style="left: @(lx1)px; top: @(ly1)px; width: @(lineLen)px; height: @(4 * Zoom)px; transform: rotate(@(lineAngle)deg) translateY(-50%);" />
+                                style="left: @((int)lx1)px; top: @((int)ly1)px; width: @((int)lineLen)px; height: @((int)(4 * Zoom))px; transform: rotate(@((int)lineAngle)deg) translateY(-50%);" />
                         }
                     }
 
@@ -78,11 +83,11 @@
                         }
 
                         float zoomedRadius = NodeRadius * Zoom;
-                        float posX = GetPos( node.Id ).x * Zoom;
-                        float posY = GetPos( node.Id ).y * Zoom;
-
+                        float posX = (GetPos( node.Id ).x * Zoom) + PanOffset.x;
+                        float posY = (GetPos( node.Id ).y * Zoom) + PanOffset.y;
+                        
                         <div class="@cls"
-                            style="left: @(posX)px; top: @(posY)px; width: @(zoomedRadius*2)px; height: @(zoomedRadius*2)px;"
+                            style="left: @((int)posX)px; top: @((int)posY)px; width: @((int)(zoomedRadius*2))px; height: @((int)(zoomedRadius*2))px;"
                             onmouseover=@( () => { HoveredId = capturedId; StateHasChanged(); } )
                             onmouseout=@( () => { HoveredId = null; StateHasChanged(); } )
                             onclick=@( () => OnNodeClick( capturedId ) )>
@@ -106,12 +111,12 @@
                         float ttY = (GetPos( hNode.Id ).y * Zoom) + PanOffset.y;
 
                         <div class="skt-tooltip" style="left: @(ttX)px; top: @(ttY)px;">
-                            <div class="tt-name">@hNode.Icon @UpgradeManager.Instance.GetUpgradeName(hNode.Id)</div>
+                            <div class="tt-name">@hNode.Icon <span>@UpgradeManager.Instance.GetUpgradeName(hNode.Id)</span></div>
                             <div class="tt-desc">@UpgradeManager.Instance.GetUpgradeDescription(hNode.Id)</div>
                             <div class="tt-level"><label>#ui.skilltree.tooltip.level</label> @hLvl <label>#ui.skilltree.tooltip.maxlevel</label> @hNode.MaxLevel</div>
                             @if ( !hMaxed )
                             {
-                                <div class="tt-cost">@hNode.GetCostForLevel( hLvl ) <label>#common.currency.scrap</label></div>
+                                <div class="tt-cost">@NumberFormatter.FormatWithSuffix(hNode.GetCostForLevel( hLvl )) <label>#common.currency.scrap</label></div>
                             }
                             else
                             {
@@ -156,8 +161,6 @@
     protected override void OnAwake()
     {
         Local = this;
-        if ( UpgradeManager.Instance?.Database != null )
-            _positions = SkillTreeLayout.Compute( UpgradeManager.Instance.Database );
     }
 
     Vector2 GetPos( string id ) =>
@@ -168,7 +171,6 @@
         if ( IsOpen ) return;
         if ( TimeSinceClosed < 0.2f ) return;
 
-        // Fermer le shop si ouvert
         if ( WeaponShopUI.Local != null )
             WeaponShopUI.Local.CloseMenu();
 
@@ -176,7 +178,11 @@
         Mouse.Position = new Vector2( Screen.Width / 2f, Screen.Height / 2f );
         Zoom = 1f;
 
-        // Trouver le nœud racine (sans prérequis) et le centrer
+        if ( _positions.Count == 0 && UpgradeManager.Instance?.Database != null )
+        {
+            _positions = SkillTreeLayout.Compute( UpgradeManager.Instance.Database );
+        }
+
         Vector2 rootPos = Vector2.Zero;
         if ( UpgradeManager.Instance?.Database != null )
         {
@@ -195,7 +201,7 @@
             (Screen.Width / 2f) - (rootPos.x * Zoom) - zoomedRadius,
             (Screen.Height / 2f) - (rootPos.y * Zoom) - zoomedRadius
         );
-        
+
         TimeSinceOpened = 0;
         StateHasChanged();
     }
@@ -233,14 +239,8 @@
         if ( Zoom == oldZoom ) return; 
 
         Vector2 mousePos = Mouse.Position;
-
-        // 2. On calcule la distance entre la souris et le point d'origine actuel du canvas
         Vector2 offsetToMouse = mousePos - PanOffset;
-        
-        // 3. On calcule le ratio d'agrandissement
         float ratio = Zoom / oldZoom;
-
-        // 4. On ajuste le PanOffset pour que le point sous la souris reste immobile
         PanOffset = mousePos - (offsetToMouse * ratio);
 
         StateHasChanged();
@@ -252,18 +252,14 @@
 
         if ( IsOpen && TimeSinceOpened > 0.1f )
         {
-            // 1. L'action Use refonctionnera car le Panel n'a plus volé le clavier !
             if ( Input.Pressed( "use" ) )
             {
                 CloseMenu();
                 return;
             }
 
-            // 2. L'interception parfaite de la touche Echap
             if ( Input.EscapePressed )
             {
-                // MAGIE : On dit au moteur s&box d'oublier cette pression de touche.
-                // Le menu pause natif ne s'ouvrira donc jamais !
                 Input.EscapePressed = false; 
                 
                 CloseMenu();
@@ -276,8 +272,7 @@
             GraphPanel.OnZoomScroll = OnScroll;
         }
 
-        // Only control mouse if THIS panel is open - don't interfere if closed
-        if ( IsOpen )
+        if (IsOpen)
         {
             Mouse.Visibility = MouseVisibility.Visible;
             Panel.Style.PointerEvents = PointerEvents.All;
@@ -285,11 +280,15 @@
         else
         {
             Panel.Style.PointerEvents = PointerEvents.None;
+            
+            if (WeaponShopUI.Local == null || !WeaponShopUI.Local.IsOpen)
+            {
+                Mouse.Visibility = MouseVisibility.Hidden;
+            }
         }
 
         if ( !IsOpen ) return;
 
-        // Gestion du déplacement (Pan)
         if ( IsDragging )
         {
             var delta = Mouse.Position - LastMousePos;
@@ -303,21 +302,13 @@
         LastMousePos = Mouse.Position;
     }
 
-    // --- Logique du Skill Tree ---
+    // --- Skill tree logic ---
     bool IsVisible( string id )
     {
         if ( !UpgradeManager.Instance.Database.TryGetValue( id, out var node ) ) return false;
-        
-        // 1. Les points de départ (Racines) sont toujours visibles
         if ( node.Requirements.Count == 0 ) return true;
-        
-        // 2. Si le nœud est débloqué (prérequis remplis), il est visible
         if ( IsUnlocked( id ) ) return true;
 
-        // 3. LA RÈGLE DU "+1" : 
-        // On l'affiche (en "?") si au moins l'un de ses parents est déjà débloqué et visible.
-        // (Astuce : Si tu veux qu'il faille d'abord ACHETER le parent pour voir le "?", 
-        // remplace "IsUnlocked(req.RequiredId)" par "GetLevel(req.RequiredId) > 0")
         foreach ( var req in node.Requirements )
         {
             if ( IsUnlocked( req.RequiredId ) ) return true;
@@ -342,16 +333,13 @@
     }
 
     int GetLevel( string id ) => GlobalUpgradesSystem.Instance?.GetUpgradeLevel( id ) ?? 0;
-    float GetScrap() => PlayerStats.Local?.TotalScrap ?? 0;
-
+    double GetScrap() => FactoryStats.Instance?.TotalScrap ?? 0;
     void OnNodeClick( string id )
     {
-        // On annule le clic si l'utilisateur était en train de glisser la vue
         if ( DragDistance > 5f ) return; 
-
         if ( !IsUnlocked( id ) ) return;
-        if ( GlobalUpgradesSystem.Instance.TryPurchaseUpgrade( id ) )
-            StateHasChanged();
+
+        PlayerFactoryActions.Local?.RpcRequestBuyGlobalUpgrade( id );
     }
 
     protected override int BuildHash()

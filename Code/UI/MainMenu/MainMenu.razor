@@ -1,0 +1,306 @@
+@using Sandbox;
+@using Sandbox.Network
+@using Sandbox.UI;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@inherits PanelComponent
+@namespace Sandbox
+@using System.Threading.Tasks;
+
+<root class="menu-root">
+    
+    <div class="nav-bar">
+        <div class="logo">#ui.mainmenu.title</div>
+        <div class="nav-buttons">
+            <div class="btn @(CurrentTab == MenuTab.Play ? "active" : "")" onclick=@(() => SetTab(MenuTab.Play))>#ui.mainmenu.tab.play</div>
+                <div class="btn @(CurrentTab == MenuTab.Join ? "active" : "")" onclick=@(() => SetTab(MenuTab.Join))>#ui.mainmenu.tab.join</div>
+                    <div class="btn @(CurrentTab == MenuTab.Options ? "active" : "")" onclick=@(() => SetTab(MenuTab.Options))>#ui.mainmenu.tab.options</div>
+                    </div>
+                    <div class="btn quit" onclick=@Game.Close>#ui.mainmenu.button.quit</div>
+                </div>
+                
+                @if (CurrentTab == MenuTab.Play)
+                {
+                    <div class="main-content">
+        
+                        <div class="master-list">
+                            <div class="btn-new" onclick=@OnClickNewFactory>
+                                <i>add</i>
+                                <span>#ui.mainmenu.button.newfactory</span>
+                            </div>
+
+                            <div class="save-list">
+                                @if (IsLoading)
+                                {
+                                    <div class="loading">#ui.mainmenu.loading</div>
+                                }
+                                else
+                                {
+                                    @foreach (var save in Saves)
+                                    {
+                                        var isSelected = SelectedSave?.FactoryId == save.FactoryId;
+                                        <div class="save-card @(isSelected ? "selected" : "")" onclick=@(() => OnSelectedSave(save))>
+                                            <div class="save-name">@GetFactoryName(save)</div>
+                                            <div class="save-meta">
+                                                <span class="label">#ui.mainmenu.factory.tier</span> <span class="value">@(save.WorldState?.Tier ?? 1)</span>
+                                                <span class="separator">•</span>
+                                                <span class="label">#ui.mainmenu.factory.scrap</span> <span class="value">@save.TotalScrap</span>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <div class="detail-view">
+                            @if (IsCreatingNew || SelectedSave != null)
+                            {
+                                <div class="detail-header">
+                                    @if (IsCreatingNew)
+                                    {
+                                        <textentry class="input-name" value:bind=@NewFactoryName placeholder=@NewFactoryPlaceholder />
+                                    }
+                                    else
+                                    {
+                                        <div class="factory-title">@GetFactoryName(SelectedSave)</div>
+                        
+                                            @if (SelectedSave.IsSandbox)
+                                            {
+                                                <div class="sandbox-warning">
+                                                    <i>warning</i>
+                                                    <span>#ui.mainmenu.factory.sandbox</span>
+                                                </div>
+                                            }
+
+                                            <div class="stats-grid">
+                                                <div class="stat-box">
+                                                    <div class="label">#ui.mainmenu.stats.totalscrap</div>
+                                                    <div class="value">@SelectedSave.TotalScrap</div>
+                                                </div>
+                                                <div class="stat-box">
+                                                    <div class="label">#ui.mainmenu.stats.prestige</div>
+                                                    <div class="value">@SelectedSave.PrestigeLevel</div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="lobby-settings">
+                                        <div class="setting-row">
+                                            <label>#ui.mainmenu.settings.visibility</label>
+                                            <div class="mock-dropdown" onclick=@CycleVisibility>
+                                                @VisibilityOptions[VisibilityIndex]
+                                            </div>
+                                        </div>
+
+                                        <div class="setting-row">
+                                            <label>#ui.mainmenu.settings.maxplayers</label>
+                                            <div class="player-selector">
+                                                <div class="btn-adjust" onclick=@(() => ChangeMaxPlayers(-1))>-</div>
+                                                <div class="val">@MaxPlayers</div>
+                                                <div class="btn-adjust" onclick=@(() => ChangeMaxPlayers(1))>+</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="launch-footer">
+                                        <div class="btn-launch" onclick=@OnClickLaunch>
+                                            @if (IsCreatingNew)
+                                            {
+                                                <span>#ui.mainmenu.button.createlaunch</span>
+                                            }
+                                            else
+                                            {
+                                                <span>#ui.mainmenu.button.launch</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+            else
+                                {
+                                    <div class="empty-state">#ui.mainmenu.empty</div>
+                                }
+                            </div>
+                        </div>
+                    }
+                else if (CurrentTab == MenuTab.Join)
+                    {
+                        <div class="server-browser">
+                            <div class="browser-header">
+                                <h2>#ui.mainmenu.servers.title</h2>
+                                <div class="btn-refresh" onclick=@RefreshLobbiesAsync>#ui.mainmenu.servers.refresh</div>
+                            </div>
+
+                            <div class="lobby-list">
+                                @if (IsFetchingLobbies)
+                                {
+                                    <div>#ui.mainmenu.servers.fetching</div>
+                                }
+                                else if (Lobbies.Count == 0)
+                                {
+                                    <div>#ui.mainmenu.servers.empty</div>
+                                }
+                                else
+                                {
+                                    @foreach (var lobby in Lobbies)
+                                    {
+                                        <div class="lobby-card">
+                                            <div class="lobby-name">@lobby.Name</div>
+                                            <div class="lobby-players"><span class="value">@lobby.Members / @lobby.MaxMembers</span> <span>#ui.mainmenu.servers.players</span></div>
+                                            <div class="btn-join" onclick=@(() => JoinLobby(lobby))><span>#ui.mainmenu.servers.join</span></div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </root>
+
+@code {
+    // --- STATE ---
+    public bool IsLoading { get; set; } = true;
+    public List<FactoryWorldData> Saves { get; set; } = new();
+    
+    public FactoryWorldData SelectedSave { get; set; }
+    public bool IsCreatingNew { get; set; } = false;
+
+    public enum MenuTab { Play, Join, Options }
+    public MenuTab CurrentTab { get; set; } = MenuTab.Play;
+
+    public List<LobbyInformation> Lobbies { get; set; } = new();
+    public bool IsFetchingLobbies { get; set; } = false;
+
+    public string[] VisibilityOptions = new[] { "#ui.mainmenu.settings.visibility.public", "#ui.mainmenu.settings.visibility.friends", "#ui.mainmenu.settings.visibility.private" };
+    public int VisibilityIndex { get; set; } = 0;
+    
+    // Champs du formulaire
+    public string NewFactoryName { get; set; } = "";
+    public string NewFactoryPlaceholder { get; set; } = "#ui.mainmenu.input.newfactoryname";
+    public float MaxPlayers { get; set; } = 4;
+
+    protected override void OnAwake()
+    {
+        _ = FetchSavesAsync();
+    }
+
+    protected override void OnUpdate()
+    {
+        base.OnUpdate();
+
+        Mouse.Visibility = MouseVisibility.Visible;
+        Panel.Style.PointerEvents = PointerEvents.All;
+    }
+
+    public void SetTab(MenuTab tab)
+    {
+        CurrentTab = tab;
+        if (tab == MenuTab.Join)
+        {
+            _ = RefreshLobbiesAsync();
+        }
+        StateHasChanged();
+    }
+
+    public void CycleVisibility()
+    {
+        VisibilityIndex = (VisibilityIndex + 1) % VisibilityOptions.Length;
+        StateHasChanged();
+    }
+
+    public void ChangeMaxPlayers(int delta)
+    {
+        MaxPlayers = Math.Clamp(MaxPlayers + delta, 1, 8);
+        StateHasChanged();
+    }
+
+    private async Task RefreshLobbiesAsync()
+    {
+        IsFetchingLobbies = true;
+        StateHasChanged();
+
+        // L'API native de s&box pour trouver les serveurs multi
+        Lobbies = await Networking.QueryLobbies();
+    
+        IsFetchingLobbies = false;
+        StateHasChanged();
+    }
+
+    private void JoinLobby(LobbyInformation lobby)
+    {
+        GameSession.Clear();
+        Log.Info($"Connexion au lobby: {lobby.Name}...");
+        Networking.Connect(lobby.LobbyId);
+    }
+
+    private async Task FetchSavesAsync()
+    {
+        IsLoading = true;
+        StateHasChanged(); // Spinner
+
+        try
+        {
+            string mySteamId = Connection.Local.SteamId.ToString();
+            string myToken = await Sandbox.Services.Auth.GetToken("supabase_sync");
+
+            Log.Info($"[Menu] Fetching saves for SteamID: {mySteamId} with token: {myToken}");
+
+            var myFactories = await SupabaseService.FetchUserFactoriesAsync(mySteamId, myToken);
+
+            Saves = myFactories ?? new List<FactoryWorldData>();
+        }
+        catch (System.Exception ex)
+        {
+            Log.Error($"[Menu] Error fetching saves: {ex.Message}");
+            Saves = new List<FactoryWorldData>();
+        }
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    public void OnClickNewFactory()
+    {
+        SelectedSave = null;
+        IsCreatingNew = true;
+        NewFactoryName = "Nouvelle Usine";
+        StateHasChanged();
+    }
+
+    public void OnSelectedSave(FactoryWorldData save)
+    {
+        IsCreatingNew = false;
+        SelectedSave = save;
+        StateHasChanged();
+    }
+
+    public void OnClickLaunch()
+    {
+        GameSession.IsNewGame = IsCreatingNew;
+        GameSession.NewSaveName = NewFactoryName;
+        GameSession.TargetFactoryId = IsCreatingNew ? System.Guid.NewGuid().ToString() : SelectedSave.FactoryId;
+
+        Log.Info($"Lancement de la factory: {GameSession.TargetFactoryId} (Max: {MaxPlayers})");
+
+        var config = new Sandbox.Network.LobbyConfig()
+        {
+            MaxPlayers = (int)MaxPlayers,
+            Name = IsCreatingNew ? NewFactoryName : SelectedSave.SaveName,
+            Hidden = (VisibilityIndex == 2),
+            Privacy = (Sandbox.Network.LobbyPrivacy)VisibilityIndex
+        };
+
+        Networking.CreateLobby(config);
+
+        Scene.LoadFromFile("scenes/game.scene");
+    }
+
+    private string GetFactoryName(FactoryWorldData save)
+    {
+        if (string.IsNullOrEmpty(save.SaveName))
+        {
+            return "#ui.mainmenu.factory.unnamed";
+        }
+        return save.SaveName;
+    }
+}

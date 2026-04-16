@@ -19,30 +19,55 @@ public sealed class PlayerInventory : Component
     private Dictionary<string, WeaponDefinition> _weaponCache = new();
     private bool _weaponsLoaded = false;
 
+    private string MySteamId => Connection.Local.SteamId.ToString();
+
     protected override void OnAwake()
     {
-        Local = this;
+        if ( !IsProxy )
+        {
+            Local = this;
+        }
     }
 
     protected override void OnStart()
     {
-        var allWeapons = ResourceLibrary.GetAll<WeaponDefinition>();
-        foreach ( var weapon in allWeapons )
+        foreach ( var weapon in ResourceLibrary.GetAll<WeaponDefinition>() )
         {
-            if ( !string.IsNullOrEmpty( weapon.Id ) )
-                _weaponCache[weapon.Id] = weapon;
+            if ( !string.IsNullOrEmpty( weapon.Id ) ) _weaponCache[weapon.Id] = weapon;
         }
-        Log.Info( $"[PlayerInventory] Weapon cache loaded: {_weaponCache.Count} weapon definition(s)" );
 
-        // Wait for SaveData to be ready before loading equipped weapons
-        if ( SaveManager.Instance?.IsDataReady == true )
+        if ( Networking.IsHost )
         {
             LoadEquippedWeapons();
         }
-        else
+    }
+
+    private void LoadEquippedWeapons()
+    {
+        if ( SaveManager.Instance?.ActivePlayers.TryGetValue( MySteamId, out var pData ) != true ) return;
+
+        var savedWeaponIds = pData.EquippedWeapons;
+        if ( savedWeaponIds == null ) return;
+
+        int successCount = 0;
+        for ( int i = 0; i < savedWeaponIds.Length && i < EquippedWeapons.Length; i++ )
         {
-            Log.Info( "[PlayerInventory] SaveData not ready yet, will load on next update" );
+            if ( string.IsNullOrEmpty( savedWeaponIds[i] ) ) continue;
+
+            if ( _weaponCache.TryGetValue( savedWeaponIds[i], out var weaponDef ) )
+            {
+                EquippedWeapons[i] = weaponDef;
+                successCount++;
+            }
         }
+
+        if ( successCount > 0 )
+        {
+            ActiveSlotIndex = pData.ActiveWeaponIndex;
+            EquipSlot( ActiveSlotIndex );
+        }
+
+        Log.Info( $"[PlayerInventory] Loaded {successCount} equipped weapons for {MySteamId}" );
     }
 
     protected override void OnPreRender()
@@ -96,12 +121,6 @@ public sealed class PlayerInventory : Component
     {
         if ( IsProxy ) return;
 
-        // Retry loading weapons if SaveData wasn't ready on start
-        if ( !_weaponsLoaded && SaveManager.Instance?.IsDataReady == true )
-        {
-            LoadEquippedWeapons();
-        }
-
         if ( PlayerBody != null && Scene.Camera != null )
         {
             var lookPos = Scene.Camera.WorldPosition
@@ -117,106 +136,46 @@ public sealed class PlayerInventory : Component
         if ( Input.Pressed( "Slot4" ) ) EquipSlot( 3 );
     }
 
-    private void LoadEquippedWeapons()
+    private void RequestEquipSlot( int index )
     {
-        if ( IsProxy || SaveManager.Instance?.Data?.Inventory == null ) return;
+        if ( index < 0 || index >= EquippedWeapons.Length ) return;
 
-        var savedWeaponIds = SaveManager.Instance.Data.Inventory.EquippedWeapons;
-        if ( savedWeaponIds == null ) return;
+        RpcSetSlot( index );
+    }
 
-        int successCount = 0, failedCount = 0;
-        for ( int i = 0; i < savedWeaponIds.Length && i < EquippedWeapons.Length; i++ )
+    [Rpc.Broadcast]
+    public void RpcSetSlot( int index )
+    {
+        if ( EquippedWeapons[index] == null )
         {
-            if ( string.IsNullOrEmpty( savedWeaponIds[i] ) ) continue;
-            if ( _weaponCache.TryGetValue( savedWeaponIds[i], out var weaponDef ) )
-            { EquippedWeapons[i] = weaponDef; successCount++; }
-            else
-            { Log.Warning( $"[PlayerInventory] Weapon not found: '{savedWeaponIds[i]}' for slot {i}" ); failedCount++; }
+            UnequipCurrentWeapon();
+            ActiveSlotIndex = index;
         }
-
-        if ( successCount > 0 )
+        else if ( ActiveSlotIndex == index && _activeWeaponObject != null )
         {
-            ActiveSlotIndex = SaveManager.Instance.Data.Inventory.ActiveWeaponIndex;
-            Log.Info( $"[PlayerInventory] Weapons loaded: {successCount} available, {failedCount} missing, active slot {ActiveSlotIndex}" );
-            _weaponsLoaded = true;
-            EquipSlot( ActiveSlotIndex );
+            UnequipCurrentWeapon();
         }
         else
         {
-            Log.Error( "[PlayerInventory] ERROR: No weapons loaded. Inventory is empty." );
-            _weaponsLoaded = true;
+            ActiveSlotIndex = index;
+            SpawnWeaponInHand();
         }
+
+        if ( Networking.IsHost ) SaveChanges();
     }
 
     private void SaveChanges()
     {
-        Log.Info( $"[PlayerInventory] SaveChanges() called, IsProxy={IsProxy}, SaveManager.Instance={SaveManager.Instance != null}" );
-        if ( IsProxy || SaveManager.Instance == null )
+        if ( !Networking.IsHost || SaveManager.Instance == null ) return;
+
+        var weaponIds = EquippedWeapons.Select( w => w?.Id ).ToArray();
+
+        if ( SaveManager.Instance.ActivePlayers.TryGetValue( MySteamId, out var pData ) )
         {
-            Log.Warning( $"[PlayerInventory] SaveChanges() aborted: IsProxy={IsProxy} or SaveManager null" );
-            return;
-        }
+            pData.EquippedWeapons = weaponIds;
+            pData.ActiveWeaponIndex = ActiveSlotIndex;
 
-        var weaponIds = new string[EquippedWeapons.Length];
-        for ( int i = 0; i < EquippedWeapons.Length; i++ )
-            weaponIds[i] = EquippedWeapons[i]?.Id;
-
-        Log.Info( $"[PlayerInventory] SaveChanges() - Current EquippedWeapons local: [{string.Join( ", ", weaponIds.Select( w => w ?? "null" ) )}]" );
-
-        // Only server modifies SaveData directly
-        if ( Networking.IsHost )
-        {
-            Log.Info( $"[PlayerInventory] SaveChanges() - IsHost=true, writing to SaveManager.Data.Inventory" );
-            Log.Info( $"[PlayerInventory] SaveChanges() - SaveManager.Data.Inventory.EquippedWeapons BEFORE: [{string.Join( ", ", SaveManager.Instance.Data.Inventory.EquippedWeapons.Select( w => w ?? "null" ) )}]" );
-
-            SaveManager.Instance.Data.Inventory.EquippedWeapons = weaponIds;
-            SaveManager.Instance.Data.Inventory.ActiveWeaponIndex = ActiveSlotIndex;
-
-            Log.Info( $"[PlayerInventory] SaveChanges() - SaveManager.Data.Inventory.EquippedWeapons AFTER: [{string.Join( ", ", SaveManager.Instance.Data.Inventory.EquippedWeapons.Select( w => w ?? "null" ) )}]" );
-        }
-        else
-        {
-            // Client sends RPC to server with new equipment
-            Log.Info( $"[PlayerInventory] SaveChanges() - IsHost=false, sending RPC" );
-            RpcEquipWeapons( weaponIds, ActiveSlotIndex );
-        }
-
-        // Notify throttler (save will be batched)
-        var weaponName = EquippedWeapons[ActiveSlotIndex]?.WeaponName ?? "empty";
-        Log.Info( $"[PlayerInventory] SaveChanges() - Notifying SaveEventBus: Slot {ActiveSlotIndex} ({weaponName})" );
-        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.WeaponEquipped, $"Slot {ActiveSlotIndex}: {weaponName}" );
-    }
-
-    /// <summary>
-    /// RPC called by client to update equipment on server.
-    /// </summary>
-    private void RpcEquipWeapons( string[] weaponIds, int activeIndex )
-    {
-        if ( !Networking.IsHost ) return;
-
-        if ( SaveManager.Instance?.Data?.Inventory != null )
-        {
-            SaveManager.Instance.Data.Inventory.EquippedWeapons = weaponIds;
-            SaveManager.Instance.Data.Inventory.ActiveWeaponIndex = activeIndex;
-
-            if ( SaveConfig.DEBUG_SAVE_LOGGING )
-                Log.Info( $"[PlayerInventory] Equipment updated via RPC: slot {activeIndex}" );
-        }
-    }
-
-    /// <summary>
-    /// RPC: Client requests to unlock a weapon on server.
-    /// Must be called on the network player object to work properly.
-    /// </summary>
-    public void RpcRequestUnlockWeapon( string weaponId )
-    {
-        if ( !Networking.IsHost ) return;
-
-        if ( ItemUnlockSystem.Instance != null )
-        {
-            ItemUnlockSystem.Instance.UnlockWeapon( weaponId );
-            if ( SaveConfig.DEBUG_SAVE_LOGGING )
-                Log.Info( $"[PlayerInventory] Weapon unlock requested via RPC: {weaponId}" );
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.WeaponEquipped, $"Slot {ActiveSlotIndex}", MySteamId );
         }
     }
 
@@ -228,8 +187,8 @@ public sealed class PlayerInventory : Component
         if ( existing >= 0 ) EquippedWeapons[existing] = null;
 
         EquippedWeapons[slotIndex] = def;
-        EquippedWeapons = EquippedWeapons;  // Force [Property] notification to SaveManager and Razor
-        EquipSlot( slotIndex );  // Activate the SLOT WE JUST EQUIPPED, not the previous active slot
+        EquippedWeapons = EquippedWeapons;
+        EquipSlot( slotIndex );
     }
 
     private void UnequipCurrentWeapon()

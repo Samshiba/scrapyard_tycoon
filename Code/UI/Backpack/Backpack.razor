@@ -1,7 +1,11 @@
 @using Sandbox;
 @using Sandbox.UI;
+@using Sandbox.Utils;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
 @inherits PanelComponent
-@using System.Linq
+@namespace Sandbox
 
 <root>
 	<div class="backpack-panel">
@@ -9,7 +13,7 @@
 		<!-- Argent -->
 		<div class="stat-row money-row">
 			<label class="stat-icon">⬡</label>
-			<label class="stat-value money-value">@((int)Stats?.TotalScrap) SC</label>
+			<label class="stat-value money-value">@NumberFormatter.FormatWithSuffix(GetScrap()) SC</label>
 		</div>
 
 		<div class="separator"></div>
@@ -22,7 +26,7 @@
 					<div class="gibs-bar-fill" style="width: @(FillPercent)%; background-color: @FillColor;"></div>
 				</div>
 				<label class="gibs-label" style="color: @FillColor;">
-					@(playerBackpack?.CurrentItemCount) / @(playerBackpack?.MaxItems)
+					@(PlayerBackpack.Local?.CurrentItemCount) / @(PlayerBackpack.Local?.MaxItems)
 				</label>
 			</div>
 		</div>
@@ -31,12 +35,9 @@
 </root>
 
 @code {
-	PlayerBackpack playerBackpack;
-	PlayerStats Stats;
-
-	float FillPercent => playerBackpack == null || playerBackpack.MaxItems == 0
+	float FillPercent => PlayerBackpack.Local == null || PlayerBackpack.Local.MaxItems == 0
 		? 0
-		: ((float)playerBackpack.CurrentItemCount / playerBackpack.MaxItems) * 100f;
+		: ((float)PlayerBackpack.Local.CurrentItemCount / PlayerBackpack.Local.MaxItems) * 100f;
 
 	// Vert → Jaune → Rouge selon remplissage
 	string FillColor
@@ -50,28 +51,15 @@
 		}
 	}
 
-	protected override void OnStart()
-	{
-		Grab();
-	}
+	double GetScrap() => FactoryStats.Instance?.TotalScrap ?? 0;
 
-	protected override void OnUpdate()
+	protected override int BuildHash()
 	{
-		if (playerBackpack == null || Stats == null) Grab();
-	}
+		var h = new System.HashCode();
+		h.Add(GetScrap());
+		h.Add(PlayerBackpack.Local?.CurrentItemCount);
+		h.Add(PlayerBackpack.Local?.MaxItems);
 
-	void Grab()
-	{
-		var player = Scene.GetAllComponents<PlayerController>().FirstOrDefault(x => !x.IsProxy);
-		if (player == null) return;
-		playerBackpack = player.Components.Get<PlayerBackpack>();
-		Stats = player.Components.Get<PlayerStats>();
+		return h.ToHashCode();
 	}
-
-	protected override int BuildHash() =>
-		System.HashCode.Combine(
-		playerBackpack?.CurrentItemCount,
-		playerBackpack?.MaxItems,
-			(int)(Stats?.TotalScrap ?? 0)
-		);
 }

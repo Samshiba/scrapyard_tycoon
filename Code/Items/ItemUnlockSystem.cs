@@ -8,47 +8,64 @@ public sealed class ItemUnlockSystem : Component
 {
     public static ItemUnlockSystem Instance { get; private set; }
 
-    private List<string> _unlockedWeapons = new();
-    private List<string> _unlockedUtilities = new();
+    [Sync] public NetList<string> UnlockedWeapons { get; private set; } = new();
+    [Sync] public NetList<string> UnlockedUtilities { get; private set; } = new();
 
     protected override void OnAwake()
     {
-        if ( Instance != null )
-        {
-            GameObject.Destroy();
-            return;
-        }
         Instance = this;
-        Load();
     }
 
-    private void Load()
+    protected override void OnStart()
     {
-        if ( SaveManager.Instance?.Data?.Inventory != null )
+        if ( !Networking.IsHost ) return;
+
+        _ = LoadUnlockedItemsAsync();
+    }
+
+    private async System.Threading.Tasks.Task LoadUnlockedItemsAsync()
+    {
+        // Wait for SaveManager to load factory data
+        while ( !SaveManager.Instance?.IsFactoryReady ?? true )
         {
-            _unlockedWeapons = SaveManager.Instance.Data.Inventory.UnlockedWeapons ?? new();
-            _unlockedUtilities = SaveManager.Instance.Data.Inventory.UnlockedUtilities ?? new();
-            Log.Info( $"[ItemUnlockSystem] Loaded: {_unlockedWeapons.Count} weapons and {_unlockedUtilities.Count} utilities unlocked" );
+            await System.Threading.Tasks.Task.Delay( 50 );
+        }
+
+        if ( SaveManager.Instance?.CurrentFactory != null )
+        {
+            var factory = SaveManager.Instance.CurrentFactory;
+
+            if ( factory.UnlockedWeapons != null )
+            {
+                foreach ( var w in factory.UnlockedWeapons ) UnlockedWeapons.Add( w );
+            }
+
+            if ( factory.UnlockedUtilities != null )
+            {
+                foreach ( var u in factory.UnlockedUtilities ) UnlockedUtilities.Add( u );
+            }
+
+            Log.Info( $"[ItemUnlockSystem] Loaded: {UnlockedWeapons.Count} weapons and {UnlockedUtilities.Count} utilities unlocked" );
         }
     }
 
     public bool IsWeaponUnlocked( string weaponId )
     {
-        return _unlockedWeapons.Contains( weaponId );
+        return UnlockedWeapons.Contains( weaponId );
     }
 
     public bool IsUtilityUnlocked( string utilityId )
     {
-        return _unlockedUtilities.Contains( utilityId );
+        return UnlockedUtilities.Contains( utilityId );
     }
 
     public void UnlockWeapon( string weaponId )
     {
-        if ( !Networking.IsHost ) return; // Server-only
+        if ( !Networking.IsHost ) return;
 
-        if ( !_unlockedWeapons.Contains( weaponId ) )
+        if ( !UnlockedWeapons.Contains( weaponId ) )
         {
-            _unlockedWeapons.Add( weaponId );
+            UnlockedWeapons.Add( weaponId );
             SaveChanges();
             Log.Info( $"[ItemUnlockSystem] Weapon unlocked: {weaponId}" );
         }
@@ -56,11 +73,11 @@ public sealed class ItemUnlockSystem : Component
 
     public void UnlockUtility( string utilityId )
     {
-        if ( !Networking.IsHost ) return; // Server-only
+        if ( !Networking.IsHost ) return;
 
-        if ( !_unlockedUtilities.Contains( utilityId ) )
+        if ( !UnlockedUtilities.Contains( utilityId ) )
         {
-            _unlockedUtilities.Add( utilityId );
+            UnlockedUtilities.Add( utilityId );
             SaveChanges();
             Log.Info( $"[ItemUnlockSystem] Utility tool unlocked: {utilityId}" );
         }
@@ -68,15 +85,11 @@ public sealed class ItemUnlockSystem : Component
 
     private void SaveChanges()
     {
-        if ( !Networking.IsHost ) return; // Server-only
+        if ( !Networking.IsHost || SaveManager.Instance?.CurrentFactory == null ) return;
 
-        if ( SaveManager.Instance != null )
-        {
-            SaveManager.Instance.Data.Inventory.UnlockedWeapons = _unlockedWeapons;
-            SaveManager.Instance.Data.Inventory.UnlockedUtilities = _unlockedUtilities;
+        SaveManager.Instance.CurrentFactory.UnlockedWeapons = [.. UnlockedWeapons];
+        SaveManager.Instance.CurrentFactory.UnlockedUtilities = [.. UnlockedUtilities];
 
-            // Notify throttler (major event: unlock triggers immediate save despite throttle)
-            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.ItemUnlocked, $"Weapons: {_unlockedWeapons.Count}, Utilities: {_unlockedUtilities.Count}" );
-        }
+        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.ItemUnlocked, $"Weapons: {UnlockedWeapons.Count}, Utilities: {UnlockedUtilities.Count}" );
     }
 }

@@ -16,18 +16,18 @@ public static class SaveConfig
 	/// Scrap value that triggers immediate save (bypass throttle).
 	/// e.g., unlocking a weapon with >1000 scrap earned triggers instant save
 	/// </summary>
-	public const float MAJOR_EVENT_SCRAP_THRESHOLD = 1000f;
+	public const double MAJOR_EVENT_SCRAP_THRESHOLD = 1000;
 
 	/// <summary>
 	/// Maximum scrap value any player can have. Prevents exploitation via manual JSON editing.
-	/// Adjust based on game balance.
+	/// Not enforced - scrap can grow infinitely.
 	/// </summary>
-	public const float MAX_SCRAP = 999_999_999f;
+	public const double MAX_SCRAP = double.MaxValue;
 
 	/// <summary>
 	/// Minimum scrap value (prevent negative balances).
 	/// </summary>
-	public const float MIN_SCRAP = 0f;
+	public const double MIN_SCRAP = 0;
 
 	/// <summary>
 	/// Maximum upgrade level per upgrade. Prevents malformed saves.

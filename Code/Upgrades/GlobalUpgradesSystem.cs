@@ -8,81 +8,69 @@ public sealed class GlobalUpgradesSystem : Component
 {
     public static GlobalUpgradesSystem Instance { get; private set; }
 
+    [Sync] public NetDictionary<string, int> SyncedUpgrades { get; set; } = new();
+
+    private bool _isLoaded = false;
+
     protected override void OnAwake()
     {
         Instance = this;
     }
 
-    private Dictionary<string, int> PlayerUpgrades => SaveManager.Instance?.Data?.Player?.GlobalUpgrades;
+    protected override void OnUpdate()
+    {
+        if ( Networking.IsHost && !_isLoaded && SaveManager.Instance?.IsFactoryReady == true )
+        {
+            var factoryUpgrades = SaveManager.Instance.CurrentFactory.GlobalUpgrades;
+
+            SyncedUpgrades.Clear();
+            foreach ( var kvp in factoryUpgrades )
+            {
+                SyncedUpgrades[kvp.Key] = kvp.Value;
+            }
+
+            _isLoaded = true;
+            Log.Info( $"[GlobalUpgradesSystem] Loaded {SyncedUpgrades.Count} upgrades." );
+        }
+    }
+
 
     public int GetUpgradeLevel( string upgradeId )
     {
-        if ( PlayerUpgrades == null ) return 0;
-
-        return PlayerUpgrades.GetValueOrDefault( upgradeId, 0 );
+        return SyncedUpgrades.TryGetValue( upgradeId, out var level ) ? level : 0;
     }
 
     public bool TryPurchaseUpgrade( string upgradeId )
     {
-        // 1. Validate presence of necessary systems and data
-        if ( PlayerUpgrades == null || UpgradeManager.Instance == null || PlayerStats.Local == null )
-        {
-            if ( SaveConfig.DEBUG_SAVE_LOGGING )
-            {
-                Log.Error( $"[GlobalUpgradesSystem] PURCHASE FAILED - Null check failed for upgrade: {upgradeId}" );
-                Log.Error( $"  PlayerUpgrades: {(PlayerUpgrades == null ? "NULL" : "OK")}" );
-                Log.Error( $"  SaveManager: {(SaveManager.Instance == null ? "NULL" : "OK")}" );
-                Log.Error( $"  UpgradeManager: {(UpgradeManager.Instance == null ? "NULL" : "OK")}" );
-                Log.Error( $"  PlayerStats.Local: {(PlayerStats.Local == null ? "NULL" : "OK")}" );
-            }
-            return false;
-        }
+        // 1. Validate server-side dependencies
+        if ( !Networking.IsHost ) return false;
 
-        // 2. Verify upgrade exists in the JSON database
-        if ( !UpgradeManager.Instance.Database.TryGetValue( upgradeId, out var node ) )
-        {
-            Log.Warning( $"[GlobalUpgradesSystem] Attempted purchase of unknown upgrade: {upgradeId}" );
-            return false;
-        }
+        var factoryUpgrades = SaveManager.Instance?.CurrentFactory?.GlobalUpgrades;
+        if ( factoryUpgrades == null || UpgradeManager.Instance == null || FactoryStats.Instance == null ) return false;
+
+        if ( !UpgradeManager.Instance.Database.TryGetValue( upgradeId, out var node ) ) return false;
 
         int currentLevel = GetUpgradeLevel( upgradeId );
+        if ( currentLevel >= node.MaxLevel ) return false;
 
-        // 3. Check if upgrade is already at max level
-        if ( currentLevel >= node.MaxLevel )
+        // 2. Verify all parent upgrade requirements are met
+        if ( !UpgradeManager.Instance.IsNodeUnlocked( upgradeId, SaveManager.Instance.CurrentFactory ) ) return false;
+
+        double cost = node.GetCostForLevel( currentLevel );
+
+        // 3. Attempt payment
+        if ( FactoryStats.Instance.SpendScrap( cost ) )
         {
-            Log.Info( $"[GlobalUpgradesSystem] WARNING: {node.Name} is already at maximum level {node.MaxLevel}" );
-            return false;
-        }
+            factoryUpgrades[upgradeId] = currentLevel + 1;
 
-        // 4. Verify all parent upgrade requirements are met
-        if ( !UpgradeManager.Instance.IsNodeUnlocked( upgradeId, SaveManager.Instance.Data ) )
-        {
-            Log.Info( $"[GlobalUpgradesSystem] WARNING: Cannot unlock {node.Name}. Parent upgrades required." );
-            return false;
-        }
+            SyncedUpgrades[upgradeId] = currentLevel + 1;
 
-        // 5. Calculate cost for the next level
-        float cost = node.GetCostForLevel( currentLevel );
-
-        // 6. Attempt payment
-        if ( PlayerStats.Local.SpendScrap( cost ) )
-        {
-            PlayerUpgrades[upgradeId] = currentLevel + 1;
-            
-            // Notify throttler (save will be batched)
             SaveEventBus.NotifyChange( SaveEventBus.SaveReason.GlobalUpgradeChanged, $"{node.Name} → Level {currentLevel + 1}" );
-
-            if ( SaveConfig.DEBUG_SAVE_LOGGING )
-                Log.Info( $"[GlobalUpgradesSystem] Upgrade purchased: {node.Name} (Level {currentLevel + 1}) for {cost} scrap - SAVE EVENT EMITTED" );
-
             Log.Info( $"[GlobalUpgradesSystem] Upgrade purchased: {node.Name} (Level {currentLevel + 1}) for {cost} scrap" );
             return true;
         }
 
-        if ( SaveConfig.DEBUG_SAVE_LOGGING )
-            Log.Error( $"[GlobalUpgradesSystem] PURCHASE FAILED - SpendScrap returned false. Have: {PlayerStats.Local.TotalScrap}, Cost: {cost}" );
-
-        Log.Warning( $"[GlobalUpgradesSystem] WARNING: Insufficient funds for {node.Name}. Cost: {cost} scrap, Available: {PlayerStats.Local.TotalScrap} scrap" );
+        Log.Warning( $"[GlobalUpgradesSystem] Insufficient funds for {node.Name}." );
         return false;
     }
 }

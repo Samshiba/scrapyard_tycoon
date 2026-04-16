@@ -43,7 +43,7 @@ public static class SaveEventBus
     /// Fired when a system detects a change that needs saving.
     /// SaveThrottler listens to this and batches saves.
     /// </summary>
-    public static event Action<SaveReason, string> OnSaveNeeded;
+    public static event Action<SaveReason, string, string> OnSaveNeeded;
 
     /// <summary>
     /// Fired after SaveManager successfully saved all pending changes.
@@ -60,14 +60,15 @@ public static class SaveEventBus
     /// </summary>
     /// <param name="reason">Why the save is needed (for filtering/logging)</param>
     /// <param name="details">Optional details about what changed (e.g., "scrap +500")</param>
-    public static void NotifyChange( SaveReason reason, string details = "" )
+    /// <param name="targetSteamId">The Steam ID of the player for whom the change is intended</param>
+    public static void NotifyChange( SaveReason reason, string details = "", string targetSteamId = null )
     {
         if ( SaveConfig.DEBUG_SAVE_LOGGING )
         {
-            Log.Info( $"[SaveEventBus] Change queued: {reason} {details}" );
+            Log.Info( $"[SaveEventBus] Change queued: {reason} | Details: {details} | Target: {targetSteamId ?? "FACTORY"}" );
         }
 
-        OnSaveNeeded?.Invoke( reason, details );
+        OnSaveNeeded?.Invoke( reason, details, targetSteamId );
     }
 
     /// <summary>Internal: Called by SaveManager after successful save</summary>

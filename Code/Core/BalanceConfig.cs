@@ -16,5 +16,7 @@ public partial class BalanceConfig : GameResource
     [Property, Group( "Gibs Balancing" )] public int GibsPerTier { get; set; } = 5;
     [Property, Group( "Gibs Balancing" )] public GameObject GibPrefab { get; set; }
 
+    [Property, Group( "Progression" )] public int MaxSpawnerTier { get; set; } = 10;
+
     public static BalanceConfig Instance => ResourceLibrary.GetAll<BalanceConfig>().FirstOrDefault();
 }

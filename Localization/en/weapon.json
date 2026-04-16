@@ -1,1 +1,10 @@
-{}
+{
+    "weapon.1.melee.bat.name": "Wooden Bat",
+    "weapon.1.melee.bat.description": "It hits hard.",
+    "weapon.1.pistol.9mm.name": "9mm",
+    "weapon.1.pistol.9mm.description": "Pew pew.",
+    "weapon.1.heavy.rocket_launcher.name": "Rocket Launcher",
+    "weapon.1.heavy.rocket_launcher.description": "Boom!",
+    "weapon.2.rifle.submachine_gun.name": "Submachine Gun",
+    "weapon.2.rifle.submachine_gun.description": "Rapid fire."
+}

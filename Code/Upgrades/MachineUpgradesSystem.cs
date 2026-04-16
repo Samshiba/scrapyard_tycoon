@@ -9,43 +9,37 @@ public sealed class MachineUpgradesSystem : Component
 {
     public static MachineUpgradesSystem Instance { get; private set; }
 
-    private Dictionary<string, int> _machineUpgrades = new();
+    private Dictionary<string, int> Upgrades => SaveManager.Instance?.CurrentFactory?.MachineUpgrades;
 
     protected override void OnAwake()
     {
         Instance = this;
     }
 
-    private void Load()
-    {
-        if ( SaveManager.Instance?.Data?.Factory != null )
-        {
-            _machineUpgrades = SaveManager.Instance.Data.Factory.MachineUpgrades ?? new();
-            Log.Info( $"[MachineUpgradesSystem] Loaded {_machineUpgrades.Count} machine upgrade(s)" );
-        }
-    }
-
     public int GetMachineUpgradeLevel( string machineId )
     {
-        return _machineUpgrades.ContainsKey( machineId ) ? _machineUpgrades[machineId] : 0;
+        if ( Upgrades == null ) return 0;
+        return Upgrades.GetValueOrDefault( machineId, 0 );
     }
 
     public void IncreaseMachineUpgrade( string machineId, int amount = 1 )
     {
-        if ( !_machineUpgrades.ContainsKey( machineId ) )
-            _machineUpgrades[machineId] = 0;
+        if ( !Networking.IsHost || Upgrades == null ) return;
 
-        _machineUpgrades[machineId] += amount;
-        SaveChanges();
-        Log.Info( $"[MachineUpgradesSystem] Machine '{machineId}' upgraded to level {_machineUpgrades[machineId]}" );
+        if ( !Upgrades.ContainsKey( machineId ) )
+            Upgrades[machineId] = 0;
+
+        Upgrades[machineId] += amount;
+
+        Log.Info( $"[MachineUpgradesSystem] Machine '{machineId}' upgraded to level {Upgrades[machineId]}" );
+        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.MachineUpgradeChanged, "Factory machines upgraded" );
     }
 
-    public bool TryPurchaseMachineUpgrade( string machineId, float costInScrap )
+    public bool TryPurchaseMachineUpgrade( string machineId, double costInScrap )
     {
-        var playerStats = Scene.GetAllComponents<PlayerStats>().FirstOrDefault();
-        if ( playerStats == null ) return false;
+        if ( !Networking.IsHost || FactoryStats.Instance == null ) return false;
 
-        if ( playerStats.SpendScrap( costInScrap ) )
+        if ( FactoryStats.Instance.SpendScrap( costInScrap ) )
         {
             IncreaseMachineUpgrade( machineId );
             return true;
@@ -53,24 +47,9 @@ public sealed class MachineUpgradesSystem : Component
         return false;
     }
 
-    /// <summary>
-    /// Obtient un multiplicateur basé sur le niveau d'upgrade de la machine
-    /// Exemple : niveau 3 → 1.3x
-    /// </summary>
     public float GetMachineMultiplier( string machineId, float baseMultiplier = 0.1f )
     {
         int level = GetMachineUpgradeLevel( machineId );
         return 1f + (level * baseMultiplier);
-    }
-
-    private void SaveChanges()
-    {
-        if ( SaveManager.Instance != null )
-        {
-            SaveManager.Instance.Data.Factory.MachineUpgrades = _machineUpgrades;
-            
-            // Notify throttler (save will be batched)
-            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.MachineUpgradeChanged, "Factory machines upgraded" );
-        }
     }
 }

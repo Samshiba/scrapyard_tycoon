@@ -1,0 +1,392 @@
+.menu-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 15, 20, 0.95); // Fond très sombre
+    backdrop-filter: blur(10px);
+    flex-direction: row;
+    font-family: Poppins, sans-serif;
+    color: white;
+}
+
+// --- NAVIGATION GAUCHE ---
+.nav-bar {
+    width: 250px;
+    background-color: rgba(0, 0, 0, 0.5);
+    flex-direction: column;
+    padding: 32px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+
+    .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #f1c40f; // Jaune Tycoon
+        margin-bottom: 48px;
+    }
+
+    .nav-buttons {
+        flex-direction: column;
+        gap: 16px;
+        flex-grow: 1;
+    }
+
+    .btn {
+        padding: 12px 16px;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: all 0.2s;
+        border-radius: 4px;
+
+        &:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        &.active {
+            color: white;
+            background-color: rgba(241, 196, 15, 0.15);
+            border-left: 4px solid #f1c40f;
+        }
+
+        &.quit {
+            color: #e74c3c;
+
+            &:hover {
+                background-color: rgba(231, 76, 60, 0.1);
+                border-left: 4px solid #e74c3c;
+            }
+        }
+    }
+}
+
+// --- CONTENEUR GLOBAL ---
+.main-content {
+    flex-grow: 1;
+    flex-direction: row;
+    padding: 48px;
+    gap: 32px;
+}
+
+// ==========================================
+// ONGLET 1 : JOUER (Master / Detail)
+// ==========================================
+
+// --- COLONNE GAUCHE (Liste) ---
+.master-list {
+    width: 350px;
+    flex-direction: column;
+    gap: 16px;
+
+    .btn-new {
+        flex-shrink: 0;
+        background-color: #27ae60;
+        color: white;
+        padding: 16px;
+        border-radius: 8px;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 18px;
+        cursor: pointer;
+        transition: transform 0.1s, background-color 0.1s;
+
+        &:hover {
+            background-color: #2ecc71;
+            transform: scale(1.02);
+        }
+    }
+
+    .save-list {
+        flex-direction: column;
+        gap: 8px;
+        overflow-y: scroll;
+
+        .loading {
+            padding: 20px;
+            color: gray;
+            justify-content: center;
+        }
+
+        .save-card {
+            flex-shrink: 0;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 8px;
+            flex-direction: column;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: background-color 0.1s;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            &.selected {
+                background-color: rgba(241, 196, 15, 0.1);
+                border: 1px solid #f1c40f;
+            }
+
+            .save-name {
+                font-weight: bold;
+                font-size: 18px;
+                margin-bottom: 4px;
+            }
+
+            .save-meta {
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.5);
+            }
+        }
+    }
+}
+
+// --- COLONNE DROITE (Détails) ---
+.detail-view {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    flex-direction: column;
+    padding: 32px;
+
+    .empty-state {
+        margin: auto;
+        color: rgba(255, 255, 255, 0.3);
+        font-size: 20px;
+    }
+
+    .detail-header {
+        flex-direction: column;
+        margin-bottom: auto;
+
+        .input-name {
+            font-size: 32px;
+            background-color: transparent;
+            border: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 0;
+            width: 100%;
+            margin-bottom: 24px;
+
+            &:focus {
+                border-bottom: 2px solid #f1c40f;
+            }
+        }
+
+        .factory-title {
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .sandbox-warning {
+            background-color: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-bottom: 24px;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-grid {
+            flex-direction: row;
+            gap: 16px;
+
+            .stat-box {
+                background-color: rgba(255, 255, 255, 0.05);
+                padding: 16px;
+                border-radius: 8px;
+                flex-direction: column;
+                min-width: 150px;
+
+                .label {
+                    font-size: 12px;
+                    text-transform: uppercase;
+                    color: gray;
+                }
+
+                .value {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: white;
+                }
+            }
+        }
+    }
+
+    .lobby-settings {
+        flex-direction: column;
+        gap: 16px;
+        background-color: rgba(0, 0, 0, 0.2);
+        padding: 24px;
+        border-radius: 8px;
+        margin-bottom: 32px;
+
+        .setting-row {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+
+            label {
+                font-size: 18px;
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            // Nouveau style pour le bouton "Cycle" (Visibilité)
+            .mock-dropdown {
+                background-color: rgba(255, 255, 255, 0.1);
+                padding: 12px 24px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: background-color 0.1s;
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.2);
+                }
+            }
+
+            // Nouveau style pour le sélecteur (+ / -)
+            .player-selector {
+                flex-direction: row;
+                align-items: center;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+
+                .btn-adjust {
+                    padding: 12px 20px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    font-size: 20px;
+                    transition: background-color 0.1s;
+
+                    &:hover {
+                        background-color: rgba(255, 255, 255, 0.1);
+                    }
+                }
+
+                .val {
+                    width: 40px;
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 20px;
+                    justify-content: center;
+                }
+            }
+        }
+    }
+
+    .launch-footer {
+        flex-direction: row;
+        justify-content: flex-end;
+
+        .btn-launch {
+            background-color: #f1c40f;
+            color: black;
+            padding: 16px 32px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s;
+
+            &:hover {
+                transform: scale(1.05);
+                background-color: white;
+            }
+        }
+    }
+}
+
+// ==========================================
+// ONGLET 2 : SERVER BROWSER (Rejoindre)
+// ==========================================
+
+.server-browser {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 32px;
+
+    .browser-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 16px;
+
+        h2 {
+            font-size: 32px;
+            margin: 0;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-refresh {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.1s;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+        }
+    }
+
+    .lobby-list {
+        flex-direction: column;
+        gap: 12px;
+        overflow-y: scroll;
+
+        .lobby-card {
+            flex-shrink: 0;
+            flex-direction: row;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 16px 24px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+
+            .lobby-name {
+                font-size: 20px;
+                font-weight: bold;
+                flex-grow: 1;
+            }
+
+            .lobby-players {
+                color: rgba(255, 255, 255, 0.6);
+                margin-right: 32px;
+                font-size: 18px;
+            }
+
+            .btn-join {
+                background-color: #27ae60;
+                color: white;
+                padding: 12px 32px;
+                font-size: 18px;
+                font-weight: bold;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: transform 0.1s, background-color 0.1s;
+
+                &:hover {
+                    background-color: #2ecc71;
+                    transform: scale(1.05);
+                }
+            }
+        }
+    }
+}

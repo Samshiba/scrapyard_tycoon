@@ -15,14 +15,14 @@ public class UpgradeNode
     [JsonPropertyName( "description" )] public string Description { get; set; }
     [JsonPropertyName( "icon" )] public string Icon { get; set; } = "⚡";
     [JsonPropertyName( "maxLevel" )] public int MaxLevel { get; set; }
-    [JsonPropertyName( "baseCost" )] public float BaseCost { get; set; }
-    [JsonPropertyName( "costMultiplier" )] public float CostMultiplier { get; set; }
+    [JsonPropertyName( "baseCost" )] public double BaseCost { get; set; }
+    [JsonPropertyName( "costMultiplier" )] public double CostMultiplier { get; set; }
 
     [JsonPropertyName( "requirements" )]
     public List<UpgradeRequirement> Requirements { get; set; } = new();
 
-    public float GetCostForLevel( int currentLevel ) =>
-        (float)Math.Round( BaseCost * MathF.Pow( CostMultiplier, currentLevel ) );
+    public double GetCostForLevel( int currentLevel ) =>
+        Math.Round( BaseCost * Math.Pow( CostMultiplier, currentLevel ) );
 }
 
 public class UpgradeRequirement

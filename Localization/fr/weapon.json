@@ -1,1 +1,10 @@
-{}
+{
+    "weapon.1.melee.bat.name": "Batte en bois",
+    "weapon.1.melee.bat.description": "Ça tape dur.",
+    "weapon.1.pistol.9mm.name": "9mm",
+    "weapon.1.pistol.9mm.description": "Piou piou.",
+    "weapon.1.heavy.rocket_launcher.name": "Lance-roquettes",
+    "weapon.1.heavy.rocket_launcher.description": "Boom !",
+    "weapon.2.rifle.submachine_gun.name": "Mitraillette",
+    "weapon.2.rifle.submachine_gun.description": "Tir rapide."
+}

@@ -49,10 +49,27 @@
         border-radius: 4px;
         border: 1px solid #4a3e20;
         white-space: nowrap;
+
+        .wallet-amount {
+            font-size: 18px;
+        }
+
+        .wallet-currency {
+            margin-left: 8px;
+        }
     }
 
-    .shop-close { color: #64748b; cursor: pointer; font-size: 24px; transition: color 0.1s; flex-shrink: 0; }
-    .shop-close:hover { color: #ef4444; }
+    .shop-close {
+        color: #64748b;
+        cursor: pointer;
+        font-size: 24px;
+        transition: color 0.1s;
+        flex-shrink: 0;
+    }
+
+    .shop-close:hover {
+        color: #ef4444;
+    }
 }
 
 .shop-body {
@@ -89,6 +106,57 @@
         }
     }
 
+    .filter-tier-controls {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+        margin-bottom: 12px;
+
+        .btn-tier-minus,
+        .btn-tier-plus {
+            flex: 0 0 auto;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e293b;
+            border: 2px solid #475569;
+            color: #94a3b8;
+            font-size: 20px;
+            font-weight: 900;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.1s;
+
+            &:hover {
+                background: #334155;
+                color: #f8fafc;
+                border-color: #94a3b8;
+                transform: scale(1.05);
+            }
+
+            &:active {
+                transform: scale(0.95);
+            }
+        }
+
+        .tier-display {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #082f49;
+            border: 2px solid #0ea5e9;
+            color: #38bdf8;
+            font-size: 16px;
+            font-weight: 900;
+            border-radius: 4px;
+            letter-spacing: 2px;
+            min-height: 40px;
+        }
+    }
+
     .filter-btn {
         color: #94a3b8;
         padding: 10px 12px;
@@ -99,30 +167,67 @@
         transition: all 0.1s;
         text-align: center;
         /* overflow-wrap removed for compatibility */
-        border-left: 3px solid transparent; /* PRÉPARE L'ESPACE POUR LA BORDURE AU SURVOL */
+        border-left: 3px solid transparent;
+        /* PRÉPARE L'ESPACE POUR LA BORDURE AU SURVOL */
 
         /* HOVER PAR DÉFAUT (Pour TOUS et Catégories) */
-        &:hover { background: #1e293b; color: #f8fafc; border-left-color: #38bdf8; }
-        
+        &:hover {
+            background: #1e293b;
+            color: #f8fafc;
+            border-left-color: #38bdf8;
+        }
+
         /* ACTIVE PAR DÉFAUT */
-        &.active { background: #082f49; color: #38bdf8; border-left: 4px solid #0ea5e9; }
+        &.active {
+            background: #082f49;
+            color: #38bdf8;
+            border-left: 4px solid #0ea5e9;
+        }
 
         /* --- Surcharges des Éléments (On garde tes couleurs) --- */
         /* Physical */
-        &.elem-physical:hover { border-left-color: #94a3b8; }
-        &.active.elem-physical { background-color: rgba(148, 163, 184, 0.1); color: #f8fafc; border-left: 4px solid #cbd5e1; }
+        &.elem-physical:hover {
+            border-left-color: #94a3b8;
+        }
+
+        &.active.elem-physical {
+            background-color: rgba(148, 163, 184, 0.1);
+            color: #f8fafc;
+            border-left: 4px solid #cbd5e1;
+        }
 
         /* Magical */
-        &.elem-magical:hover { border-left-color: #a855f7; }
-        &.active.elem-magical { background-color: rgba(168, 85, 247, 0.1); color: #d8b4fe; border-left: 4px solid #c084fc; }
+        &.elem-magical:hover {
+            border-left-color: #a855f7;
+        }
+
+        &.active.elem-magical {
+            background-color: rgba(168, 85, 247, 0.1);
+            color: #d8b4fe;
+            border-left: 4px solid #c084fc;
+        }
 
         /* Electric */
-        &.elem-electric:hover { border-left-color: #eab308; }
-        &.active.elem-electric { background-color: rgba(234, 179, 8, 0.1); color: #fef08a; border-left: 4px solid #facc15; }
+        &.elem-electric:hover {
+            border-left-color: #eab308;
+        }
+
+        &.active.elem-electric {
+            background-color: rgba(234, 179, 8, 0.1);
+            color: #fef08a;
+            border-left: 4px solid #facc15;
+        }
 
         /* Poison */
-        &.elem-poison:hover { border-left-color: #22c55e; }
-        &.active.elem-poison { background-color: rgba(34, 197, 94, 0.1); color: #86efac; border-left: 4px solid #4ade80; }
+        &.elem-poison:hover {
+            border-left-color: #22c55e;
+        }
+
+        &.active.elem-poison {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #86efac;
+            border-left: 4px solid #4ade80;
+        }
     }
 }
 
@@ -167,7 +272,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        img { width: 100%; height: 100%; object-fit: contain; }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
     }
 
     .item-name {
@@ -191,26 +301,37 @@
         bottom: 8px;
         left: 0;
         width: 100%;
-        display: flex; /* Force Flexbox */
-        justify-content: center; /* Centre horizontalement de force */
-        align-items: center; /* Centre verticalement de force */
+        display: flex;
+        /* Force Flexbox */
+        justify-content: center;
+        /* Centre horizontalement de force */
+        align-items: center;
+        /* Centre verticalement de force */
         color: #e2b740;
         font-size: 11px;
         font-weight: 700;
-        line-height: 14px; /* On protège le texte pour pas qu'il soit coupé */
+        line-height: 14px;
+        /* On protège le texte pour pas qu'il soit coupé */
     }
 
     /* États */
     &.item-accessible {
-        &:hover { border-color: #475569; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+        &:hover {
+            border-color: #475569;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
     }
-    
-    &.item-owned { 
+
+    &.item-owned {
         background: #1e293b;
         border-color: #334155;
-        .item-price { display: none; }
+
+        .item-price {
+            display: none;
+        }
     }
-    
+
     &.item-selected {
         border-color: #0ea5e9;
         background: #082f49;
@@ -224,12 +345,14 @@
         /* border-style removed for compatibility; will default to solid */
         /* If you want a dashed look, consider using a background image or SVG for the border. */
         cursor: not-allowed;
-        opacity: 0.5; /* Rend l'arme à moitié transparente */
-        filter: grayscale(80%); /* Désature un peu l'image pour l'effet "verrouillé" */
+        opacity: 0.5;
+        /* Rend l'arme à moitié transparente */
+        filter: grayscale(80%);
+        /* Désature un peu l'image pour l'effet "verrouillé" */
         background-color: rgba(20, 25, 34, 0.5);
-        
+
         /* On remplace le prix par un texte de cadenas, avec les mêmes propriétés de centrage absolu ! */
-        .item-teaser-lock { 
+        .item-teaser-lock {
             position: absolute;
             bottom: 8px;
             left: 0;
@@ -237,9 +360,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #94a3b8; 
-            font-size: 11px; 
-            font-weight: 800; 
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 800;
             line-height: 14px;
             letter-spacing: 1px;
         }
@@ -276,39 +399,63 @@
         padding: 24px;
         border-bottom: 1px solid #2d3542;
         gap: 16px;
-        
-        .inspect-name { 
-            font-size: 24px; 
-            color: #f8fafc; 
-            font-weight: 900; 
-            text-transform: uppercase; 
+
+        .inspect-name {
+            font-size: 24px;
+            color: #f8fafc;
+            font-weight: 900;
+            text-transform: uppercase;
             white-space: normal;
         }
-        
+
         .inspect-tags {
             display: flex;
             flex-direction: row;
             gap: 8px;
             flex-shrink: 0;
-            
-            .tag { 
+
+            .tag {
                 width: 100px;
                 padding: 6px 0;
-                border-radius: 4px; 
-                font-size: 11px; 
-                font-weight: 800; 
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 800;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
             }
-            .tag-cat { background: #334155; color: #f8fafc; border: 1px solid #475569; }
-            
+
+            .tag-cat {
+                background: #334155;
+                color: #f8fafc;
+                border: 1px solid #475569;
+            }
+
             /* --- Couleurs dynamiques des éléments --- */
-            .tag-physical { background: #1e293b; color: #cbd5e1; border: 1px solid #475569; }
-            .tag-magical { background: #3b0764; color: #d8b4fe; border: 1px solid #9333ea; }
-            .tag-electric { background: #422006; color: #fef08a; border: 1px solid #ca8a04; }
-            .tag-poison { background: #052e16; color: #86efac; border: 1px solid #16a34a; }
+            .tag-physical {
+                background: #1e293b;
+                color: #cbd5e1;
+                border: 1px solid #475569;
+            }
+
+            .tag-magical {
+                background: #3b0764;
+                color: #d8b4fe;
+                border: 1px solid #9333ea;
+            }
+
+            .tag-electric {
+                background: #422006;
+                color: #fef08a;
+                border: 1px solid #ca8a04;
+            }
+
+            .tag-poison {
+                background: #052e16;
+                color: #86efac;
+                border: 1px solid #16a34a;
+            }
         }
     }
 
@@ -320,13 +467,15 @@
         flex-direction: column;
         gap: 20px;
 
-        .inspect-desc { 
-            color: #94a3b8; 
-            font-size: 14px; 
-            line-height: 20px; /* FIX: Line-height fixe en px */
+        .inspect-desc {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 20px;
+            /* FIX: Line-height fixe en px */
             white-space: normal;
-            flex-shrink: 0; 
-            padding: 2px 0; /* Laisse respirer le haut/bas */
+            flex-shrink: 0;
+            padding: 2px 0;
+            /* Laisse respirer le haut/bas */
         }
 
         .inspect-stats-box {
@@ -340,18 +489,23 @@
             color: #cbd5e1;
             font-size: 13px;
             flex-shrink: 0;
-            
+
             div {
                 display: flex;
                 flex-direction: row;
                 align-items: center;
-                gap: 6px; /* Un peu plus d'espace entre l'icône et le texte */
-                flex-shrink: 0; 
-                line-height: 18px; /* FIX: Line-height fixe */
+                gap: 6px;
+                /* Un peu plus d'espace entre l'icône et le texte */
+                flex-shrink: 0;
+                line-height: 18px;
+                /* FIX: Line-height fixe */
                 padding: 2px 0;
             }
 
-            b { color: #f8fafc; flex-shrink: 0; }
+            b {
+                color: #f8fafc;
+                flex-shrink: 0;
+            }
         }
 
         .inspect-attacks {
@@ -369,28 +523,39 @@
                 border-radius: 8px;
                 border-left: 4px solid #3b82f6;
 
-                .atk-title { 
+                .atk-title {
                     display: flex;
                     flex-direction: row;
-                    flex-wrap: wrap; 
-                    align-items: center; /* Changé de baseline à center pour mieux aligner emojis/texte */
+                    flex-wrap: wrap;
+                    align-items: center;
+                    /* Changé de baseline à center pour mieux aligner emojis/texte */
                     gap: 6px;
-                    color: #f8fafc; 
-                    font-weight: 800; 
-                    font-size: 15px; 
+                    color: #f8fafc;
+                    font-weight: 800;
+                    font-size: 15px;
                     margin-bottom: 8px;
                     white-space: normal;
                     flex-shrink: 0;
-                    line-height: 20px; /* FIX: Line-height fixe en px */
+                    line-height: 20px;
+                    /* FIX: Line-height fixe en px */
                     padding-top: 2px;
                 }
-                .atk-cd { color: #64748b; font-weight: normal; font-size: 12px; flex-shrink: 0; line-height: 16px; }
-                .atk-desc { 
-                    color: #94a3b8; 
-                    font-size: 13px; 
-                    line-height: 18px; /* FIX: Line-height fixe en px */
-                    white-space: normal; 
-                    flex-shrink: 0; 
+
+                .atk-cd {
+                    color: #64748b;
+                    font-weight: normal;
+                    font-size: 12px;
+                    flex-shrink: 0;
+                    line-height: 16px;
+                }
+
+                .atk-desc {
+                    color: #94a3b8;
+                    font-size: 13px;
+                    line-height: 18px;
+                    /* FIX: Line-height fixe en px */
+                    white-space: normal;
+                    flex-shrink: 0;
                     padding-bottom: 2px;
                 }
             }
@@ -416,36 +581,41 @@
             letter-spacing: 1px;
             border: none;
             transition: all 0.15s;
-            
-            &.active { 
-                background: #0ea5e9; 
-                color: #f8fafc; 
+
+            &.active {
+                background: #0ea5e9;
+                color: #f8fafc;
                 cursor: pointer;
-                &:hover { background: #38bdf8; transform: scale(1.02); }
+
+                &:hover {
+                    background: #38bdf8;
+                    transform: scale(1.02);
+                }
             }
-            &.disabled { 
-                background: #1e293b; 
-                color: #64748b; 
-                border: 1px solid #334155; 
-                cursor: not-allowed; 
+
+            &.disabled {
+                background: #1e293b;
+                color: #64748b;
+                border: 1px solid #334155;
+                cursor: not-allowed;
             }
         }
 
-        .equip-label { 
-            color: #94a3b8; 
-            font-size: 12px; 
+        .equip-label {
+            color: #94a3b8;
+            font-size: 12px;
             font-weight: 800;
             letter-spacing: 1px;
             width: 100%;
             text-align: center;
         }
-        
+
         .slot-row {
             display: flex;
             gap: 12px;
             width: 100%;
             justify-content: center;
-            
+
             .btn-slot {
                 width: 48px;
                 height: 48px;
@@ -462,8 +632,18 @@
                 transition: all 0.1s;
                 flex-shrink: 0;
 
-                &:hover { background: #334155; border-color: #94a3b8; transform: translateY(-2px); }
-                &.equipped { background: #431407; border-color: #f97316; color: #f97316; pointer-events: none; }
+                &:hover {
+                    background: #334155;
+                    border-color: #94a3b8;
+                    transform: translateY(-2px);
+                }
+
+                &.equipped {
+                    background: #431407;
+                    border-color: #f97316;
+                    color: #f97316;
+                    pointer-events: none;
+                }
             }
         }
     }

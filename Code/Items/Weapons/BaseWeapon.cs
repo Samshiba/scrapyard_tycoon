@@ -21,9 +21,9 @@ public abstract class BaseWeapon : Component, ITooltipProvider
             float baseDamage = Data.DamageBase;
             float totalMultiplier = 1.0f;
 
-            if ( SaveManager.Instance?.Data?.Player?.GlobalUpgrades != null )
+            if ( SaveManager.Instance?.CurrentFactory?.GlobalUpgrades != null )
             {
-                var upgrades = SaveManager.Instance.Data.Player.GlobalUpgrades;
+                var upgrades = SaveManager.Instance.CurrentFactory.GlobalUpgrades;
                 string typeName = Data.DamageType.ToString().ToLower();
                 float[] bonusValues = { 0.05f, 0.25f, 1.0f, 5.0f };
 
@@ -47,9 +47,9 @@ public abstract class BaseWeapon : Component, ITooltipProvider
             float baseRate = Data.AttackRateBase;
             float totalMultiplier = 1.0f;
 
-            if ( SaveManager.Instance?.Data?.Player?.GlobalUpgrades != null )
+            if ( SaveManager.Instance?.CurrentFactory?.GlobalUpgrades != null )
             {
-                var upgrades = SaveManager.Instance.Data.Player.GlobalUpgrades;
+                var upgrades = SaveManager.Instance.CurrentFactory.GlobalUpgrades;
                 float[] bonusValues = { 0.05f, 0.25f, 1.0f, 5.0f };
 
                 for ( int i = 0; i < bonusValues.Length; i++ )

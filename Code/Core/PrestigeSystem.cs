@@ -1,72 +1,81 @@
 using Sandbox;
 using System.Collections.Generic;
 
-/// <summary>
-/// Gère le système de prestige : niveaux et upgrades déblocables
-/// </summary>
 public sealed class PrestigeSystem : Component
 {
     public static PrestigeSystem Instance { get; private set; }
 
-    private int _prestigeLevel = 0;
-    private Dictionary<string, bool> _unlockedUpgrades = new();
-
-    public int PrestigeLevel
-    {
-        get => _prestigeLevel;
-        set
-        {
-            _prestigeLevel = value;
-            SaveChanges();
-            Log.Info($"[PrestigeSystem] Prestige increased to level {_prestigeLevel}");
-        }
-    }
+    [Sync] public int PrestigeLevel { get; private set; } = 0;
+    [Sync] public NetDictionary<string, bool> UnlockedUpgrades { get; private set; } = new();
 
     protected override void OnAwake()
     {
-        if (Instance != null)
-        {
-            GameObject.Destroy();
-            return;
-        }
         Instance = this;
-        Load();
     }
 
-    private void Load()
+    protected override void OnStart()
     {
-        if (SaveManager.Instance?.Data?.Prestige != null)
+        if ( !Networking.IsHost ) return;
+
+        if ( SaveManager.Instance?.CurrentFactory != null )
         {
-            _prestigeLevel = SaveManager.Instance.Data.Prestige.PrestigeLevel;
-            _unlockedUpgrades = SaveManager.Instance.Data.Prestige.UnlockedPrestigeUpgrades ?? new();
-            Log.Info($"[PrestigeSystem] Prestige loaded: level {_prestigeLevel}");
+            var factory = SaveManager.Instance.CurrentFactory;
+            PrestigeLevel = factory.PrestigeLevel;
+
+            if ( factory.UnlockedPrestigeUpgrades != null )
+            {
+                foreach ( var kvp in factory.UnlockedPrestigeUpgrades )
+                {
+                    UnlockedUpgrades[kvp.Key] = kvp.Value;
+                }
+            }
+            Log.Info( $"[PrestigeSystem] Prestige loaded: level {PrestigeLevel}" );
         }
     }
 
-    public bool IsUpgradeUnlocked(string upgradeName)
+    public bool IsUpgradeUnlocked( string upgradeName )
     {
-        return _unlockedUpgrades.ContainsKey(upgradeName) && _unlockedUpgrades[upgradeName];
+        return UnlockedUpgrades.ContainsKey( upgradeName ) && UnlockedUpgrades[upgradeName];
     }
 
-    public void UnlockUpgrade(string upgradeName)
+    // --- SERVER ACTION ---
+
+    public void IncreasePrestige()
     {
-        if (!_unlockedUpgrades.ContainsKey(upgradeName))
+        if ( !Networking.IsHost ) return;
+
+        PrestigeLevel++;
+        SaveChanges();
+        Log.Info( $"[PrestigeSystem] L'Usine est passée au Prestige {PrestigeLevel} !" );
+
+        // TODO : RESET FACTORY
+    }
+
+    public void UnlockUpgrade( string upgradeName )
+    {
+        if ( !Networking.IsHost ) return;
+
+        if ( !UnlockedUpgrades.ContainsKey( upgradeName ) || !UnlockedUpgrades[upgradeName] )
         {
-            _unlockedUpgrades[upgradeName] = true;
+            UnlockedUpgrades[upgradeName] = true;
             SaveChanges();
-            Log.Info($"[PrestigeSystem] Prestige upgrade unlocked: {upgradeName}");
+            Log.Info( $"[PrestigeSystem] Prestige upgrade unlocked: {upgradeName}" );
         }
     }
 
     private void SaveChanges()
     {
-        if (SaveManager.Instance != null)
+        if ( !Networking.IsHost || SaveManager.Instance?.CurrentFactory == null ) return;
+
+        SaveManager.Instance.CurrentFactory.PrestigeLevel = PrestigeLevel;
+
+        var dict = new Dictionary<string, bool>();
+        foreach ( var kvp in UnlockedUpgrades )
         {
-            SaveManager.Instance.Data.Prestige.PrestigeLevel = _prestigeLevel;
-            SaveManager.Instance.Data.Prestige.UnlockedPrestigeUpgrades = _unlockedUpgrades;
-            
-            // Notify throttler (major event: prestige change triggers immediate save despite throttle)
-            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PrestigeChanged, $"Prestige Level {_prestigeLevel}" );
+            dict[kvp.Key] = kvp.Value;
         }
+        SaveManager.Instance.CurrentFactory.UnlockedPrestigeUpgrades = dict;
+
+        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PrestigeChanged, $"Prestige Level {PrestigeLevel}" );
     }
 }
