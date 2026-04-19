@@ -29,14 +29,15 @@
                 onmouseup=@EndDrag
                 style="background-position: @(PanOffset.x)px @(PanOffset.y)px; background-size: @(80 * Zoom)px @(80 * Zoom)px;">
 
-                <div class="skt-canvas" style="position: absolute; width: 100%; height: 100%; left: 0; top: 0;">
+                <div style="position: absolute; left: 50%; top: 50%; width: 0; height: 0; overflow: visible;">
+                    <div class="skt-canvas" style="position: absolute; width: 100%; height: 100%; left: 0; top: 0;">
 
                     @foreach ( var node in VisibleNodes() )
                     {
-                        @foreach ( var req in node.Requirements )
+                        @foreach ( var req in node.RequiredUpgrades )
                         {
                             if ( UpgradeManager.Instance?.Database == null ) continue;
-                            if ( !UpgradeManager.Instance.Database.TryGetValue( req.RequiredId, out var parent ) ) continue;
+                            if ( !UpgradeManager.Instance.Database.TryGetValue( req.RequiredUpgrade.Id, out var parent ) ) continue;
                             
                             // Sécurité : on ne dessine la ligne que si le parent est AUSSI visible
                             if ( !IsVisible( parent.Id ) ) continue; 
@@ -90,14 +91,15 @@
                             style="left: @((int)posX)px; top: @((int)posY)px; width: @((int)(zoomedRadius*2))px; height: @((int)(zoomedRadius*2))px;"
                             onmouseover=@( () => { HoveredId = capturedId; StateHasChanged(); } )
                             onmouseout=@( () => { HoveredId = null; StateHasChanged(); } )
-                            onclick=@( () => OnNodeClick( capturedId ) )>
+                            onclick=@( () => { HoveredId = capturedId; OnNodeClick( capturedId ); } )>
                             
                             <div class="node-icon" style="font-size: @(36 * Zoom)px;">@displayIcon</div>
                             <div class="node-lvl" style="font-size: @(14 * Zoom)px; padding: @(2*Zoom)px @(6*Zoom)px;">@displayLvl</div>
                         </div>
                     }
 
-                </div>
+                    </div>
+                
 
                 @if ( HoveredId != null && UpgradeManager.Instance.Database.TryGetValue( HoveredId, out var hNode ) )
                 {
@@ -113,10 +115,15 @@
                         <div class="skt-tooltip" style="left: @(ttX)px; top: @(ttY)px;">
                             <div class="tt-name">@hNode.Icon <span>@UpgradeManager.Instance.GetUpgradeName(hNode.Id)</span></div>
                             <div class="tt-desc">@UpgradeManager.Instance.GetUpgradeDescription(hNode.Id)</div>
-                            <div class="tt-level"><label>#ui.skilltree.tooltip.level</label> @hLvl <label>#ui.skilltree.tooltip.maxlevel</label> @hNode.MaxLevel</div>
+                            <div class="tt-level">
+                                <label>#ui.skilltree.tooltip.level</label>
+                                <label style="margin-left: 8px;">@hLvl/@hNode.MaxLevel</label>
+                            </div>
                             @if ( !hMaxed )
                             {
-                                <div class="tt-cost">@NumberFormatter.FormatWithSuffix(hNode.GetCostForLevel( hLvl )) <label>#common.currency.scrap</label></div>
+                                <div class="tt-cost">
+                                    <label>@NumberFormatter.FormatWithSuffix(hNode.GetCostForLevel( hLvl ))</label>
+                                    <label style="margin-left: 8px;">#common.currency.scrap</label></div>
                             }
                             else
                             {
@@ -129,6 +136,8 @@
                         </div>
                     }
                 }
+
+                </div>
             </zoomgraphpanel>
         </div>
     </div>
@@ -174,6 +183,12 @@
         if ( WeaponShopUI.Local != null )
             WeaponShopUI.Local.CloseMenu();
 
+        if (CodexUI.Local != null)
+            CodexUI.Local.CloseMenu();
+        
+        Mouse.Visibility = MouseVisibility.Visible;
+            Panel.Style.PointerEvents = PointerEvents.All;
+
         IsOpen = true;
         Mouse.Position = new Vector2( Screen.Width / 2f, Screen.Height / 2f );
         Zoom = 1f;
@@ -188,7 +203,7 @@
         {
             foreach ( var node in UpgradeManager.Instance.Database.Values )
             {
-                if ( node.Requirements.Count == 0 )
+                if ( node.RequiredUpgrades == null || node.RequiredUpgrades.Count == 0 )
                 {
                     rootPos = GetPos( node.Id );
                     break;
@@ -198,8 +213,8 @@
 
         float zoomedRadius = NodeRadius * Zoom;
         PanOffset = new Vector2( 
-            (Screen.Width / 2f) - (rootPos.x * Zoom) - zoomedRadius,
-            (Screen.Height / 2f) - (rootPos.y * Zoom) - zoomedRadius
+           -(rootPos.x * Zoom) - zoomedRadius,
+            -(rootPos.y * Zoom) - zoomedRadius
         );
 
         TimeSinceOpened = 0;
@@ -208,6 +223,18 @@
 
     public void CloseMenu()
     {
+        Panel.Style.PointerEvents = PointerEvents.None;
+            
+        if (WeaponShopUI.Local == null || !WeaponShopUI.Local.IsOpen)
+        {
+            Mouse.Visibility = MouseVisibility.Hidden;
+        }
+
+        if (CodexUI.Local != null && CodexUI.Local.IsOpen)
+        {
+            Mouse.Visibility = MouseVisibility.Visible;
+        }
+
         IsOpen = false;
         HoveredId = null;
         IsDragging = false;
@@ -230,7 +257,7 @@
 
     public void OnScroll( float delta )
     {
-        if ( !IsOpen || delta == 0f ) return;
+        if ( !IsOpen || delta == 0f || GraphPanel == null ) return;
 
         float zoomDelta = -delta * 0.1f; 
         float oldZoom = Zoom;
@@ -238,10 +265,12 @@
 
         if ( Zoom == oldZoom ) return; 
 
-        Vector2 mousePos = Mouse.Position;
-        Vector2 offsetToMouse = mousePos - PanOffset;
+        Vector2 screenCenter = GraphPanel.Box.Rect.Center; 
+        Vector2 mouseFromCenter = (Mouse.Position - screenCenter) * GraphPanel.ScaleFromScreen;
+
+        Vector2 offsetToMouse = mouseFromCenter - PanOffset;
         float ratio = Zoom / oldZoom;
-        PanOffset = mousePos - (offsetToMouse * ratio);
+        PanOffset = mouseFromCenter - (offsetToMouse * ratio);
 
         StateHasChanged();
     }
@@ -272,26 +301,10 @@
             GraphPanel.OnZoomScroll = OnScroll;
         }
 
-        if (IsOpen)
-        {
-            Mouse.Visibility = MouseVisibility.Visible;
-            Panel.Style.PointerEvents = PointerEvents.All;
-        }
-        else
-        {
-            Panel.Style.PointerEvents = PointerEvents.None;
-            
-            if (WeaponShopUI.Local == null || !WeaponShopUI.Local.IsOpen)
-            {
-                Mouse.Visibility = MouseVisibility.Hidden;
-            }
-        }
-
         if ( !IsOpen ) return;
-
         if ( IsDragging )
         {
-            var delta = Mouse.Position - LastMousePos;
+            var delta = (Mouse.Position - LastMousePos) * GraphPanel.ScaleFromScreen;
             if ( delta.LengthSquared > 0 )
             {
                 PanOffset += delta;
@@ -306,12 +319,14 @@
     bool IsVisible( string id )
     {
         if ( !UpgradeManager.Instance.Database.TryGetValue( id, out var node ) ) return false;
-        if ( node.Requirements.Count == 0 ) return true;
+
+        if ( node.RequiredUpgrades == null || node.RequiredUpgrades.Count == 0 ) return true;
+
         if ( IsUnlocked( id ) ) return true;
 
-        foreach ( var req in node.Requirements )
+        foreach ( var req in node.RequiredUpgrades )
         {
-            if ( IsUnlocked( req.RequiredId ) ) return true;
+            if ( IsUnlocked( req.RequiredUpgrade.Id ) ) return true;
         }
 
         return false;
@@ -320,12 +335,19 @@
     bool IsUnlocked( string id )
     {
         if ( !UpgradeManager.Instance.Database.TryGetValue( id, out var node ) ) return false;
-        foreach ( var req in node.Requirements )
-            if ( GetLevel( req.RequiredId ) < req.RequiredLevel ) return false;
+
+        if ( node.RequiredUpgrades != null )
+        {
+            foreach ( var req in node.RequiredUpgrades )
+            {
+                if ( GetLevel( req.RequiredUpgrade.Id ) < req.RequiredLevel ) return false;
+            }
+        }
+        
         return true;
     }
 
-    IEnumerable<UpgradeNode> VisibleNodes()
+    IEnumerable<UpgradeDefinition> VisibleNodes()
     {
         if ( UpgradeManager.Instance?.Database == null ) yield break;
         foreach ( var node in UpgradeManager.Instance.Database.Values )

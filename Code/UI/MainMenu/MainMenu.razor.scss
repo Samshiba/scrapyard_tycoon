@@ -1,161 +1,183 @@
+// ============================================================================
+// MainMenu Component Styles
+// ============================================================================
+// Multi-tab menu (Play / Server Browser / Options)
+@import '../_design-system.scss';
+@import '../_mixins.scss';
+@import '../_animations.scss';
+
 .menu-root {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(15, 15, 20, 0.95); // Fond très sombre
-    backdrop-filter: blur(10px);
+    background: $bg-primary;
+    backdrop-filter: blur(8px);
     flex-direction: row;
-    font-family: Poppins, sans-serif;
-    color: white;
+    font-family: $font-body;
+    color: $text-primary;
 }
 
-// --- NAVIGATION GAUCHE ---
+// ============================================================================
+// NAVIGATION BAR (Left Side)
+// ============================================================================
 .nav-bar {
     width: 250px;
     background-color: rgba(0, 0, 0, 0.5);
     flex-direction: column;
-    padding: 32px;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding: $spacing-2xl;
+    border-right: 1px solid $border-subtle;
 
     .logo {
-        font-size: 24px;
-        font-weight: bold;
-        color: #f1c40f; // Jaune Tycoon
-        margin-bottom: 48px;
+        font-size: $fs-h2;
+        font-weight: 900;
+        color: $orange-copper;
+        margin-bottom: $spacing-3xl;
+        font-family: $font-heading;
+        text-transform: uppercase;
+        letter-spacing: 2px;
     }
 
     .nav-buttons {
         flex-direction: column;
-        gap: 16px;
+        gap: $spacing-lg;
         flex-grow: 1;
     }
 
     .btn {
-        padding: 12px 16px;
-        font-size: 18px;
-        color: rgba(255, 255, 255, 0.6);
+        padding: $spacing-md $spacing-lg;
+        font-size: $fs-body-lg;
+        color: $text-secondary; /* Changed from $text-tertiary for better visibility */
         cursor: pointer;
-        transition: all 0.2s;
-        border-radius: 4px;
+        transition: all 200ms ease-out;
+        border-radius: $radius-sm;
+        font-family: $font-body;
+        font-weight: 600;
 
         &:hover {
-            color: white;
+            color: $text-primary;
             background-color: rgba(255, 255, 255, 0.05);
         }
 
         &.active {
-            color: white;
-            background-color: rgba(241, 196, 15, 0.15);
-            border-left: 4px solid #f1c40f;
+            color: $text-primary;
+            background-color: rgba($orange-copper, 0.15);
+            border-left: 4px solid $orange-copper;
+            padding-left: calc($spacing-lg - 4px);
         }
 
         &.quit {
-            color: #e74c3c;
+            color: $status-critical;
 
             &:hover {
-                background-color: rgba(231, 76, 60, 0.1);
-                border-left: 4px solid #e74c3c;
+                background-color: rgba($status-critical, 0.1);
+                border-left: 4px solid $status-critical;
+                padding-left: calc($spacing-lg - 4px);
             }
         }
     }
 }
 
-// --- CONTENEUR GLOBAL ---
+// ============================================================================
+// MAIN CONTENT AREA
+// ============================================================================
 .main-content {
     flex-grow: 1;
     flex-direction: row;
-    padding: 48px;
-    gap: 32px;
+    padding: $spacing-3xl;
+    gap: $spacing-2xl;
 }
 
-// ==========================================
-// ONGLET 1 : JOUER (Master / Detail)
-// ==========================================
+// ============================================================================
+// TAB 1: PLAY (Master/Detail Layout)
+// ============================================================================
 
-// --- COLONNE GAUCHE (Liste) ---
 .master-list {
     width: 350px;
     flex-direction: column;
-    gap: 16px;
+    gap: $spacing-lg;
 
     .btn-new {
         flex-shrink: 0;
-        background-color: #27ae60;
-        color: white;
-        padding: 16px;
-        border-radius: 8px;
+        background-color: $status-success;
+        color: $text-primary;
+        padding: $spacing-lg;
+        border-radius: $radius-md;
         justify-content: center;
         align-items: center;
-        font-weight: bold;
-        font-size: 18px;
+        font-weight: 700;
+        font-size: $fs-body-lg;
         cursor: pointer;
-        transition: transform 0.1s, background-color 0.1s;
+        transition: transform 100ms ease-out, background-color 100ms ease-out;
+        font-family: $font-body;
 
         &:hover {
-            background-color: #2ecc71;
+            background-color: lighten($status-success, 10%);
             transform: scale(1.02);
         }
     }
 
     .save-list {
         flex-direction: column;
-        gap: 8px;
+        gap: $spacing-sm;
         overflow-y: scroll;
 
         .loading {
-            padding: 20px;
-            color: gray;
+            padding: $spacing-xl;
+            color: $text-muted;
             justify-content: center;
+            font-family: $font-body;
         }
 
         .save-card {
             flex-shrink: 0;
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 16px;
-            border-radius: 8px;
+            background-color: $bg-hud-overlay;
+            padding: $spacing-lg;
+            border-radius: $radius-md;
             flex-direction: column;
             cursor: pointer;
             border: 1px solid transparent;
-            transition: background-color 0.1s;
+            transition: background-color 200ms ease-out;
+            font-family: $font-body;
 
             &:hover {
                 background-color: rgba(255, 255, 255, 0.1);
             }
 
             &.selected {
-                background-color: rgba(241, 196, 15, 0.1);
-                border: 1px solid #f1c40f;
+                background-color: rgba($orange-copper, 0.1);
+                border: 1px solid $orange-copper;
             }
 
             .save-name {
-                font-weight: bold;
-                font-size: 18px;
-                margin-bottom: 4px;
+                font-weight: 700;
+                font-size: $fs-body-lg;
+                margin-bottom: $spacing-xs;
+                color: $text-primary;
             }
 
             .save-meta {
-                font-size: 14px;
-                color: rgba(255, 255, 255, 0.5);
+                font-size: $fs-body; /* Increased from $fs-body-sm */
+                color: $text-secondary; /* Changed from $text-tertiary for better contrast */
             }
         }
     }
 }
 
-// --- COLONNE DROITE (Détails) ---
 .detail-view {
     flex-grow: 1;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: $bg-hud-overlay;
+    border-radius: $radius-md;
+    border: 1px solid $border-subtle;
     flex-direction: column;
-    padding: 32px;
+    padding: $spacing-2xl;
 
     .empty-state {
         margin: auto;
-        color: rgba(255, 255, 255, 0.3);
-        font-size: 20px;
+        color: $text-secondary; /* Changed from $text-tertiary for better contrast */
+        font-size: $fs-body-lg; /* Increased from $fs-body-lg */
+        font-family: $font-body;
     }
 
     .detail-header {
@@ -163,59 +185,71 @@
         margin-bottom: auto;
 
         .input-name {
-            font-size: 32px;
+            font-size: $fs-h1;
             background-color: transparent;
             border: none;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 8px 0;
+            border-bottom: 2px solid $border-subtle;
+            color: $text-primary;
+            padding: $spacing-sm 0;
             width: 100%;
-            margin-bottom: 24px;
+            margin-bottom: $spacing-xl;
+            font-family: $font-heading;
+            font-weight: 900;
 
             &:focus {
-                border-bottom: 2px solid #f1c40f;
+                border-bottom: 2px solid $orange-copper;
+                outline: none;
             }
         }
 
         .factory-title {
             font-size: 42px;
-            font-weight: bold;
-            margin-bottom: 16px;
+            font-weight: 900;
+            margin-bottom: $spacing-lg;
+            font-family: $font-heading;
+            color: $text-primary;
         }
 
         .sandbox-warning {
-            background-color: rgba(231, 76, 60, 0.2);
-            border: 1px solid #e74c3c;
-            color: #e74c3c;
-            padding: 12px 16px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-bottom: 24px;
+            background-color: rgba($status-critical, 0.15);
+            border: 1px solid $status-critical;
+            color: $status-critical;
+            padding: $spacing-md $spacing-lg;
+            border-radius: $radius-sm;
+            font-weight: 700;
+            margin-bottom: $spacing-xl;
             align-items: center;
-            gap: 8px;
+            gap: $spacing-sm;
+            font-family: $font-body;
+            font-size: $fs-body;
         }
 
         .stats-grid {
             flex-direction: row;
-            gap: 16px;
+            gap: $spacing-lg;
 
             .stat-box {
-                background-color: rgba(255, 255, 255, 0.05);
-                padding: 16px;
-                border-radius: 8px;
+                background-color: $bg-tertiary;
+                padding: $spacing-lg;
+                border-radius: $radius-md;
                 flex-direction: column;
                 min-width: 150px;
+                border: 1px solid $border-standard;
 
                 .label {
-                    font-size: 12px;
+                    font-size: $fs-body-sm; /* Increased from $fs-badge */
                     text-transform: uppercase;
-                    color: gray;
+                    color: $text-secondary; /* Changed from $text-tertiary */
+                    font-weight: 700;
+                    letter-spacing: 1px;
+                    font-family: $font-heading;
                 }
 
                 .value {
-                    font-size: 24px;
-                    font-weight: bold;
-                    color: white;
+                    font-size: $fs-stat-numbers;
+                    font-weight: 900;
+                    color: $text-primary;
+                    font-family: $font-mono;
                 }
             }
         }
@@ -223,11 +257,12 @@
 
     .lobby-settings {
         flex-direction: column;
-        gap: 16px;
-        background-color: rgba(0, 0, 0, 0.2);
-        padding: 24px;
-        border-radius: 8px;
-        margin-bottom: 32px;
+        gap: $spacing-lg;
+        background-color: $bg-secondary;
+        padding: $spacing-xl;
+        border-radius: $radius-md;
+        margin-bottom: $spacing-2xl;
+        border: 1px solid $border-standard;
 
         .setting-row {
             flex-direction: row;
@@ -235,49 +270,58 @@
             justify-content: space-between;
 
             label {
-                font-size: 18px;
-                color: rgba(255, 255, 255, 0.8);
+                font-size: $fs-body-lg;
+                color: $text-secondary;
+                font-weight: 600;
+                font-family: $font-body;
             }
 
-            // Nouveau style pour le bouton "Cycle" (Visibilité)
             .mock-dropdown {
-                background-color: rgba(255, 255, 255, 0.1);
-                padding: 12px 24px;
-                border-radius: 4px;
+                background-color: $bg-tertiary;
+                padding: $spacing-md $spacing-xl;
+                border-radius: $radius-sm;
                 cursor: pointer;
-                font-weight: bold;
-                transition: background-color 0.1s;
+                font-weight: 700;
+                transition: background-color 200ms ease-out;
+                border: 1px solid $border-standard;
+                color: $text-primary;
+                font-family: $font-body;
 
                 &:hover {
-                    background-color: rgba(255, 255, 255, 0.2);
+                    background-color: $blue-slate-dark;
+                    border-color: $blue-slate;
                 }
             }
 
-            // Nouveau style pour le sélecteur (+ / -)
             .player-selector {
                 flex-direction: row;
                 align-items: center;
-                background-color: rgba(255, 255, 255, 0.1);
-                border-radius: 4px;
+                background-color: $bg-tertiary;
+                border-radius: $radius-sm;
+                border: 1px solid $border-standard;
 
                 .btn-adjust {
-                    padding: 12px 20px;
+                    padding: $spacing-md $spacing-xl;
                     cursor: pointer;
-                    font-weight: bold;
+                    font-weight: 700;
                     font-size: 20px;
-                    transition: background-color 0.1s;
+                    transition: background-color 200ms ease-out;
+                    color: $text-primary;
+                    font-family: $font-body;
 
                     &:hover {
-                        background-color: rgba(255, 255, 255, 0.1);
+                        background-color: $blue-slate-dark;
                     }
                 }
 
                 .val {
                     width: 40px;
                     text-align: center;
-                    font-weight: bold;
+                    font-weight: 900;
                     font-size: 20px;
                     justify-content: center;
+                    color: $text-primary;
+                    font-family: $font-mono;
                 }
             }
         }
@@ -288,102 +332,118 @@
         justify-content: flex-end;
 
         .btn-launch {
-            background-color: #f1c40f;
-            color: black;
-            padding: 16px 32px;
-            font-size: 20px;
-            font-weight: bold;
-            border-radius: 8px;
+            background-color: $orange-copper;
+            color: $bg-primary;
+            padding: $spacing-lg $spacing-2xl;
+            font-size: $fs-body-lg;
+            font-weight: 900;
+            border-radius: $radius-md;
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: transform 100ms ease-out, background-color 100ms ease-out;
+            font-family: $font-heading;
+            text-transform: uppercase;
+            letter-spacing: 1px;
 
             &:hover {
                 transform: scale(1.05);
-                background-color: white;
+                background-color: $orange-copper-hover;
             }
         }
     }
 }
 
-// ==========================================
-// ONGLET 2 : SERVER BROWSER (Rejoindre)
-// ==========================================
-
+// ============================================================================
+// TAB 2: SERVER BROWSER
+// ============================================================================
 .server-browser {
     flex-grow: 1;
     flex-direction: column;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 32px;
+    background-color: $bg-hud-overlay;
+    border-radius: $radius-md;
+    border: 1px solid $border-subtle;
+    padding: $spacing-2xl;
 
     .browser-header {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 32px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 16px;
+        margin-bottom: $spacing-2xl;
+        border-bottom: 1px solid $border-subtle;
+        padding-bottom: $spacing-lg;
 
         h2 {
-            font-size: 32px;
+            font-size: $fs-h1;
             margin: 0;
-            color: white;
-            font-weight: bold;
+            color: $text-primary;
+            font-weight: 900;
+            font-family: $font-heading;
         }
 
         .btn-refresh {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 12px 24px;
-            border-radius: 4px;
+            background-color: $bg-tertiary;
+            padding: $spacing-md $spacing-xl;
+            border-radius: $radius-sm;
             cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.1s;
+            font-weight: 700;
+            transition: background-color 200ms ease-out;
+            border: 1px solid $border-standard;
+            color: $text-primary;
+            font-family: $font-body;
 
             &:hover {
-                background-color: rgba(255, 255, 255, 0.2);
+                background-color: $blue-slate-dark;
+                border-color: $blue-slate;
             }
         }
     }
 
     .lobby-list {
         flex-direction: column;
-        gap: 12px;
+        gap: $spacing-md;
         overflow-y: scroll;
 
         .lobby-card {
             flex-shrink: 0;
             flex-direction: row;
             align-items: center;
-            background-color: rgba(0, 0, 0, 0.4);
-            padding: 16px 24px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background-color: $bg-secondary;
+            padding: $spacing-lg $spacing-xl;
+            border-radius: $radius-md;
+            border: 1px solid $border-standard;
+            transition: border-color 200ms ease-out;
+            font-family: $font-body;
+
+            &:hover {
+                border-color: $orange-copper;
+            }
 
             .lobby-name {
-                font-size: 20px;
-                font-weight: bold;
+                font-size: $fs-body-lg;
+                font-weight: 700;
                 flex-grow: 1;
+                color: $text-primary;
             }
 
             .lobby-players {
-                color: rgba(255, 255, 255, 0.6);
-                margin-right: 32px;
-                font-size: 18px;
+                color: $text-secondary; /* Changed from $text-tertiary */
+                margin-right: $spacing-2xl;
+                font-size: $fs-body-lg;
+                font-family: $font-mono;
             }
 
             .btn-join {
-                background-color: #27ae60;
-                color: white;
-                padding: 12px 32px;
-                font-size: 18px;
-                font-weight: bold;
-                border-radius: 4px;
+                background-color: $status-success;
+                color: $text-primary;
+                padding: $spacing-md $spacing-2xl;
+                font-size: $fs-body-lg;
+                font-weight: 700;
+                border-radius: $radius-sm;
                 cursor: pointer;
-                transition: transform 0.1s, background-color 0.1s;
+                transition: transform 100ms ease-out, background-color 100ms ease-out;
+                font-family: $font-body;
 
                 &:hover {
-                    background-color: #2ecc71;
+                    background-color: lighten($status-success, 10%);
                     transform: scale(1.05);
                 }
             }

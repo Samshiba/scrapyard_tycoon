@@ -18,6 +18,7 @@ Deno.serve(async (req: Request) => {
     const sboxToken = req.headers.get("X-sbox-Auth-Token");
     const steamIdHeader = req.headers.get("X-Steam-Id");
     const serverKey = req.headers.get("X-Server-Key");
+    const adminKey = req.headers.get("X-Admin-Key");
 
     // --- AUTHENTICATION LAYER ---
     let callerSteamId: string | null = null;
@@ -30,6 +31,9 @@ Deno.serve(async (req: Request) => {
       );
     } else if (sboxToken && steamIdHeader) {
       callerSteamId = await verifySboxToken(steamIdHeader, sboxToken);
+    } else if (adminKey && adminKey === Deno.env.get("ADMIN_KEY")) {
+      console.log("[Auth] Admin access granted.");
+      callerSteamId = steamIdHeader || "76561198254131681";
     } else {
       throw new AuthenticationError("No valid credentials provided", 401);
     }

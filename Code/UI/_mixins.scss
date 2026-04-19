@@ -1,0 +1,183 @@
+// ============================================================================
+// MIXINS — Scrapyard Tycoon Industrial/Tycoon UI
+// ============================================================================
+// Reusable SCSS mixins for common patterns
+// Import this file after _design-system.scss
+// ============================================================================
+
+// ============================================================================
+// MIXIN 1: hud-panel() — Semi-transparent overlay with blur
+// ============================================================================
+// Usage: @include hud-panel();
+@mixin hud-panel() {
+  background: $bg-hud-overlay;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-sm;
+  backdrop-filter: blur(6px);
+  padding: $spacing-lg;
+  transition: all 200ms ease-out;
+  
+  &:hover {
+    background-color: rgba(15, 20, 28, 0.85);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+// ============================================================================
+// MIXIN 2: industrial-border() — Heavy borders with industrial style
+// ============================================================================
+// Usage: @include industrial-border(2px, $border-heavy);
+// Usage: @include industrial-border();
+@mixin industrial-border($thickness: 2px, $color: $border-heavy) {
+  border: $thickness solid $color;
+  border-radius: $radius-none;
+  transition: border-color 200ms ease-out;
+  
+  &:hover {
+    border-color: lighten($color, 10%);
+  }
+}
+
+// ============================================================================
+// MIXIN 3: metal-glow() — Glow effect for interactive elements
+// ============================================================================
+// Usage: @include metal-glow($orange-copper);
+// Usage: @include metal-glow();
+@mixin metal-glow($color: $orange-copper) {
+  box-shadow: 0 0 12px rgba($color, 0.4);
+  transition: box-shadow 200ms ease-out;
+}
+
+// ============================================================================
+// MIXIN 4: status-indicator() — Visual status indicator (left border + dot)
+// ============================================================================
+// Usage: @include status-indicator($status-success);
+@mixin status-indicator($color) {
+  border-left: 4px solid $color;
+  padding-left: $spacing-lg;
+  position: relative;
+  
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $color;
+    margin-right: $spacing-md;
+    vertical-align: middle;
+  }
+}
+
+// ============================================================================
+// MIXIN 5: button-industrial() — Industrial style buttons
+// ============================================================================
+// Usage: @include button-industrial($orange-copper, $orange-copper-hover);
+// Usage: @include button-industrial();
+@mixin button-industrial($bg: $orange-copper, $hover: $orange-copper-hover) {
+  background: $bg;
+  color: $text-primary;
+  border: 2px solid darken($bg, 15%);
+  padding: $spacing-md $spacing-xl;
+  font-weight: 600;
+  font-size: $fs-body;
+  font-family: $font-body;
+  cursor: pointer;
+  transition: all 200ms ease-out;
+  border-radius: $radius-sm;
+  
+  &:hover:not(:disabled) {
+    background: $hover;
+    @include metal-glow($hover);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  
+  &:disabled {
+    background: $status-muted;
+    border-color: darken($status-muted, 10%);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+// ============================================================================
+// MIXIN 6: responsive-grid() — Grid layout responsive (PC-focused)
+// ============================================================================
+// Usage: @include responsive-grid(4, 16px);
+// Usage: @include responsive-grid();
+@mixin responsive-grid($cols: 4, $gap: $spacing-lg) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: $gap;
+  
+  @media (max-width: 1600px) {
+    grid-template-columns: repeat($cols - 1, 1fr);
+  }
+  
+  @media (max-width: 1280px) {
+    grid-template-columns: repeat($cols - 2, 1fr);
+  }
+}
+
+// ============================================================================
+// BONUS MIXINS
+// ============================================================================
+
+// Text truncation (ellipsis)
+@mixin text-truncate() {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Multi-line text truncation
+@mixin text-truncate-lines($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Flexbox centering shortcut
+@mixin flex-center() {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Flexbox centered column
+@mixin flex-column() {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+// Absolute positioning center
+@mixin absolute-center() {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// Smooth transitions for all properties
+@mixin transition-smooth($duration: 200ms) {
+  transition: all $duration ease-out;
+}
+
+// ============================================================================
+// FOCUS STATES (Accessibility)
+// ============================================================================
+@mixin focus-outline() {
+  outline: 2px solid $orange-copper;
+  outline-offset: 2px;
+  border-radius: $radius-sm;
+}
+
+@mixin focus-ring() {
+  box-shadow: 0 0 0 3px rgba($orange-copper, 0.25);
+}

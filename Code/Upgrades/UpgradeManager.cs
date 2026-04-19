@@ -6,37 +6,28 @@ public sealed class UpgradeManager : Component
 {
     public static UpgradeManager Instance { get; private set; }
 
-    [Property] public Dictionary<string, UpgradeNode> Database { get; private set; } = new();
+    public Dictionary<string, UpgradeDefinition> Database { get; private set; } = new();
 
     private bool _isLoaded = false;
 
     protected override void OnAwake()
     {
         Instance = this;
+        LoadDefinitions();
     }
 
-    protected override void OnStart()
+    private void LoadDefinitions()
     {
-        LoadDatabase();
-    }
-
-    private void LoadDatabase()
-    {
-        if ( _isLoaded ) return;
-
-        if ( FileSystem.Mounted.FileExists( "data/upgrades.json" ) )
+        var allUpgrades = ResourceLibrary.GetAll<UpgradeDefinition>();
+        foreach ( var upgrade in allUpgrades )
         {
-            var graph = FileSystem.Mounted.ReadJson<UpgradeGraphData>( "data/upgrades.json" );
-
-            Database = graph.Nodes.ToDictionary( node => node.Id );
-
-            Log.Info( $"[UpgradeManager] Upgrade database loaded: {Database.Count} upgrades available" );
-            _isLoaded = true;
+            if ( upgrade.Id == null )
+            {
+                Log.Error( $"[UpgradeManager] Found upgrade with null Id: {upgrade}" );
+            }
         }
-        else
-        {
-            Log.Error( "[UpgradeManager] Upgrade database file 'data/upgrades.json' not found. Upgrades system will not function." );
-        }
+        Database = allUpgrades.Where( u => u.Id != null ).ToDictionary( u => u.Id );
+        Log.Info( $"[UpgradeManager] Loaded {Database.Count} upgrades from assets." );
     }
 
     public string GetUpgradeName( string upgradeId ) => Database.ContainsKey( upgradeId ) ? $"#upgrade.{upgradeId}.name" : "[UNKNOWN]";
@@ -46,9 +37,9 @@ public sealed class UpgradeManager : Component
     {
         if ( !Database.TryGetValue( upgradeId, out var node ) || factorySave == null ) return false;
 
-        foreach ( var req in node.Requirements )
+        foreach ( var req in node.RequiredUpgrades )
         {
-            int currentLevel = factorySave.GlobalUpgrades.GetValueOrDefault( req.RequiredId, 0 );
+            int currentLevel = factorySave.GlobalUpgrades.GetValueOrDefault( req.RequiredUpgrade.Id, 0 );
             if ( currentLevel < req.RequiredLevel ) return false;
         }
         return true;

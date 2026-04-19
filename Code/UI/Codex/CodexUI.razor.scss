@@ -1,0 +1,493 @@
+@import '../_design-system.scss';
+@import '../_mixins.scss';
+@import '../_animations.scss';
+
+.codex-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: $bg-modal;
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+}
+
+.codex-window {
+    background-color: $bg-primary;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+// ============================================================================
+// HEADER & TABS
+// ============================================================================
+.codex-header {
+    display: flex;
+    align-items: center;
+    padding: 0 $spacing-2xl;
+    background-color: $bg-secondary;
+    border-bottom: 1px solid $border-standard;
+    min-height: 80px;
+    flex-shrink: 0;
+
+    .codex-title {
+        font-size: $fs-h2;
+        color: $text-primary;
+        font-weight: $fw-h2;
+        letter-spacing: 4px;
+        font-family: $font-heading;
+        margin-right: $spacing-3xl;
+    }
+
+    .codex-tabs {
+        display: flex;
+        flex-direction: row;
+        gap: $spacing-sm;
+        flex: 1;
+        height: 100%;
+        align-items: flex-end;
+
+        .tab-btn {
+            padding: $spacing-lg $spacing-xl;
+            color: $text-tertiary;
+            font-size: $fs-body-lg;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: $font-heading;
+            border-bottom: 4px solid transparent;
+            transition: all 150ms ease-out;
+
+            &:hover {
+                color: $text-secondary;
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+
+            // Onglet actif en Cuivre (Orange) pour le style carnet technique
+            &.active {
+                color: $orange-copper;
+                border-bottom-color: $orange-copper;
+                background-color: rgba(217, 119, 6, 0.1); 
+            }
+        }
+    }
+
+    .codex-close {
+        color: $text-tertiary;
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: 700;
+        transition: color 100ms ease-out;
+
+        &:hover {
+            color: $status-critical;
+        }
+    }
+}
+
+.codex-body {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    overflow: hidden;
+}
+
+// ============================================================================
+// GRID MASTER (Gauches)
+// ============================================================================
+.col-grid {
+    flex: 1;
+    padding: $spacing-xl;
+    overflow-y: scroll;
+    background-color: $bg-primary;
+}
+
+.grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-lg;
+    align-content: flex-start;
+}
+
+.grid-item {
+    width: 140px;
+    height: 160px;
+    background-color: $bg-secondary;
+    border: 2px solid $border-standard;
+    border-radius: $radius-md;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-md;
+    cursor: pointer;
+    transition: all 200ms ease-out;
+
+    .item-img-box {
+        width: 80px;
+        height: 80px;
+        margin-bottom: $spacing-md;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        &.silhouette {
+            filter: brightness(0) invert(0.2);
+            opacity: 0.5;
+        }
+    }
+
+    .item-name {
+        color: $text-primary;
+        font-weight: 800;
+        font-size: $fs-body;
+        text-align: center;
+        font-family: $font-body;
+        line-height: 18px;
+    }
+
+    &.item-accessible {
+        &:hover {
+            border-color: $orange-copper;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+    }
+
+    // Sélection en cuivre pour différencier du shop
+    &.item-selected {
+        border-color: $orange-copper;
+        background-color: rgba(217, 119, 6, 0.15);
+        @include metal-glow($orange-copper);
+    }
+
+    &.item-locked {
+        border-color: $border-standard;
+        cursor: not-allowed;
+        background-color: rgba(20, 25, 34, 0.5);
+        opacity: 0.6;
+        
+        .item-name {
+            color: $text-muted;
+        }
+    }
+}
+
+// ============================================================================
+// INSPECT PANEL (Droite)
+// ============================================================================
+.col-inspect {
+    width: 28%;
+    min-width: 320px;
+    background-color: $bg-secondary;
+    border-left: 1px solid $border-standard;
+    display: flex;
+    flex-direction: column;
+
+    .inspect-empty {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: $blue-slate;
+        font-size: 16px;
+        font-weight: 800;
+        font-family: $font-heading;
+        padding: $spacing-2xl;
+    }
+
+    .inspect-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: $spacing-xl;
+        border-bottom: 1px solid $border-standard;
+        gap: $spacing-lg;
+
+        .inspect-name {
+            font-size: $fs-h2;
+            color: $text-primary;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-family: $font-heading;
+        }
+
+        .inspect-tags {
+            display: flex;
+            gap: $spacing-sm;
+            
+            .tag {
+                padding: 6px 12px;
+                border-radius: $radius-sm;
+                font-size: $fs-badge;
+                font-weight: 800;
+                font-family: $font-body;
+            }
+            .tag-cat { background: $border-standard; color: $text-primary; border: 1px solid $blue-slate; }
+            .tag-physical { background: $bg-tertiary; color: $text-secondary; border: 1px solid $blue-slate; }
+            .tag-magical { background: #3b0764; color: #d8b4fe; border: 1px solid $tag-magical; }
+            .tag-electric { background: #422006; color: #fef08a; border: 1px solid $tag-electric; }
+            .tag-poison { background: #052e16; color: #86efac; border: 1px solid $tag-poison; }
+        }
+    }
+
+    .inspect-scroll {
+        flex: 1;
+        padding: $spacing-xl;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xl;
+        overflow-y: scroll;
+
+        .inspect-desc {
+            color: $text-tertiary;
+            font-size: $fs-body;
+            line-height: 20px;
+            font-family: $font-body;
+        }
+
+        .section-title {
+            font-size: $fs-h4;
+            color: $text-muted;
+            font-weight: 800;
+            letter-spacing: 2px;
+            font-family: $font-heading;
+            margin-bottom: -$spacing-sm;
+            text-transform: uppercase;
+        }
+
+        .power-breakdown-box {
+            background-color: $bg-primary;
+            border: 1px solid $border-standard;
+            border-radius: $radius-md;
+            display: flex;
+            flex-direction: column;
+
+            .stat-line {
+                display: flex;
+                flex-direction: column;
+                padding: $spacing-md $spacing-lg;
+                border-bottom: 1px solid $border-standard;
+
+                .stat-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+
+                    .stat-label { 
+                        color: $text-secondary; 
+                        font-weight: 700; 
+                        font-family: $font-body;
+                    }
+                    .stat-final { 
+                        color: $text-primary; 
+                        font-weight: 900; 
+                        font-size: 16px; 
+                        font-family: $font-mono; 
+                    }
+                }
+
+                .stat-math {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end; // Aligné à droite sous le score final
+                    gap: 6px;
+                    margin-top: 4px;
+                    font-size: $fs-body-sm;
+                    font-family: $font-mono;
+
+                    .base-val { color: $text-tertiary; }
+                    .math-op { color: $text-muted; }
+                    .bonus-val { color: $status-success; font-weight: 700; }
+                    
+                    // New formula display style
+                    .formula {
+                        color: $text-tertiary;
+                        font-weight: 500;
+                        white-space: pre-wrap;
+                        word-break: break-word;
+                        display: inline-block;
+                        max-width: 100%;
+                    }
+                }
+            }
+
+            // Retour de l'orange cuivré pour le Theorycrafting / DPS
+            .stat-dps {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: $spacing-md $spacing-lg;
+                background-color: rgba(217, 119, 6, 0.1); 
+                border-left: 4px solid $orange-copper;
+                
+                span {
+                    color: $orange-copper;
+                    font-weight: 900;
+                    letter-spacing: 1px;
+                    font-family: $font-heading;
+                }
+                
+                .dps-val {
+                    font-size: 20px;
+                    font-family: $font-mono;
+                }
+            }
+        }
+
+        .vanity-stats-box {
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-sm;
+            background-color: $bg-tertiary;
+            padding: $spacing-lg;
+            border-radius: $radius-md;
+
+            .v-stat {
+                display: flex;
+                justify-content: space-between;
+                color: $text-secondary;
+                font-size: $fs-body;
+                font-family: $font-body;
+
+                b {
+                    color: $text-primary;
+                    font-family: $font-mono;
+                }
+            }
+        }
+    }
+}
+
+// ============================================================================
+// EMPIRE DASHBOARD (Stats)
+// ============================================================================
+.empire-dashboard {
+    flex: 1;
+    padding: $spacing-3xl;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-3xl;
+    overflow-y: scroll;
+    background-color: $bg-primary;
+
+    .dashboard-section {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-lg;
+        flex-shrink: 0;
+
+        .section-title {
+            font-size: $fs-h3;
+            color: $text-tertiary;
+            font-weight: 800;
+            letter-spacing: 2px;
+            font-family: $font-heading;
+            text-transform: uppercase;
+            border-bottom: 1px solid $border-standard;
+            padding-bottom: $spacing-md;
+        }
+
+        // Le conteneur principal vertical
+        .kpi-grid {
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-xl; // Espace vertical entre les lignes
+        }
+
+        // Chaque ligne horizontale
+        .kpi-row {
+            display: flex;
+            flex-direction: row;
+            gap: $spacing-xl; // Espace horizontal entre les cartes
+            // PLUS DE FLEX-WRAP !
+
+            .kpi-card {
+                flex: 1; // Magie absolue : s&box partage l'espace équitablement
+                
+                background: $bg-secondary;
+                border: 1px solid $border-standard;
+                border-radius: $radius-md;
+                display: flex;
+                flex-direction: column;
+                gap: $spacing-md;
+                transition: transform 200ms ease-out;
+
+                &:hover {
+                    transform: translateY(-2px);
+                }
+
+                .kpi-label {
+                    color: $text-secondary;
+                    font-size: $fs-body-lg;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    font-family: $font-body;
+                }
+
+                .kpi-val {
+                    color: $text-primary;
+                    font-size: 36px;
+                    font-weight: 900;
+                    font-family: $font-mono;
+                }
+
+                // Les classes de taille ne gèrent plus que le padding et la police
+                &.kpi-large { 
+                    padding: $spacing-2xl;
+                    .kpi-val { font-size: 42px; }
+                }
+                
+                &.kpi-medium { 
+                    padding: $spacing-2xl;
+                }
+                
+                &.kpi-small { 
+                    padding: $spacing-xl; 
+                    .kpi-label { font-size: $fs-body-sm; }
+                    .kpi-val { font-size: 28px; }
+                }
+
+                // ==============================
+                // THÈMES
+                // ==============================
+                &.gold {
+                    border-color: $currency-gibs;
+                    background: rgba(212, 175, 55, 0.05);
+                    .kpi-val { color: $currency-gibs; }
+                }
+
+                &.buff {
+                    border-left: 4px solid $status-success;
+                    .kpi-val { color: $status-success; }
+                }
+
+                &.combat {
+                    border-left: 4px solid $status-critical;
+                    .kpi-val { color: $status-critical; }
+                }
+
+                &.info {
+                    border-left: 4px solid $currency-xp;
+                    .kpi-val { color: $currency-xp; }
+                }
+                
+                &.magic {
+                    border-left: 4px solid $tag-magical;
+                    .kpi-val { color: $tag-magical; }
+                }
+            }
+        }
+    }
+}

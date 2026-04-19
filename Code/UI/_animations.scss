@@ -1,0 +1,401 @@
+// ============================================================================
+// ANIMATIONS — Scrapyard Tycoon Industrial/Tycoon UI
+// ============================================================================
+// Global keyframe animations and animation utilities
+// Import this file after _design-system.scss
+// ============================================================================
+
+// ============================================================================
+// KEYFRAME ANIMATIONS
+// ============================================================================
+
+// pulse-warning — Urgent alert pulse effect
+@keyframes pulse-warning {
+  0%, 100% {
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
+  }
+  50% {
+    border-color: rgba(239, 68, 68, 0.9);
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+  }
+}
+
+// glow-copper — Interactive copper glow
+@keyframes glow-copper {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(217, 119, 6, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(217, 119, 6, 0.5);
+  }
+}
+
+// glow-blue-slate — Interactive blue-slate glow
+@keyframes glow-blue-slate {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(71, 85, 105, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(71, 85, 105, 0.5);
+  }
+}
+
+// glow-cyan — Experience/progression cyan glow
+@keyframes glow-cyan {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.5);
+  }
+}
+
+// slide-in-left — HUD elements slide in from left
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// slide-in-right — HUD elements slide in from right
+@keyframes slide-in-right {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// slide-in-top — HUD elements slide in from top
+@keyframes slide-in-top {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// slide-in-bottom — HUD elements slide in from bottom
+@keyframes slide-in-bottom {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// fade-in — Simple fade-in transition
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// fade-out — Simple fade-out transition
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+// bounce — Subtle bounce effect
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+// shake — Warning/error shake
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+// spin — Infinite rotation (loading)
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// heartbeat — Pulsing heartbeat effect
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.05);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+// flicker — Flicker effect (tech glitch)
+@keyframes flicker {
+  0%, 18%, 22%, 25%, 54%, 56%, 100% {
+    opacity: 1;
+  }
+  20%, 24%, 55% {
+    opacity: 0.8;
+  }
+}
+
+// ============================================================================
+// ANIMATION UTILITY CLASSES
+// ============================================================================
+
+// Pulse warning
+.animate-pulse-warning {
+  animation: pulse-warning 1.5s infinite;
+}
+
+// Glow effects
+.animate-glow-copper {
+  animation: glow-copper 2s infinite;
+}
+
+.animate-glow-blue {
+  animation: glow-blue-slate 2s infinite;
+}
+
+.animate-glow-cyan {
+  animation: glow-cyan 2s infinite;
+}
+
+// Slide-in effects
+.animate-slide-in-left {
+  animation: slide-in-left 300ms ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 300ms ease-out;
+}
+
+.animate-slide-in-top {
+  animation: slide-in-top 300ms ease-out;
+}
+
+.animate-slide-in-bottom {
+  animation: slide-in-bottom 300ms ease-out;
+}
+
+// Fade effects
+.animate-fade-in {
+  animation: fade-in 200ms ease-out;
+}
+
+.animate-fade-out {
+  animation: fade-out 200ms ease-out;
+}
+
+// Other effects
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+.animate-shake {
+  animation: shake 400ms;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.3s ease-in-out infinite;
+}
+
+.animate-flicker {
+  animation: flicker 150ms linear infinite;
+}
+
+// ============================================================================
+// ANIMATION SPEED MODIFIERS
+// ============================================================================
+
+.animate-fast {
+  animation-duration: 100ms !important;
+}
+
+.animate-slow {
+  animation-duration: 500ms !important;
+}
+
+.animate-slower {
+  animation-duration: 1000ms !important;
+}
+
+// ============================================================================
+// TRANSITION UTILITIES
+// ============================================================================
+
+.transition-none {
+  transition: all 0s linear !important; 
+}
+
+.transition-fast {
+  transition: all 100ms ease-out;
+}
+
+.transition-normal {
+  transition: all 200ms ease-out;
+}
+
+.transition-slow {
+  transition: all 300ms ease-out;
+}
+
+// Property-specific transitions
+.transition-color {
+  transition: color 200ms ease-out, background-color 200ms ease-out, border-color 200ms ease-out;
+}
+
+.transition-transform {
+  transition: transform 200ms ease-out;
+}
+
+.transition-opacity {
+  transition: opacity 200ms ease-out;
+}
+
+.transition-shadow {
+  transition: box-shadow 200ms ease-out;
+}
+
+// ============================================================================
+// ANIMATION TIMING FUNCTIONS
+// ============================================================================
+
+.ease-linear {
+  animation-timing-function: linear;
+}
+
+.ease-in {
+  animation-timing-function: ease-in;
+}
+
+.ease-out {
+  animation-timing-function: ease-out;
+}
+
+.ease-in-out {
+  animation-timing-function: ease-in-out;
+}
+
+// ============================================================================
+// VISIBILITY & DISPLAY ANIMATIONS
+// ============================================================================
+
+// Show/hide with animation
+@keyframes show {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hide {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.show-animated {
+  animation: show 200ms ease-out forwards;
+}
+
+.hide-animated {
+  animation: hide 200ms ease-out forwards;
+}
+
+// ============================================================================
+// PARALLAX & DEPTH ANIMATIONS (ADVANCED)
+// ============================================================================
+
+// Subtle depth shift on hover
+@keyframes depth-up {
+  from {
+    transform: translateZ(0);
+  }
+  to {
+    transform: translateZ(8px);
+  }
+}
+
+@keyframes depth-down {
+  from {
+    transform: translateZ(8px);
+  }
+  to {
+    transform: translateZ(0);
+  }
+}
+
+.hover-depth-up:hover {
+  animation: depth-up 200ms ease-out forwards;
+}
+
+.hover-depth-down:hover {
+  animation: depth-down 200ms ease-out forwards;
+}
+
+// ============================================================================
+// REDUCED MOTION (ACCESSIBILITY)
+// ============================================================================
+
+/* @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+} */

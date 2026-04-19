@@ -10,6 +10,14 @@ public enum ResourceType
     Battery
 }
 
+public static class ResourceHelper
+{
+    public static string CategoryToLocalizedString( this ResourceType resourceType )
+    {
+        return $"#prop.resource.type.{resourceType.ToString().ToLower()}";
+    }
+}
+
 public struct ItemData
 {
     public ResourceType Type { get; set; }

@@ -1,0 +1,7 @@
+{
+    "prop.resource.type.wood": "Wood",
+    "prop.resource.type.metal": "Metal",
+    "prop.resource.type.plastic": "Plastic",
+    "prop.resource.type.glass": "Glass",
+    "prop.resource.type.battery": "Battery"
+}

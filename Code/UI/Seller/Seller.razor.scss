@@ -1,18 +1,25 @@
+// ============================================================================
+// Seller Component Styles
+// ============================================================================
+@import '../_design-system.scss';
+@import '../_mixins.scss';
+@import '../_animations.scss';
+
 root {
     justify-content: center;
     align-items: center;
-    font-family: Poppins, sans-serif;
+    font-family: $font-body;
 }
 
 .seller-panel {
-    background-color: rgba(0, 0, 0, 0.55);
-    border: 2px solid rgba(255, 255, 255, 0.12);
+    background-color: $bg-hud-overlay;
+    border: 2px solid $border-subtle;
     border-radius: 20px;
-    padding: 20px 24px;
+    padding: $spacing-xl;
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    gap: 12px;
+    gap: $spacing-md;
 }
 
 .seller-header {
@@ -22,27 +29,31 @@ root {
 }
 
 .seller-title {
-    font-size: 13px;
-    font-weight: bold;
-    color: rgba(255, 255, 255, 0.5);
+    font-size: $fs-h4;
+    font-weight: $fw-h4;
+    color: $text-secondary; /* Changed from $text-tertiary for better visibility */
     text-transform: uppercase;
     letter-spacing: 2px;
+    font-family: $font-heading;
 }
 
 .seller-counter-group {
     flex-direction: row;
     align-items: baseline;
-    gap: 2px;
+    gap: $spacing-xs;
 }
 
 .seller-count {
-    font-size: 28px;
-    font-weight: 900;
+    font-size: $fs-stat-numbers;
+    font-weight: $fw-stat-numbers;
+    color: $text-primary;
+    font-family: $font-mono;
 }
 
 .seller-max {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.3);
+    font-size: $fs-h4;
+    color: $text-secondary; /* Changed from $text-tertiary for better visibility */
+    font-family: $font-body;
 }
 
 .seller-separator {
@@ -60,5 +71,18 @@ root {
 .seller-bar-fill {
     height: 100%;
     border-radius: 4px;
-    transition: width 0.2s ease-out;
+    transition: width 200ms ease-out;
+    
+    /* Dynamic color based on capacity */
+    &.status-ok {
+        background-color: $status-success;
+    }
+    
+    &.status-warning {
+        background-color: $status-warning;
+    }
+    
+    &.status-critical {
+        background-color: $status-critical;
+    }
 }

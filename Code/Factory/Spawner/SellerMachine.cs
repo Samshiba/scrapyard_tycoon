@@ -1,31 +1,27 @@
 using Sandbox;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 
 public sealed class SellerMachine : Component, Component.ITriggerListener
 {
+    public static SellerMachine Instance { get; private set; }
     [Property, Group( "Stats Tycoon" )] public float ProcessRateBase { get; set; } = 0.4f;
     [Property, Group( "Stats Tycoon" )] public float ValueMultiplierBase { get; set; } = 1.0f;
     [Property, Group( "Stats Tycoon" )] public int MaxQueueSizeBase { get; set; } = 10;
 
     private bool _isLoaded = false;
 
+    protected override void OnAwake()
+    {
+        Instance = this;
+    }
+
     public int MaxQueueSize
     {
         get
         {
-            int total = MaxQueueSizeBase;
-
-            if ( SaveManager.Instance?.CurrentFactory?.GlobalUpgrades == null )
-                return total;
-
-            int upgradeLevel1 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "seller_queue_1", 0 );
-            total += (upgradeLevel1 * 5);
-
-            int upgradeLevel2 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "seller_queue_2", 0 );
-            total += (upgradeLevel2 * 50);
-
-            return total;
+            return (int)GlobalUpgradesSystem.Instance.ApplyModifiers( "seller_queue", MaxQueueSizeBase );
         }
     }
 
@@ -33,18 +29,7 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
     {
         get
         {
-            float total = ProcessRateBase;
-
-            if ( SaveManager.Instance?.CurrentFactory?.GlobalUpgrades == null )
-                return total;
-
-            int upgradeLevel1 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "seller_speed_1", 0 );
-            total += (upgradeLevel1 * 0.1f);
-
-            int upgradeLevel2 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "seller_speed_2", 0 );
-            total += (upgradeLevel2 * 0.5f);
-
-            return total;
+            return GlobalUpgradesSystem.Instance.ApplyModifiers( "seller_speed", ProcessRateBase );
         }
     }
 
@@ -52,21 +37,7 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
     {
         get
         {
-            float total = ValueMultiplierBase;
-
-            if ( SaveManager.Instance?.CurrentFactory?.GlobalUpgrades == null )
-                return total;
-
-            int upgradeLevel1 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "seller_value_1", 0 );
-            total += (upgradeLevel1 * 0.05f);
-
-            int upgradeLevel2 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "seller_value_2", 0 );
-            total += (upgradeLevel2 * 0.25f);
-
-            int upgradeLevel3 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "seller_value_3", 0 );
-            total += (upgradeLevel3 * 1.0f);
-
-            return total;
+            return GlobalUpgradesSystem.Instance.ApplyModifiers( "seller_value", ValueMultiplierBase );
         }
     }
 
@@ -82,6 +53,8 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
         if ( backpack != null )
         {
             int itemsTransferred = 0;
+            string playerSteamId = backpack.Network.Owner?.SteamId.ToString() ?? "unknown";
+            double scrapGained = 0;
 
             while ( backpack.CollectedItems.Count > 0 && ProcessingQueue.Count < MaxQueueSize )
             {
@@ -89,12 +62,14 @@ public sealed class SellerMachine : Component, Component.ITriggerListener
                 backpack.CollectedItems.RemoveAt( backpack.CollectedItems.Count - 1 );
 
                 ProcessingQueue.Enqueue( item );
+                scrapGained += item.Value;
                 itemsTransferred++;
             }
 
             if ( itemsTransferred > 0 )
             {
                 backpack.SaveChanges();
+                GameStats.OnScrapGained( playerSteamId, scrapGained );
                 Log.Info( $"[SellerMachine] Backpack emptied: {itemsTransferred} items transferred to machine" );
             }
             return;

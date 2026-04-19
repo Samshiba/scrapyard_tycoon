@@ -7,3 +7,5 @@ fix collision arme recule cassé quand on passe a la bat (distance mal reset je 
 pas de muzzle falsh sur le submachine gun (prefab rigle cassé)
 
 arme auto la barre d'enrgie ne devient pas rouge
+
+mauvaise arme spawn en assignant (bloquer sur bate)

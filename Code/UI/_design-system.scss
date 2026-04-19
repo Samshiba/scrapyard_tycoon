@@ -1,0 +1,174 @@
+// ============================================================================
+// DESIGN SYSTEM — Scrapyard Tycoon Industrial/Tycoon UI
+// ============================================================================
+// Central repository for all colors, spacing, typography, and global values
+// Import this file first in all component stylesheets
+// ============================================================================
+
+// ============================================================================
+// FONT FAMILIES (fallback to system fonts if unavailable)
+// ============================================================================
+// S&Box doesn't support external font URLs, uses system fallbacks:
+// - 'IBM Plex Sans' → falls back to -apple-system, BlinkMacSystemFont, Arial, etc.
+// - 'Roboto' → falls back to Segoe UI, sans-serif
+// - 'JetBrains Mono' → falls back to Courier New, monospace
+$font-heading: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+$font-body: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-mono: 'JetBrains Mono', 'Monaco', 'Courier New', monospace;
+
+// ============================================================================
+// COLOR PALETTE — BACKGROUNDS
+// ============================================================================
+$bg-primary: #0f1419;        // Noir industriel (interface principale)
+$bg-secondary: #1a1f28;      // Gris acier foncé (panels, sections)
+$bg-tertiary: #242b34;       // Gris acier moyen (cards, hover states)
+$bg-hud-overlay: rgba(15, 20, 28, 0.75);  // Semi-transparent (HUD éléments)
+$bg-modal: rgba(10, 12, 16, 0.85);        // Très sombre + blur (modals)
+
+// ============================================================================
+// COLOR PALETTE — BORDERS & STRUCTURES
+// ============================================================================
+$border-heavy: #3d4452;                          // Bordure épaisse (2-3px) — métal brossé
+$border-standard: #2d333f;                       // Bordure fine (1-2px) — séparations
+$border-subtle: rgba(255, 255, 255, 0.08);      // Très légère (HUD)
+$border-accent: #d97706;                         // Orange cuivre (interactive, focus)
+
+// ============================================================================
+// COLOR PALETTE — PRIMARY ACCENTS (CONCEPT B)
+// ============================================================================
+// Orange Cuivre — Metal chaud, buyable, highlight
+$orange-copper: #d97706;
+$orange-copper-hover: #f59e0b;
+$orange-copper-dark: #b45309;
+
+// Bleu Ardoise — Metal froid, secondary interactive
+$blue-slate: #475569;
+$blue-slate-hover: #64748b;
+$blue-slate-dark: #334155;
+
+// ============================================================================
+// COLOR PALETTE — STATUS COLORS
+// ============================================================================
+$status-success: #10b981;      // Healthy capacity, active
+$status-warning: #f59e0b;      // Caution (50-80%)
+$status-critical: #ef4444;     // >80%, exhausted, locked
+$status-muted: #6b7280;        // Disabled, unavailable
+
+// ============================================================================
+// COLOR PALETTE — DAMAGE TYPE TAGS
+// ============================================================================
+$tag-physical: #94a3b8;        // Physical weapons, neutral
+$tag-magical: #a855f7;         // Magical weapons, purple
+$tag-electric: #fbbf24;        // Electric weapons, golden yellow
+$tag-poison: #34d399;          // Poison weapons, teal green
+
+// ============================================================================
+// COLOR PALETTE — TEXT COLORS
+// ============================================================================
+$text-primary: #f5f3f0;        // Blanc cassé warm (lisible sur dark)
+$text-secondary: #cbd5e1;      // Gris clair (labels, descriptions)
+$text-tertiary: #94a3b8;       // Gris moyen (metadata, secondary info)
+$text-muted: #64748b;          // Gris foncé (disabled, locked)
+
+// ============================================================================
+// COLOR PALETTE — SPECIAL
+// ============================================================================
+$currency-gibs: #d4af37;       // Gold riche (standard tycoon currency)
+$currency-xp: #06b6d4;         // Cyan clair (progression/experience)
+
+// ============================================================================
+// SPACING SCALE (Standardisé 4px-based)
+// ============================================================================
+$spacing-xs: 4px;              // Micro gaps
+$spacing-sm: 8px;              // Small gaps
+$spacing-md: 12px;             // Medium gaps (default)
+$spacing-lg: 16px;             // Large gaps
+$spacing-xl: 24px;             // Extra large
+$spacing-2xl: 32px;            // Huge
+$spacing-3xl: 48px;            // Extra huge (page margins)
+
+// ============================================================================
+// TYPOGRAPHY SCALE
+// ============================================================================
+
+// HEADINGS
+$fs-h1: 32px;      // Display/Major titles
+$fw-h1: 900;
+$lh-h1: 40px;
+
+$fs-h2: 24px;      // Panel titles
+$fw-h2: 800;
+$lh-h2: 32px;
+
+$fs-h3: 18px;      // Sub-section titles
+$fw-h3: 700;
+$lh-h3: 26px;
+
+$fs-h4: 14px;      // Form labels
+$fw-h4: 600;
+$lh-h4: 20px;
+
+// BODY TEXT
+$fs-body-lg: 15px; // Main descriptions
+$fs-body: 14px;    // Standard paragraphs
+$fs-body-sm: 15px; // Metadata, secondary (was 13px, increased for readability)
+$fw-body: 400;
+$lh-body: 24px;    // Increased from 22px
+$lh-body-lg: 26px; // Increased from 24px
+
+// UI-SPECIFIC
+$fs-stat-numbers: 18px;  // Large values (currency, count)
+$fw-stat-numbers: 900;
+
+$fs-ui-label: 15px;      // Inventory counters, resource displays (was 13px)
+$fw-ui-label: 700;
+
+$fs-badge: 14px;         // Badge/Tag — Weapon types, stat icons (was 12px, increased from 12→14)
+$fw-badge: 600;
+
+// ============================================================================
+// Z-INDEX SCALE
+// ============================================================================
+$z-base: 1;
+$z-dropdown: 100;
+$z-modal: 1000;
+$z-tooltip: 1100;
+$z-notification: 1200;
+
+// ============================================================================
+// TRANSITIONS & ANIMATIONS
+// ============================================================================
+$transition-fast: 100ms;
+$transition-normal: 200ms;
+$transition-slow: 300ms;
+
+$easing-in: cubic-bezier(0.4, 0, 1, 1);
+$easing-out: cubic-bezier(0, 0, 0.2, 1);
+$easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+// ============================================================================
+// BORDER RADIUS
+// ============================================================================
+$radius-none: 0px;         // Sharp (industrial)
+$radius-sm: 2px;           // Subtle rounding
+$radius-md: 4px;           // Medium
+$radius-lg: 8px;           // Large (rare)
+
+// ============================================================================
+// BOX SHADOWS
+// ============================================================================
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+// ============================================================================
+// BACKDROP FILTER
+// ============================================================================
+$backdrop-blur: blur(6px);
+$backdrop-blur-heavy: blur(8px);
+
+// ============================================================================
+// RESPONSIVE BREAKPOINTS (PC ONLY)
+// ============================================================================
+$bp-desktop: 1920px;   // Primary target
+$bp-ultrawide: 2560px; // Ultrawide support

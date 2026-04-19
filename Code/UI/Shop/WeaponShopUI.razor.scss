@@ -1,9 +1,16 @@
-/* --- CSS COMPLET --- */
+// ============================================================================
+// WeaponShop Component Styles
+// ============================================================================
+// Complex 3-column panel: filters | grid | inspect
+@import '../_design-system.scss';
+@import '../_mixins.scss';
+@import '../_animations.scss';
+
 .shop-bg {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: rgba(8, 10, 15, 0.85);
+    background-color: $bg-modal;
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
@@ -12,7 +19,7 @@
 }
 
 .shop-window {
-    background: #0f131a;
+    background: $bg-primary;
     border: none;
     box-shadow: none;
     width: 100%;
@@ -24,51 +31,53 @@
 .shop-header {
     display: flex;
     align-items: center;
-    padding: 20px 32px;
-    background: #141922;
-    border-bottom: 1px solid #2d3542;
-    gap: 24px;
+    padding: $spacing-xl $spacing-2xl;
+    background: $bg-secondary;
+    border-bottom: 1px solid $border-standard;
+    gap: $spacing-xl;
     flex-shrink: 0;
     z-index: 10;
 
     .shop-title {
         flex: 1;
-        font-size: 20px;
-        color: #f0f4f8;
-        font-weight: 700;
+        font-size: $fs-h2;
+        color: $text-primary;
+        font-weight: $fw-h2;
         letter-spacing: 4px;
         text-align: left;
+        font-family: $font-heading;
     }
 
     .shop-wallet {
-        color: #e2b740;
+        color: $currency-gibs;
         font-size: 16px;
         font-weight: 800;
-        background: #1e1d17;
-        padding: 10px 16px;
-        border-radius: 4px;
-        border: 1px solid #4a3e20;
+        background: $bg-tertiary;
+        padding: $spacing-sm $spacing-lg;
+        border-radius: $radius-sm;
+        border: 1px solid $border-standard;
         white-space: nowrap;
+        font-family: $font-mono;
 
         .wallet-amount {
-            font-size: 18px;
+            font-size: $fs-stat-numbers;
         }
 
         .wallet-currency {
-            margin-left: 8px;
+            margin-left: $spacing-md;
         }
     }
 
     .shop-close {
-        color: #64748b;
+        color: $text-secondary; /* Changed from $text-tertiary for better visibility */
         cursor: pointer;
         font-size: 24px;
-        transition: color 0.1s;
+        transition: color 100ms ease-out;
         flex-shrink: 0;
-    }
 
-    .shop-close:hover {
-        color: #ef4444;
+        &:hover {
+            color: $status-critical;
+        }
     }
 }
 
@@ -79,27 +88,29 @@
     overflow: hidden;
 }
 
-/* --- COLONNE 1 : FILTRES --- */
+// ============================================================================
+// COLUMN 1: FILTERS
+// ============================================================================
 .col-filters {
     width: 18%;
     min-width: 200px;
-    background: #141922;
-    border-right: 1px solid #2d3542;
-    padding: 24px 16px;
+    background: $bg-secondary;
+    border-right: 1px solid $border-standard;
+    padding: $spacing-xl $spacing-lg;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    /* overflow-y: auto; removed to avoid conflict with overflow:auto */
+    gap: $spacing-sm;
 
     .filter-section {
-        color: #64748b;
-        font-size: 12px;
+        color: $text-muted;
+        font-size: $fs-badge;
         font-weight: 800;
         letter-spacing: 2px;
-        margin-top: 16px;
-        margin-bottom: 12px;
+        margin-top: $spacing-lg;
+        margin-bottom: $spacing-md;
         text-transform: uppercase;
         text-align: center;
+        font-family: $font-heading;
 
         &:first-child {
             margin-top: 0;
@@ -108,9 +119,9 @@
 
     .filter-tier-controls {
         display: flex;
-        gap: 8px;
+        gap: $spacing-sm;
         width: 100%;
-        margin-bottom: 12px;
+        margin-bottom: $spacing-md;
 
         .btn-tier-minus,
         .btn-tier-plus {
@@ -120,19 +131,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #1e293b;
-            border: 2px solid #475569;
-            color: #94a3b8;
+            background: $bg-tertiary;
+            border: 2px solid $blue-slate;
+            color: $text-secondary; /* Changed from $text-tertiary for better visibility */
             font-size: 20px;
             font-weight: 900;
-            border-radius: 4px;
+            border-radius: $radius-sm;
             cursor: pointer;
-            transition: all 0.1s;
+            transition: all 100ms ease-out;
+            font-family: $font-mono;
 
             &:hover {
-                background: #334155;
-                color: #f8fafc;
-                border-color: #94a3b8;
+                background: $blue-slate-dark;
+                color: $text-primary;
+                border-color: $text-tertiary;
                 transform: scale(1.05);
             }
 
@@ -151,99 +163,94 @@
             color: #38bdf8;
             font-size: 16px;
             font-weight: 900;
-            border-radius: 4px;
+            border-radius: $radius-sm;
             letter-spacing: 2px;
             min-height: 40px;
+            font-family: $font-mono;
         }
     }
 
     .filter-btn {
-        color: #94a3b8;
-        padding: 10px 12px;
-        border-radius: 4px;
-        font-size: 13px;
+        color: $text-secondary; /* Changed from $text-tertiary for better visibility */
+        padding: $spacing-sm $spacing-md;
+        border-radius: $radius-sm;
+        font-size: $fs-body;
         font-weight: 700;
         cursor: pointer;
-        transition: all 0.1s;
+        transition: all 100ms ease-out;
         text-align: center;
-        /* overflow-wrap removed for compatibility */
         border-left: 3px solid transparent;
-        /* PRÉPARE L'ESPACE POUR LA BORDURE AU SURVOL */
+        font-family: $font-body;
 
-        /* HOVER PAR DÉFAUT (Pour TOUS et Catégories) */
         &:hover {
-            background: #1e293b;
-            color: #f8fafc;
+            background: $bg-tertiary;
+            color: $text-primary;
             border-left-color: #38bdf8;
         }
 
-        /* ACTIVE PAR DÉFAUT */
         &.active {
             background: #082f49;
             color: #38bdf8;
             border-left: 4px solid #0ea5e9;
         }
 
-        /* --- Surcharges des Éléments (On garde tes couleurs) --- */
-        /* Physical */
+        // Element type overrides
         &.elem-physical:hover {
-            border-left-color: #94a3b8;
+            border-left-color: $tag-physical;
         }
 
         &.active.elem-physical {
-            background-color: rgba(148, 163, 184, 0.1);
-            color: #f8fafc;
-            border-left: 4px solid #cbd5e1;
+            background-color: rgba($tag-physical, 0.1);
+            color: $text-primary;
+            border-left: 4px solid $text-secondary;
         }
 
-        /* Magical */
         &.elem-magical:hover {
-            border-left-color: #a855f7;
+            border-left-color: $tag-magical;
         }
 
         &.active.elem-magical {
-            background-color: rgba(168, 85, 247, 0.1);
+            background-color: rgba($tag-magical, 0.1);
             color: #d8b4fe;
-            border-left: 4px solid #c084fc;
+            border-left: 4px solid $tag-magical;
         }
 
-        /* Electric */
         &.elem-electric:hover {
-            border-left-color: #eab308;
+            border-left-color: $tag-electric;
         }
 
         &.active.elem-electric {
-            background-color: rgba(234, 179, 8, 0.1);
+            background-color: rgba($tag-electric, 0.1);
             color: #fef08a;
-            border-left: 4px solid #facc15;
+            border-left: 4px solid $tag-electric;
         }
 
-        /* Poison */
         &.elem-poison:hover {
-            border-left-color: #22c55e;
+            border-left-color: $tag-poison;
         }
 
         &.active.elem-poison {
-            background-color: rgba(34, 197, 94, 0.1);
+            background-color: rgba($tag-poison, 0.1);
             color: #86efac;
-            border-left: 4px solid #4ade80;
+            border-left: 4px solid $tag-poison;
         }
     }
 }
 
-/* --- COLONNE 2 : GRILLE --- */
+// ============================================================================
+// COLUMN 2: GRID
+// ============================================================================
 .col-grid {
     flex: 1;
-    background: #0b0e14;
-    padding: 24px;
-    /* overflow-y: auto; removed to avoid conflict with overflow:auto */
+    background: $bg-primary;
+    padding: $spacing-xl;
     overflow-x: hidden;
 }
 
 .grid-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: $spacing-lg;
     align-content: flex-start;
     justify-content: space-around;
 }
@@ -251,23 +258,23 @@
 .grid-item {
     position: relative;
     width: 140px;
-    height: 160px;
-    background: #141922;
-    border: 2px solid #2d3542;
-    border-radius: 8px;
+    height: 180px; /* Increased from 160px to accommodate larger item-name */
+    background: $bg-secondary;
+    border: 2px solid $border-standard;
+    border-radius: $radius-md;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 12px;
+    padding: $spacing-md;
     padding-bottom: 30px;
     cursor: pointer;
-    transition: all 0.15s ease-out;
+    transition: all 200ms ease-out;
 
     .item-img-box {
         width: 80px;
         height: 80px;
-        margin-bottom: 8px;
+        margin-bottom: $spacing-sm;
         flex-shrink: 0;
         display: flex;
         align-items: center;
@@ -281,19 +288,22 @@
     }
 
     .item-name {
-        color: #f8fafc;
-        font-size: 13px;
+        color: $text-primary;
+        font-size: $fs-body;
         font-weight: 800;
         text-align: center;
         white-space: normal;
         width: 100%;
-        height: 40px;
+        height: 50px; /* Increased from 40px */
         flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         line-height: 18px;
         padding-top: 2px;
+        font-family: $font-body;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .item-price {
@@ -302,30 +312,27 @@
         left: 0;
         width: 100%;
         display: flex;
-        /* Force Flexbox */
         justify-content: center;
-        /* Centre horizontalement de force */
         align-items: center;
-        /* Centre verticalement de force */
-        color: #e2b740;
-        font-size: 11px;
+        color: $currency-gibs;
+        font-size: $fs-badge;
         font-weight: 700;
         line-height: 14px;
-        /* On protège le texte pour pas qu'il soit coupé */
+        font-family: $font-mono;
     }
 
-    /* États */
+    // States
     &.item-accessible {
         &:hover {
-            border-color: #475569;
+            border-color: $blue-slate;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
     }
 
     &.item-owned {
-        background: #1e293b;
-        border-color: #334155;
+        background: $bg-tertiary;
+        border-color: $border-standard;
 
         .item-price {
             display: none;
@@ -335,23 +342,16 @@
     &.item-selected {
         border-color: #0ea5e9;
         background: #082f49;
-        box-shadow: 0 0 15px rgba(14, 165, 233, 0.3);
+        @include metal-glow(#0ea5e9);
     }
 
-    /* Le Teasing (Tier N+1) */
     &.item-teaser {
-        border-width: 2px;
-        border-color: #475569;
-        /* border-style removed for compatibility; will default to solid */
-        /* If you want a dashed look, consider using a background image or SVG for the border. */
+        border-color: $blue-slate;
         cursor: not-allowed;
         opacity: 0.5;
-        /* Rend l'arme à moitié transparente */
         filter: grayscale(80%);
-        /* Désature un peu l'image pour l'effet "verrouillé" */
         background-color: rgba(20, 25, 34, 0.5);
 
-        /* On remplace le prix par un texte de cadenas, avec les mêmes propriétés de centrage absolu ! */
         .item-teaser-lock {
             position: absolute;
             bottom: 8px;
@@ -360,21 +360,24 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #94a3b8;
-            font-size: 11px;
+            color: $text-secondary; /* Changed from $text-tertiary for better visibility */
+            font-size: $fs-badge;
             font-weight: 800;
             line-height: 14px;
             letter-spacing: 1px;
+            font-family: $font-body;
         }
     }
 }
 
-/* --- COLONNE 3 : INSPECTION --- */
+// ============================================================================
+// COLUMN 3: INSPECT
+// ============================================================================
 .col-inspect {
     width: 28%;
     min-width: 320px;
-    background: #141922;
-    border-left: 1px solid #2d3542;
+    background: $bg-secondary;
+    border-left: 1px solid $border-standard;
     display: flex;
     flex-direction: column;
 
@@ -384,11 +387,12 @@
         align-items: center;
         justify-content: center;
         text-align: center;
-        color: #475569;
+        color: $blue-slate;
         font-size: 16px;
         font-weight: 800;
         letter-spacing: 2px;
         line-height: 1.5;
+        font-family: $font-heading;
     }
 
     .inspect-header {
@@ -396,195 +400,277 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        padding: 24px;
-        border-bottom: 1px solid #2d3542;
-        gap: 16px;
+        padding: $spacing-xl;
+        border-bottom: 1px solid $border-standard;
+        gap: $spacing-lg;
 
         .inspect-name {
-            font-size: 24px;
-            color: #f8fafc;
+            font-size: $fs-h2;
+            color: $text-primary;
             font-weight: 900;
             text-transform: uppercase;
             white-space: normal;
+            font-family: $font-heading;
         }
 
         .inspect-tags {
             display: flex;
             flex-direction: row;
-            gap: 8px;
+            gap: $spacing-sm;
             flex-shrink: 0;
 
             .tag {
                 width: 100px;
                 padding: 6px 0;
-                border-radius: 4px;
-                font-size: 11px;
+                border-radius: $radius-sm;
+                font-size: $fs-badge;
                 font-weight: 800;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
+                font-family: $font-body;
             }
 
             .tag-cat {
-                background: #334155;
-                color: #f8fafc;
-                border: 1px solid #475569;
+                background: $border-standard;
+                color: $text-primary;
+                border: 1px solid $blue-slate;
             }
 
-            /* --- Couleurs dynamiques des éléments --- */
             .tag-physical {
-                background: #1e293b;
-                color: #cbd5e1;
-                border: 1px solid #475569;
+                background: $bg-tertiary;
+                color: $text-secondary;
+                border: 1px solid $blue-slate;
             }
 
             .tag-magical {
                 background: #3b0764;
                 color: #d8b4fe;
-                border: 1px solid #9333ea;
+                border: 1px solid $tag-magical;
             }
 
             .tag-electric {
                 background: #422006;
                 color: #fef08a;
-                border: 1px solid #ca8a04;
+                border: 1px solid $tag-electric;
             }
 
             .tag-poison {
                 background: #052e16;
                 color: #86efac;
-                border: 1px solid #16a34a;
+                border: 1px solid $tag-poison;
             }
         }
     }
 
     .inspect-scroll {
         flex: 1;
-        padding: 24px;
-        /* overflow-y: auto; removed to avoid conflict with overflow:auto */
+        padding: $spacing-xl;
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        gap: $spacing-xl;
 
         .inspect-desc {
-            color: #94a3b8;
-            font-size: 14px;
-            line-height: 20px;
-            /* FIX: Line-height fixe en px */
+            color: $text-secondary; /* Changed from $text-tertiary for better contrast */
+            font-size: 15px; /* Increased from $fs-body (14px) */
+            line-height: 22px; /* Increased from 20px */
             white-space: normal;
             flex-shrink: 0;
             padding: 2px 0;
-            /* Laisse respirer le haut/bas */
+            font-family: $font-body;
         }
 
         .inspect-stats-box {
-            background: #0f131a;
-            border: 1px solid #2d3542;
-            border-radius: 8px;
-            padding: 16px;
+            background: $bg-secondary;
+            border: 1px solid $border-standard;
+            border-radius: $radius-md;
+            padding: $spacing-lg;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            color: #cbd5e1;
-            font-size: 13px;
+            gap: $spacing-md;
             flex-shrink: 0;
+            border-left: 4px solid $orange-copper;
 
-            div {
+            .section-header {
+                color: $text-primary;
+                font-size: $fs-body-lg;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: $spacing-sm;
+                font-family: $font-heading;
+            }
+
+            .stat-row {
                 display: flex;
                 flex-direction: row;
                 align-items: center;
-                gap: 6px;
-                /* Un peu plus d'espace entre l'icône et le texte */
+                justify-content: space-between;
+                gap: $spacing-md;
                 flex-shrink: 0;
-                line-height: 18px;
-                /* FIX: Line-height fixe */
-                padding: 2px 0;
+                line-height: 20px;
+                padding: $spacing-sm 0;
+                font-family: $font-body;
+                border-bottom: 1px solid rgba($border-standard, 0.3);
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                .stat-label {
+                    color: $text-secondary;
+                    font-size: $fs-body;
+                    font-weight: 600;
+                    flex: 1;
+                }
+
+                .stat-value {
+                    color: $text-primary;
+                    font-size: $fs-body-lg;
+                    font-weight: 700;
+                    font-family: $font-mono;
+                    white-space: nowrap;
+                }
+            }
+        }
+
+        .inspect-effects-box {
+            background: $bg-secondary;
+            border: 1px solid $border-standard;
+            border-radius: $radius-md;
+            padding: $spacing-lg;
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-md;
+            flex-shrink: 0;
+            border-left: 4px solid $blue-slate;
+
+            .section-header {
+                color: $text-primary;
+                font-size: $fs-body-lg;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: $spacing-sm;
+                font-family: $font-heading;
             }
 
-            b {
-                color: #f8fafc;
-                flex-shrink: 0;
+            .effects-empty {
+                color: $text-secondary;
+                font-size: $fs-body;
+                font-style: italic;
+                padding: $spacing-md 0;
+                text-align: center;
+                font-family: $font-body;
+            }
+
+            .effect-item {
+                display: flex;
+                flex-direction: column;
+                gap: $spacing-xs;
+                padding: $spacing-sm 0;
+                border-bottom: 1px solid rgba($border-standard, 0.3);
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                .effect-name {
+                    color: $text-primary;
+                    font-size: $fs-body;
+                    font-weight: 700;
+                    font-family: $font-body;
+                }
+
+                .effect-desc {
+                    color: $text-secondary;
+                    font-size: $fs-body-sm;
+                    line-height: 18px;
+                    font-family: $font-body;
+                }
             }
         }
 
         .inspect-attacks {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: $spacing-lg;
             flex-shrink: 0;
 
             .atk-block {
                 display: flex;
                 flex-direction: column;
                 flex-shrink: 0;
-                background: #1e293b;
-                padding: 16px;
-                border-radius: 8px;
-                border-left: 4px solid #3b82f6;
+                background: $bg-tertiary;
+                padding: $spacing-lg;
+                border-radius: $radius-md;
+                border-left: 4px solid $orange-copper;
 
                 .atk-title {
                     display: flex;
                     flex-direction: row;
                     flex-wrap: wrap;
                     align-items: center;
-                    /* Changé de baseline à center pour mieux aligner emojis/texte */
-                    gap: 6px;
-                    color: #f8fafc;
+                    gap: $spacing-sm;
+                    color: $text-primary;
                     font-weight: 800;
-                    font-size: 15px;
-                    margin-bottom: 8px;
+                    font-size: $fs-body-lg;
+                    margin-bottom: $spacing-sm;
                     white-space: normal;
                     flex-shrink: 0;
                     line-height: 20px;
-                    /* FIX: Line-height fixe en px */
                     padding-top: 2px;
+                    font-family: $font-heading;
                 }
 
                 .atk-cd {
-                    color: #64748b;
+                    color: $text-muted;
                     font-weight: normal;
-                    font-size: 12px;
+                    font-size: $fs-body-sm;
                     flex-shrink: 0;
                     line-height: 16px;
+                    font-family: $font-body;
                 }
 
                 .atk-desc {
-                    color: #94a3b8;
-                    font-size: 13px;
+                    color: $text-secondary; /* Changed from $text-tertiary for better visibility */
+                    font-size: $fs-body;
                     line-height: 18px;
-                    /* FIX: Line-height fixe en px */
                     white-space: normal;
                     flex-shrink: 0;
                     padding-bottom: 2px;
+                    font-family: $font-body;
                 }
             }
         }
     }
 
     .inspect-action {
-        padding: 20px;
-        background: #0f131a;
-        border-top: 1px solid #2d3542;
+        padding: $spacing-xl;
+        background: $bg-primary;
+        border-top: 1px solid $border-standard;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 12px;
+        gap: $spacing-md;
         flex-shrink: 0;
 
         .btn-buy {
             width: 100%;
-            padding: 16px;
-            border-radius: 6px;
+            padding: $spacing-lg;
+            border-radius: $radius-md;
             font-weight: 800;
             text-align: center;
             letter-spacing: 1px;
             border: none;
-            transition: all 0.15s;
+            transition: all 100ms ease-out;
+            font-size: $fs-body;
+            font-family: $font-body;
 
             &.active {
                 background: #0ea5e9;
-                color: #f8fafc;
+                color: $text-primary;
                 cursor: pointer;
 
                 &:hover {
@@ -594,25 +680,26 @@
             }
 
             &.disabled {
-                background: #1e293b;
-                color: #64748b;
-                border: 1px solid #334155;
+                background: $bg-tertiary;
+                color: $text-muted;
+                border: 1px solid $border-standard;
                 cursor: not-allowed;
             }
         }
 
         .equip-label {
-            color: #94a3b8;
-            font-size: 12px;
+            color: $text-secondary; /* Changed from $text-tertiary for better visibility */
+            font-size: $fs-badge;
             font-weight: 800;
             letter-spacing: 1px;
             width: 100%;
             text-align: center;
+            font-family: $font-body;
         }
 
         .slot-row {
             display: flex;
-            gap: 12px;
+            gap: $spacing-md;
             width: 100%;
             justify-content: center;
 
@@ -622,26 +709,27 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: #1e293b;
-                border: 2px solid #475569;
-                color: #cbd5e1;
+                background: $bg-tertiary;
+                border: 2px solid $blue-slate;
+                color: $text-secondary;
                 font-size: 18px;
                 font-weight: 900;
-                border-radius: 8px;
+                border-radius: $radius-md;
                 cursor: pointer;
-                transition: all 0.1s;
+                transition: all 100ms ease-out;
                 flex-shrink: 0;
+                font-family: $font-mono;
 
                 &:hover {
-                    background: #334155;
-                    border-color: #94a3b8;
+                    background: $blue-slate-dark;
+                    border-color: $text-tertiary;
                     transform: translateY(-2px);
                 }
 
                 &.equipped {
                     background: #431407;
-                    border-color: #f97316;
-                    color: #f97316;
+                    border-color: $orange-copper;
+                    color: $orange-copper;
                     pointer-events: none;
                 }
             }

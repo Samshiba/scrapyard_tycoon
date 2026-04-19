@@ -1,4 +1,13 @@
 {
+    "weapon.damagetype.physical": "Physical",
+    "weapon.damagetype.magical": "Magical",
+    "weapon.damagetype.electric": "Electric",
+    "weapon.damagetype.poison": "Poison",
+    "weapon.category.melee": "Melee",
+    "weapon.category.pistol": "Pistol",
+    "weapon.category.rifle": "Rifle",
+    "weapon.category.heavy": "Heavy",
+    "weapon.category.special": "Special",
     "weapon.1.melee.bat.name": "Wooden Bat",
     "weapon.1.melee.bat.description": "It hits hard.",
     "weapon.1.pistol.9mm.name": "9mm",

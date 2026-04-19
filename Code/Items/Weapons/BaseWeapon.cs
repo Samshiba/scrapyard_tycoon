@@ -12,56 +12,15 @@ public abstract class BaseWeapon : Component, ITooltipProvider
 
     protected virtual bool IsAutomatic => false;
 
-    public float Damage
-    {
-        get
-        {
-            if ( Data == null ) return 0;
+    public float Damage => WeaponStatsCalculator.GetStat( Data, WeaponStatTarget.Damage );
 
-            float baseDamage = Data.DamageBase;
-            float totalMultiplier = 1.0f;
+    public float AttackRate => WeaponStatsCalculator.GetStat( Data, WeaponStatTarget.AttackRate );
 
-            if ( SaveManager.Instance?.CurrentFactory?.GlobalUpgrades != null )
-            {
-                var upgrades = SaveManager.Instance.CurrentFactory.GlobalUpgrades;
-                string typeName = Data.DamageType.ToString().ToLower();
-                float[] bonusValues = { 0.05f, 0.25f, 1.0f, 5.0f };
+    public float CriticalChance => WeaponStatsCalculator.GetStat( Data, WeaponStatTarget.CriticalChance );
 
-                for ( int i = 0; i < bonusValues.Length; i++ )
-                {
-                    string upgradeKey = $"{typeName}_damage_{i + 1}";
-                    totalMultiplier += upgrades.GetValueOrDefault( upgradeKey, 0 ) * bonusValues[i];
-                }
-            }
+    public float CriticalDamage => WeaponStatsCalculator.GetStat( Data, WeaponStatTarget.CriticalDamage );
 
-            return baseDamage * totalMultiplier;
-        }
-    }
-
-    public float AttackRate
-    {
-        get
-        {
-            if ( Data == null ) return 1f;
-
-            float baseRate = Data.AttackRateBase;
-            float totalMultiplier = 1.0f;
-
-            if ( SaveManager.Instance?.CurrentFactory?.GlobalUpgrades != null )
-            {
-                var upgrades = SaveManager.Instance.CurrentFactory.GlobalUpgrades;
-                float[] bonusValues = { 0.05f, 0.25f, 1.0f, 5.0f };
-
-                for ( int i = 0; i < bonusValues.Length; i++ )
-                {
-                    string upgradeKey = $"weapon_attack_rate_{i + 1}";
-                    totalMultiplier += upgrades.GetValueOrDefault( upgradeKey, 0 ) * bonusValues[i];
-                }
-            }
-
-            return baseRate * totalMultiplier;
-        }
-    }
+    public float Range => WeaponStatsCalculator.GetStat( Data, WeaponStatTarget.Range );
 
     // --- Lifecycle ---
 
@@ -161,6 +120,19 @@ public abstract class BaseWeapon : Component, ITooltipProvider
              _playerStats.CurrentEnergy <= 0 ||
              _playerStats.TimeSinceLastAttack < 1f);
     }
+
+    public bool ShouldHit()
+    {
+        float rollChance = Game.Random.Float( 0f, 100f );
+        return rollChance < CriticalChance;
+    }
+
+    public float GetFinalDamage( bool isCrit )
+    {
+        return isCrit ? Damage * CriticalDamage : Damage;
+    }
+
+    public float GetDPS() => WeaponStatsCalculator.GetDPS( Data );
 
     // --- Abstract & Virtual Methods ---
 

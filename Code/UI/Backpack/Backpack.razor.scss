@@ -1,15 +1,22 @@
+// ============================================================================
+// Backpack Component Styles
+// ============================================================================
+@import '../_design-system.scss';
+@import '../_mixins.scss';
+@import '../_animations.scss';
+
 .backpack-panel {
 	position: absolute;
 	top: 28px;
 	right: 28px;
 
-	background-color: rgba(0, 0, 0, 0.5);
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	background-color: $bg-hud-overlay;
+	border: 1px solid $border-subtle;
 	border-radius: 12px;
-	padding: 12px 16px;
+	padding: $spacing-lg $spacing-lg;
 
 	flex-direction: column;
-	gap: 8px;
+	gap: $spacing-sm;
 	min-width: 180px;
 }
 
@@ -17,38 +24,40 @@
 .stat-row {
 	flex-direction: row;
 	align-items: center;
-	gap: 10px;
+	gap: $spacing-md;
 }
 
 .stat-icon {
-	font-size: 16px;
-	width: 20px;
+	font-size: 18px;
+	width: 24px;
 	text-align: center;
+	font-family: $font-mono;
 }
 
 .separator {
 	height: 1px;
 	background-color: rgba(255, 255, 255, 0.08);
-	margin: 2px 0;
+	margin: $spacing-xs 0;
 }
 
-/* ---- Argent ---- */
+/* ---- Currency (Gibs) ---- */
 .money-value {
-	font-size: 15px;
-	font-weight: bold;
-	color: #f0c040;
+	font-size: $fs-body-lg;
+	font-weight: 700;
+	color: $currency-gibs;
 	letter-spacing: 0.5px;
+	font-family: $font-mono;
 }
 
-/* ---- Gibs ---- */
+/* ---- Gibs Capacity ---- */
 .gibs-block {
 	flex-direction: column;
-	gap: 4px;
+	gap: $spacing-xs;
 	flex-grow: 1;
 }
 
 .gibs-bar-track {
-	height: 5px;
+	height: 6px;
 	border-radius: 4px;
 	background-color: rgba(255, 255, 255, 0.1);
 	overflow: hidden;
@@ -58,11 +67,26 @@
 .gibs-bar-fill {
 	height: 100%;
 	border-radius: 4px;
-	transition: width 0.2s ease, background-color 0.3s ease;
+	transition: width 200ms ease-out, background-color 200ms ease-out;
+	
+	/* Dynamic color based on capacity */
+	&.status-ok {
+		background-color: $status-success;
+	}
+	
+	&.status-warning {
+		background-color: $status-warning;
+	}
+	
+	&.status-critical {
+		background-color: $status-critical;
+	}
 }
 
 .gibs-label {
-	font-size: 12px;
-	font-weight: bold;
-	transition: color 0.3s ease;
+	font-size: $fs-body-sm;
+	font-weight: 700;
+	color: $text-secondary;
+	font-family: $font-body;
+	transition: color 200ms ease-out;
 }

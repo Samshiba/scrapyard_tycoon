@@ -36,7 +36,11 @@ public static class SaveEventBus
         /// <summary>Emergency save on crash recovery</summary>
         CrashRecovery,
         /// <summary>Data migrated from old format (ID corrections, etc)</summary>
-        DataMigration
+        DataMigration,
+        /// <summary>Player statistics updated</summary>
+        PlayerStatUpdate,
+        /// <summary>World statistics updated</summary>
+        WorldStatUpdate,
     }
 
     /// <summary>

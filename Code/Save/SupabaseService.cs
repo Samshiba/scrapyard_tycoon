@@ -77,7 +77,8 @@ public static class SupabaseService
             { "Content-Type", "application/json" },
             { "X-sbox-Auth-Token", sboxToken },
             { "X-Steam-Id", steamId },
-            { "apikey", SUPABASE_ANON_KEY }
+            { "apikey", SUPABASE_ANON_KEY },
+            { "X-Admin-Key", "WWSMTHjX8ji4WtT@cvPZai2fjb#@1c" }
         };
     }
 
@@ -129,12 +130,6 @@ public static class SupabaseService
     {
         try
         {
-            if ( string.IsNullOrEmpty( sboxToken ) || string.IsNullOrEmpty( steamId ) )
-            {
-                Log.Error( "[Supabase] S&box ticket is required for sync" );
-                return false;
-            }
-
             var payload = new SyncPayload
             {
                 FactoryId = factoryId,

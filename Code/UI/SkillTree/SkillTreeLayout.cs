@@ -16,7 +16,7 @@ public static class SkillTreeLayout
         (0, 1)
     };
 
-    public static Dictionary<string, Vector2> Compute( Dictionary<string, UpgradeNode> db )
+    public static Dictionary<string, Vector2> Compute( Dictionary<string, UpgradeDefinition> db )
     {
         var positions = new Dictionary<string, Vector2>();
         if ( db == null || db.Count == 0 ) return positions;
@@ -29,7 +29,9 @@ public static class SkillTreeLayout
         var queue = new Queue<(string Id, (int x, int y) ParentPos, (int x, int y) PrefDir)>();
 
         // 1. Trouver la/les racines (noeuds sans prérequis)
-        var roots = db.Where( kvp => kvp.Value.Requirements.Count == 0 ).Select( kvp => kvp.Key ).ToList();
+        var roots = db.Where( kvp => kvp.Value.RequiredUpgrades == null || kvp.Value.RequiredUpgrades.Count == 0 )
+                      .Select( kvp => kvp.Key )
+                      .ToList();
         if ( roots.Count == 0 ) roots.Add( db.Keys.First() ); // Sécurité anti-boucle
 
         (int x, int y) currentRootPos = (0, 0);
@@ -80,12 +82,13 @@ public static class SkillTreeLayout
     // --- Fonctions utilitaires internes ---
 
     static void EnqueueChildren( string parentId, (int x, int y) parentPos, (int x, int y) baseDir,
-                                 Dictionary<string, UpgradeNode> db,
+                                 Dictionary<string, UpgradeDefinition> db,
                                  Dictionary<string, (int x, int y)> gridPositions,
                                  Queue<(string, (int x, int y), (int x, int y))> queue )
     {
         // On récupère les enfants non placés
-        var children = db.Where( kvp => kvp.Value.Requirements.Any( r => r.RequiredId == parentId ) )
+        var children = db.Where( kvp => kvp.Value.RequiredUpgrades != null &&
+                                        kvp.Value.RequiredUpgrades.Any( r => r.RequiredUpgrade.Id == parentId ) )
                          .Select( kvp => kvp.Key )
                          .Where( id => !gridPositions.ContainsKey( id ) )
                          .ToList();

@@ -47,6 +47,8 @@ public sealed class PrestigeSystem : Component
         PrestigeLevel++;
         SaveChanges();
         Log.Info( $"[PrestigeSystem] L'Usine est passée au Prestige {PrestigeLevel} !" );
+        
+        GameStats.OnPrestige( PrestigeLevel );
 
         // TODO : RESET FACTORY
     }

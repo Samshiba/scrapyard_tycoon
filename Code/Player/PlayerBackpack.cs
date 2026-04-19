@@ -17,24 +17,7 @@ public sealed class PlayerBackpack : Component, Component.INetworkListener
     {
         get
         {
-            int total = BaseMaxItems;
-
-            if ( SaveManager.Instance?.CurrentFactory?.GlobalUpgrades == null )
-                return total;
-
-            int upgradeLevel1 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "backpack_capacity_1", 0 );
-            total += (upgradeLevel1 * 5);
-
-            int upgradeLevel2 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "backpack_capacity_2", 0 );
-            total += (upgradeLevel2 * 50);
-
-            int upgradeLevel3 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "backpack_capacity_3", 0 );
-            total += (upgradeLevel3 * 500);
-
-            int upgradeLevel4 = SaveManager.Instance.CurrentFactory.GlobalUpgrades.GetValueOrDefault( "backpack_capacity_4", 0 );
-            total += (upgradeLevel4 * 5000);
-
-            return total;
+            return (int)GlobalUpgradesSystem.Instance.ApplyModifiers( "backpack_capacity", BaseMaxItems );
         }
     }
 

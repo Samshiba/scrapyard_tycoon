@@ -27,6 +27,19 @@ public enum WeaponHoldType
     Melee = 5
 }
 
+public static class WeaponHelper
+{
+    public static string CategoryToLocalizedString( this WeaponCategory category )
+    {
+        return $"#weapon.category.{category.ToString().ToLower()}";
+    }
+
+    public static string DamageTypeToLocalizedString( this DamageType damageType )
+    {
+        return $"#weapon.damagetype.{damageType.ToString().ToLower()}";
+    }
+}
+
 
 [AssetType( Name = "Weapon Definition", Extension = "weapon", Category = "ScrapYard" )]
 public partial class WeaponDefinition : GameResource
@@ -38,7 +51,7 @@ public partial class WeaponDefinition : GameResource
     [Group( "Identity" )]
     public string IconPath
     {
-        get => $"Resources/Weapons/Textures/{Id}.prefab.png";
+        get => $"Weapons/Textures/{Id}.prefab.png";
     }
 
     // --- Filters ---
@@ -48,7 +61,9 @@ public partial class WeaponDefinition : GameResource
     // --- Stats ---
     [Property, Group( "Stats" )] public float DamageBase { get; set; }
     [Property, Group( "Stats" )] public float AttackRateBase { get; set; }
-    [Property, Group( "Stats" )] public float Range { get; set; }
+    [Property, Group( "Stats" )] public float CriticalChanceBase { get; set; } = 5.0f;
+    [Property, Group( "Stats" )] public float CriticalDamageBase { get; set; } = 2.0f;
+    [Property, Group( "Stats" )] public float RangeBase { get; set; }
 
     // --- Energy System ---
     [Property, Group( "Energy" )] public bool UsesEnergy { get; set; } = true;

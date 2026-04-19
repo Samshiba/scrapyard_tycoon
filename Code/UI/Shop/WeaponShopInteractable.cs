@@ -1,19 +1,19 @@
 using Sandbox;
 
-public sealed class TerminalInteractable : Component, Component.IPressable
+public sealed class WeaponShopInteractable : Component, Component.IPressable
 {
     public bool Press( IPressable.Event e )
     {
         if ( e.Source == null ) return false;
 
-        // Show skill tree UI
-        if ( SkillTreeUI.Local != null )
+        // Show weapon shop UI
+        if ( WeaponShopUI.Local != null )
         {
-            SkillTreeUI.Local.OpenMenu();
+            WeaponShopUI.Local.OpenMenu();
             return true;
         }
 
-        Log.Warning( "[TerminalInteractable] ERROR: SkillTreeUI component not found in scene" );
+        Log.Warning( "[WeaponShopInteractable] ERROR: WeaponShopUI component not found in scene" );
         return false;
     }
 
@@ -24,7 +24,7 @@ public sealed class TerminalInteractable : Component, Component.IPressable
     {
         return new IPressable.Tooltip
         {
-            Description = "#tooltip.terminal.description",
+            Description = "#tooltip.shop.description",
         };
     }
 }

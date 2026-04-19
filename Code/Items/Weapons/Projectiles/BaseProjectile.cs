@@ -6,6 +6,7 @@ public abstract class BaseProjectile : Component
 
     public float Damage { get; protected set; }
     public GameObject Shooter { get; protected set; }
+    public string WeaponId { get; protected set; }
 
     [Property, Group("Base Stats")] public float Speed { get; set; } = 1000f;
     [Property, Group("Base Stats")] public float MaxLifeTime { get; set; } = 5f;
@@ -14,10 +15,11 @@ public abstract class BaseProjectile : Component
 
     // --- Lifecycle ---
 
-    public virtual void Initialize(float damage, GameObject shooter)
+    public virtual void Initialize(float damage, GameObject shooter, string weaponId = "")
     {
         Damage = damage;
         Shooter = shooter;
+        WeaponId = weaponId;
         TimeSinceFired = 0;
     }
 

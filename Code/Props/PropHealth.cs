@@ -1,4 +1,3 @@
-using Microsoft.VisualBasic;
 using Sandbox;
 using System;
 
@@ -15,69 +14,74 @@ public sealed class PropHealth : Component, Component.IDamageable
 
     [Property] public BalanceConfig config { get; set; }
 
-    public void Initialize(PropDefinition data)
+    // Track last attacker for stats
+    private string _lastAttackerSteamId = "";
+    private string _lastWeaponId = "";
+
+    public void Initialize( PropDefinition data )
     {
         config = BalanceConfig.Instance;
-        if (config == null)
+        if ( config == null )
         {
-            Log.Error("[PropHealth] ERROR: BalanceConfig not found. Ensure BalanceConfig.asset is in your project and loaded.");
+            Log.Error( "[PropHealth] ERROR: BalanceConfig not found. Ensure BalanceConfig.asset is in your project and loaded." );
             return;
         }
         Data = data;
         GibPrefab = config.GibPrefab;
 
-        // 1. HP Calcul : (base_hp * (hp_mult^(tier-1))) * rarity_mod
-        float rawHP = config.BaseHP * MathF.Pow(config.HPMult, data.Tier - 1) * data.RarityMod;
-        CurrentHealth = MathF.Round(rawHP);
-
-        // 2. Value Calcul : (base_value * (value_mult^(tier-1))) * rarity_mod * jackpot_bonus
-        float jackpot = data.RarityMod >= 3 ? config.JackpotBonus : 1.0f;
-        float rawValue = config.BaseValue * MathF.Pow(config.ValueMult, data.Tier - 1) * (data.RarityMod * jackpot);
-        TotalValue = MathF.Round(rawValue);
-
-        // 3. Gib Count Calcul : base_gibs + ((tier-1) * gibs_per_tier), clamped at max_gibs
-        int desiredGibs = config.BaseGibs + ((data.Tier - 1) * config.GibsPerTier);
-        FinalGibCount = Math.Clamp(desiredGibs, 0, config.MaxGibs);
-
-        // 4. Value per Gib : TotalValue / FinalGibCount (with safety check)
-        ValuePerGib = FinalGibCount > 0 ? (float)Math.Round(TotalValue / FinalGibCount, 2) : TotalValue;
+        CurrentHealth = PropStatsCalculator.GetHealth( data );
+        TotalValue = PropStatsCalculator.GetValue( data );
+        FinalGibCount = PropStatsCalculator.GetGibCount( data );
+        ValuePerGib = PropStatsCalculator.GetValuePerGib( data );
     }
 
-    public void OnDamage(in DamageInfo damage)
+    public void OnDamage( in DamageInfo damage )
     {
         if ( !damage.Tags.Has( "player" ) && !damage.Tags.Has( "machine" ) && !damage.Tags.Has( "explosion" ) )
         {
             return;
         }
-        Log.Info($"[PropHealth] Damage received: {damage.Damage} from tags: {string.Join(", ", damage.Tags)}");
+        Log.Info( $"[PropHealth] Damage received: {damage.Damage} from tags: {string.Join( ", ", damage.Tags )}" );
         CurrentHealth -= damage.Damage;
         FlashWhite();
-        if (CurrentHealth <= 0) OnBreak();
+        if ( CurrentHealth <= 0 ) OnBreak();
+    }
+
+    public void OnDamageDealt( string steamId, string weaponId, double damage, bool isCrit )
+    {
+        _lastAttackerSteamId = steamId;
+        _lastWeaponId = weaponId;
+
+        // Call stats immediately for damage dealt event
+        GameStats.OnDamageDealt( steamId, weaponId, damage );
     }
 
     public async void FlashWhite()
     {
-        var renderer = GameObject.Components.Get<ModelRenderer>(FindMode.EverythingInSelfAndDescendants);
-        if (renderer == null) return;
+        var renderer = GameObject.Components.Get<ModelRenderer>( FindMode.EverythingInSelfAndDescendants );
+        if ( renderer == null ) return;
 
         var originalMat = renderer.MaterialOverride;
-        renderer.MaterialOverride = Material.Load("materials/dev/primary_white.vmat");
-        await Task.DelayRealtime(50);
+        renderer.MaterialOverride = Material.Load( "materials/dev/primary_white.vmat" );
+        await Task.DelayRealtime( 50 );
         renderer.MaterialOverride = originalMat;
     }
 
     private void OnBreak()
     {
-        // 1. Check if there are SubProps to spawn instead of gibs
-        if (Data.SubProps != null && Data.SubProps.Count > 0)
-        {
-            foreach (var drop in Data.SubProps)
-            {
-                if (drop.Prop == null) continue;
+        // Call stats for prop destroyed
+        GameStats.OnPropDestroyed( _lastAttackerSteamId, Data.PropID, _lastWeaponId, TotalValue );
 
-                for (int i = 0; i < drop.Count; i++)
+        // 1. Check if there are SubProps to spawn instead of gibs
+        if ( Data.SubProps != null && Data.SubProps.Count > 0 )
+        {
+            foreach ( var drop in Data.SubProps )
+            {
+                if ( drop.Prop == null ) continue;
+
+                for ( int i = 0; i < drop.Count; i++ )
                 {
-                    SpawnChild(drop.Prop);
+                    SpawnChild( drop.Prop );
                 }
             }
         }
@@ -90,7 +94,7 @@ public sealed class PropHealth : Component, Component.IDamageable
         GameObject.Destroy();
     }
 
-    private void SpawnChild(PropDefinition childData)
+    private void SpawnChild( PropDefinition childData )
     {
         var childGo = new GameObject();
         childGo.WorldPosition = WorldPosition + Vector3.Random * 15f;
@@ -105,39 +109,39 @@ public sealed class PropHealth : Component, Component.IDamageable
 
         // Rigidbody
         var rb = childGo.AddComponent<Rigidbody>();
-        rb.Velocity = Vector3.Random * Game.Random.Float(50f, 150f) + Vector3.Up * Game.Random.Float(50f, 100f);
+        rb.Velocity = Vector3.Random * Game.Random.Float( 50f, 150f ) + Vector3.Up * Game.Random.Float( 50f, 100f );
 
         // PropHealth
         var health = childGo.AddComponent<PropHealth>();
-        health.Initialize(childData);
+        health.Initialize( childData );
         health.GibPrefab = config.GibPrefab;
     }
 
     private void BreakIntoGibs()
     {
-        if (GibPrefab == null)
+        if ( GibPrefab == null )
         {
-            Log.Warning($"[PropHealth] WARNING: GibPrefab not set on {GameObject.Name}. Gib spawning disabled.");
+            Log.Warning( $"[PropHealth] WARNING: GibPrefab not set on {GameObject.Name}. Gib spawning disabled." );
             return;
         }
 
-        for (int i = 0; i < FinalGibCount; i++)
+        for ( int i = 0; i < FinalGibCount; i++ )
         {
             var randomDir = new Vector3(
-                Game.Random.Float(-1f, 1f),
-                Game.Random.Float(-1f, 1f),
-                Game.Random.Float(0f, 0.4f)
+                Game.Random.Float( -1f, 1f ),
+                Game.Random.Float( -1f, 1f ),
+                Game.Random.Float( 0f, 0.4f )
             ).Normal;
 
-            var spawnOffset = randomDir * Game.Random.Float(5f, 15f) + Vector3.Up * Game.Random.Float(5f, 15f);
-            var gib = GibPrefab.Clone(WorldPosition + spawnOffset);
+            var spawnOffset = randomDir * Game.Random.Float( 5f, 15f ) + Vector3.Up * Game.Random.Float( 5f, 15f );
+            var gib = GibPrefab.Clone( WorldPosition + spawnOffset );
 
-            var scrapItem = gib.Components.Get<ResourceGib>(FindMode.EverythingInSelfAndDescendants);
-            if (scrapItem == null) continue;
+            var scrapItem = gib.Components.Get<ResourceGib>( FindMode.EverythingInSelfAndDescendants );
+            if ( scrapItem == null ) continue;
 
-            var randomResourceType = Data.Types.Count > 0 ? Data.Types[Game.Random.Int(0, Data.Types.Count - 1)] : ResourceType.Wood;
+            var randomResourceType = Data.Types.Count > 0 ? Data.Types[Game.Random.Int( 0, Data.Types.Count - 1 )] : ResourceType.Wood;
 
-            scrapItem.Initialize(randomResourceType, ValuePerGib, randomDir);
+            scrapItem.Initialize( randomResourceType, ValuePerGib, randomDir );
         }
 
         GameObject.Destroy();

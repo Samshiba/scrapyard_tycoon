@@ -6,7 +6,7 @@ public abstract class MeleeWeapon : BaseWeapon
     {
         var ray = Scene.Camera.ScreenNormalToRay( 0.5f );
 
-        var tr = Scene.Trace.Ray( ray, Data.Range )
+        var tr = Scene.Trace.Ray( ray, Range )
             .IgnoreGameObjectHierarchy( GameObject.Root )
             .Radius( 15f )
             .UsePhysicsWorld()
@@ -18,12 +18,15 @@ public abstract class MeleeWeapon : BaseWeapon
 
             if ( health != null )
             {
+                bool isCrit = ShouldHit();
                 var damageInfo = new DamageInfo
                 {
-                    Damage = Damage,
+                    Damage = GetFinalDamage( isCrit ),
                     Position = tr.HitPosition
                 };
                 damageInfo.Tags.Add( "player" );
+                if ( isCrit ) damageInfo.Tags.Add( "critical" );
+                damageInfo.Tags.Add( Data.Id );
                 health.OnDamage( damageInfo );
 
                 if ( Data.HitEffectPrefab != null )
