@@ -24,7 +24,7 @@ public class SaveAuditLog
 	private const string AUDIT_FILE_SUFFIX = "_audit";
 	private const string SAVE_EXTENSION = ".json";
 
-	public SaveAuditLog(string playerId)
+	public SaveAuditLog( string playerId )
 	{
 		_playerId = playerId;
 		_entries = new List<AuditEntry>();
@@ -38,62 +38,75 @@ public class SaveAuditLog
 	{
 		try
 		{
+			// Validate FileSystem is available
+			if ( FileSystem.Data == null )
+			{
+				if ( SaveConfig.DEBUG_SAVE_LOGGING )
+					Log.Warning( $"[SaveAuditLog] FileSystem.Data not available on load" );
+				return;
+			}
+
 			var fileName = GetAuditFileName();
-			if (FileSystem.Data.FileExists(fileName))
+			if ( string.IsNullOrEmpty( fileName ) )
+			{
+				return;
+			}
+
+			if ( FileSystem.Data.FileExists( fileName ) )
 			{
 				// Note: SaveAuditData should be a simple class with List<AuditEntry>
 				// For now, we'll use basic JSON parsing
 				_entries.Clear(); // Fresh start for this session
 			}
 		}
-		catch (Exception ex)
+		catch ( Exception ex )
 		{
-			Log.Error($"[SaveAuditLog] Failed to load audit log: {ex.Message}");
+			Log.Error( $"[SaveAuditLog] Failed to load audit log: {ex.Message}" );
 		}
 	}
 
 	/// <summary>
 	/// Record a scrap transaction in the audit log.
 	/// </summary>
-	public void LogScrapChange(float oldValue, float newValue, string reason)
+	public void LogScrapChange( float oldValue, float newValue, string reason )
 	{
-		LogChange("ScrapBalance", oldValue, newValue, reason);
+		LogChange( "ScrapBalance", oldValue, newValue, reason );
 	}
 
 	/// <summary>
 	/// Record an upgrade level change in the audit log.
 	/// </summary>
-	public void LogUpgradeChange(string upgradeName, int oldLevel, int newLevel, string reason)
+	public void LogUpgradeChange( string upgradeName, int oldLevel, int newLevel, string reason )
 	{
-		LogChange($"Upgrade_{upgradeName}", oldLevel, newLevel, reason);
+		LogChange( $"Upgrade_{upgradeName}", oldLevel, newLevel, reason );
 	}
 
 	/// <summary>
 	/// Record a prestige change in the audit log.
 	/// </summary>
-	public void LogPrestigeChange(int oldLevel, int newLevel, string reason)
+	public void LogPrestigeChange( int oldLevel, int newLevel, string reason )
 	{
-		LogChange("PrestigeLevel", oldLevel, newLevel, reason);
+		LogChange( "PrestigeLevel", oldLevel, newLevel, reason );
 	}
 
 	/// <summary>
 	/// Record an item unlock in the audit log.
 	/// </summary>
-	public void LogItemUnlock(string itemName, string reason)
+	public void LogItemUnlock( string itemName, string reason )
 	{
 		var entry = new AuditEntry
 		{
-			Timestamp = DateTime.UtcNow.ToString("O"),
+			Timestamp = DateTime.UtcNow.ToString( "O" ),
 			ChangeType = $"ItemUnlock_{itemName}",
 			OldValue = 0,
 			NewValue = 1,
 			Reason = reason
 		};
 
-		_entries.Add(entry);
+		_entries.Add( entry );
 
-		if (SaveConfig.DEBUG_SAVE_LOGGING)
-			Log.Info($"[SaveAuditLog] Unlocked: {itemName}");
+		if ( SaveConfig.DEBUG_SAVE_LOGGING )
+			Log.Info( $"[SaveAuditLog] Unlocked: {itemName}" );
 
 		RotateIfNeeded();
 	}
@@ -101,21 +114,21 @@ public class SaveAuditLog
 	/// <summary>
 	/// Generic change logging.
 	/// </summary>
-	private void LogChange(string changeType, float oldValue, float newValue, string reason)
+	private void LogChange( string changeType, float oldValue, float newValue, string reason )
 	{
 		var entry = new AuditEntry
 		{
-			Timestamp = DateTime.UtcNow.ToString("O"),
+			Timestamp = DateTime.UtcNow.ToString( "O" ),
 			ChangeType = changeType,
 			OldValue = oldValue,
 			NewValue = newValue,
 			Reason = reason
 		};
 
-		_entries.Add(entry);
+		_entries.Add( entry );
 
-		if (SaveConfig.DEBUG_SAVE_LOGGING)
-			Log.Info($"[SaveAuditLog] {changeType}: {oldValue} → {newValue} ({reason})");
+		if ( SaveConfig.DEBUG_SAVE_LOGGING )
+			Log.Info( $"[SaveAuditLog] {changeType}: {oldValue} → {newValue} ({reason})" );
 
 		RotateIfNeeded();
 	}
@@ -125,14 +138,14 @@ public class SaveAuditLog
 	/// </summary>
 	private void RotateIfNeeded()
 	{
-		if (_entries.Count > SaveConfig.MAX_AUDIT_LOG_ENTRIES)
+		if ( _entries.Count > SaveConfig.MAX_AUDIT_LOG_ENTRIES )
 		{
 			// Keep only the most recent entries
-			_entries = _entries.Skip(_entries.Count - SaveConfig.MAX_AUDIT_LOG_ENTRIES)
+			_entries = _entries.Skip( _entries.Count - SaveConfig.MAX_AUDIT_LOG_ENTRIES )
 				.ToList();
 
-			if (SaveConfig.DEBUG_SAVE_LOGGING)
-				Log.Info($"[SaveAuditLog] Rotated. Keeping last {SaveConfig.MAX_AUDIT_LOG_ENTRIES} entries");
+			if ( SaveConfig.DEBUG_SAVE_LOGGING )
+				Log.Info( $"[SaveAuditLog] Rotated. Keeping last {SaveConfig.MAX_AUDIT_LOG_ENTRIES} entries" );
 		}
 	}
 
@@ -144,16 +157,30 @@ public class SaveAuditLog
 	{
 		try
 		{
-			var fileName = GetAuditFileName();
-			// Simple serialization: Just store entries as JSON
-			FileSystem.Data.WriteJson(fileName, new { Entries = _entries });
+			// Validate FileSystem is available
+			if ( FileSystem.Data == null )
+			{
+				if ( SaveConfig.DEBUG_SAVE_LOGGING )
+					Log.Warning( $"[SaveAuditLog] FileSystem.Data not available, skipping save" );
+				return;
+			}
 
-			if (SaveConfig.DEBUG_SAVE_LOGGING)
-				Log.Info($"[SaveAuditLog] Saved {_entries.Count} audit entries");
+			var fileName = GetAuditFileName();
+			if ( string.IsNullOrEmpty( fileName ) )
+			{
+				Log.Warning( $"[SaveAuditLog] Invalid audit file name" );
+				return;
+			}
+
+			// Simple serialization: Just store entries as JSON
+			FileSystem.Data.WriteJson( fileName, new { Entries = _entries } );
+
+			if ( SaveConfig.DEBUG_SAVE_LOGGING )
+				Log.Info( $"[SaveAuditLog] Saved {_entries.Count} audit entries" );
 		}
-		catch (Exception ex)
+		catch ( Exception ex )
 		{
-			Log.Error($"[SaveAuditLog] Failed to save audit log: {ex.Message}");
+			Log.Error( $"[SaveAuditLog] Failed to save audit log: {ex.Message}\n{ex.StackTrace}" );
 		}
 	}
 
@@ -168,7 +195,7 @@ public class SaveAuditLog
 	public void Clear()
 	{
 		_entries.Clear();
-		Log.Warning($"[SaveAuditLog] Audit log cleared for {_playerId}");
+		Log.Warning( $"[SaveAuditLog] Audit log cleared for {_playerId}" );
 	}
 
 	/// <summary>

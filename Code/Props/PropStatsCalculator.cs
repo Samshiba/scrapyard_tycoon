@@ -17,8 +17,10 @@ public static class PropStatsCalculator
         var config = BalanceConfig.Instance;
         if ( config == null ) return 0;
 
-        float rawHP = config.BaseHP * MathF.Pow( config.HPMult, prop.Tier - 1 ) * prop.RarityMod;
-        return MathF.Round( rawHP );
+        float rarityHPMod = 1f + (prop.RarityMod - 1f) * 0.75f;
+
+        float rawHP = config.BaseHP * MathF.Pow( config.HPMult, prop.Tier - 1 ) * rarityHPMod;
+        return MathF.Round( rawHP, 2 );
     }
 
     /// <summary>
@@ -32,9 +34,14 @@ public static class PropStatsCalculator
         var config = BalanceConfig.Instance;
         if ( config == null ) return 0;
 
-        float jackpot = prop.RarityMod >= 3 ? config.JackpotBonus : 1.0f;
-        float rawValue = config.BaseValue * MathF.Pow( config.ValueMult, prop.Tier - 1 ) * (prop.RarityMod * jackpot);
-        return MathF.Round( rawValue );
+        float finalJackpotMultiplier = 1.0f;
+        if ( prop.IsJackpot )
+        {
+            finalJackpotMultiplier = GlobalUpgradesSystem.Instance.ApplyModifiers( "jackpot_bonus", config.JackpotBonus );
+        }
+
+        float rawValue = config.BaseValue * MathF.Pow( config.ValueMult, prop.Tier - 1 ) * prop.RarityMod * finalJackpotMultiplier;
+        return MathF.Round( rawValue, 2 );
     }
 
     /// <summary>
@@ -49,7 +56,7 @@ public static class PropStatsCalculator
         if ( config == null ) return 0;
 
         int desiredGibs = config.BaseGibs + ((prop.Tier - 1) * config.GibsPerTier);
-        return System.Math.Clamp( desiredGibs, 0, config.MaxGibs );
+        return Math.Clamp( desiredGibs, 0, config.MaxGibs );
     }
 
     /// <summary>
@@ -63,7 +70,7 @@ public static class PropStatsCalculator
         float totalValue = GetValue( prop );
         int gibCount = GetGibCount( prop );
 
-        return gibCount > 0 ? (float)System.Math.Round( totalValue / gibCount, 2 ) : totalValue;
+        return gibCount > 0 ? MathF.Round( totalValue / gibCount, 2 ) : totalValue;
     }
 
     /// <summary>
@@ -121,15 +128,5 @@ public static class PropStatsCalculator
             return sellerMachine.ValueMultiplier;
 
         return 1.0f;
-    }
-
-    /// <summary>
-    /// Get formatted display value for a prop (with multiplier applied if provided)
-    /// </summary>
-    public static string GetDisplayValue( PropDefinition prop, float moneyMultiplier = 1.0f )
-    {
-        float totalValue = GetTotalValueWithSubProps( prop );
-        float multipliedValue = ApplyMoneyMultiplier( totalValue, moneyMultiplier );
-        return NumberFormatter.FormatWithSuffix( multipliedValue, 1 );
     }
 }

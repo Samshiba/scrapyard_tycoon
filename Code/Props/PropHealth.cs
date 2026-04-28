@@ -43,7 +43,7 @@ public sealed class PropHealth : Component, Component.IDamageable
         }
         Log.Info( $"[PropHealth] Damage received: {damage.Damage} from tags: {string.Join( ", ", damage.Tags )}" );
         CurrentHealth -= damage.Damage;
-        FlashWhite();
+        FlashDamage();
         if ( CurrentHealth <= 0 ) OnBreak();
     }
 
@@ -56,15 +56,34 @@ public sealed class PropHealth : Component, Component.IDamageable
         GameStats.OnDamageDealt( steamId, weaponId, damage );
     }
 
-    public async void FlashWhite()
+    private Color GetFlashColor()
+    {
+        if ( Data.IsJackpot || Data.RarityMod >= 10 ) return (Color)Color.Parse( "#ffde23" );
+
+        if ( Data.RarityMod > 6 ) return (Color)Color.Parse( "#ff0000" );
+
+        if ( Data.RarityMod > 3 ) return (Color)Color.Parse( "#002fff" );
+
+        return (Color)Color.Parse( "#FFFFFF" );
+    }
+
+    public async void FlashDamage()
     {
         var renderer = GameObject.Components.Get<ModelRenderer>( FindMode.EverythingInSelfAndDescendants );
         if ( renderer == null ) return;
 
         var originalMat = renderer.MaterialOverride;
+        var originalTint = renderer.Tint;
+
         renderer.MaterialOverride = Material.Load( "materials/dev/primary_white.vmat" );
+        renderer.Tint = GetFlashColor();
+
         await Task.DelayRealtime( 50 );
+
+        if ( !renderer.IsValid() || !GameObject.IsValid() ) return;
+
         renderer.MaterialOverride = originalMat;
+        renderer.Tint = originalTint;
     }
 
     private void OnBreak()
@@ -125,6 +144,8 @@ public sealed class PropHealth : Component, Component.IDamageable
             return;
         }
 
+        Color gibColor = GetFlashColor();
+
         for ( int i = 0; i < FinalGibCount; i++ )
         {
             var randomDir = new Vector3(
@@ -133,8 +154,16 @@ public sealed class PropHealth : Component, Component.IDamageable
                 Game.Random.Float( 0f, 0.4f )
             ).Normal;
 
-            var spawnOffset = randomDir * Game.Random.Float( 5f, 15f ) + Vector3.Up * Game.Random.Float( 5f, 15f );
+            float explosionForce = Data.IsJackpot ? 3.0f : 1.0f;
+            var spawnOffset = randomDir * Game.Random.Float( 5f, 15f ) * explosionForce + Vector3.Up * Game.Random.Float( 5f, 15f ) * explosionForce;
+
             var gib = GibPrefab.Clone( WorldPosition + spawnOffset );
+
+            var renderer = gib.Components.Get<ModelRenderer>( FindMode.EverythingInSelfAndDescendants );
+            if ( renderer != null )
+            {
+                renderer.Tint = gibColor;
+            }
 
             var scrapItem = gib.Components.Get<ResourceGib>( FindMode.EverythingInSelfAndDescendants );
             if ( scrapItem == null ) continue;
@@ -144,6 +173,35 @@ public sealed class PropHealth : Component, Component.IDamageable
             scrapItem.Initialize( randomResourceType, ValuePerGib, randomDir );
         }
 
+        if ( Data.IsJackpot )
+        {
+            TriggerJackpotEffects();
+        }
+
         GameObject.Destroy();
+    }
+
+    private void TriggerJackpotEffects()
+    {
+        // 1. LE SON (KACHING !)
+        // Joue un son très distinctif, fort, et satisfaisant.
+        // Remplace "ui.coins" par le nom d'un son de ta bibliothèque S&box.
+        Sound.Play( "ui.coins", WorldPosition );
+        Sound.Play( "explosion.small", WorldPosition ); // Un petit boom pour le côté impact
+
+        // 2. LES PARTICULES (Feu d'artifice)
+        // Spawn un système de particules (des étincelles dorées ou des confettis)
+        // Assure-toi d'avoir un petit prefab de particules prêt dans tes assets.
+        /* var vfx = ParticlePrefab.Clone(WorldPosition);
+        vfx.DestroyAsync(2f); // Se détruit tout seul après 2 secondes
+        */
+
+        // 3. LE TEXTE FLOTTANT (La cerise sur le gâteau)
+        // Montre au joueur COMBIEN il vient de faire exploser d'un coup.
+        float displayValue = PropStatsCalculator.GetValue( Data );
+        Log.Info( $"[JACKPOT] {Data.PropID} destroyed for {displayValue} Scrap!" );
+
+        // Si tu as un système de Floating Text :
+        // FloatingText.Spawn(WorldPosition + Vector3.Up * 30f, $"JACKPOT! {displayValue}", Color.Parse("#FFD700"));
     }
 }

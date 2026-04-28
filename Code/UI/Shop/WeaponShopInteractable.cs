@@ -2,6 +2,21 @@ using Sandbox;
 
 public sealed class WeaponShopInteractable : Component, Component.IPressable
 {
+    protected override void OnStart()
+    {
+        base.OnStart();
+
+        foreach ( var child in GameObject.Children )
+        {
+            if ( child.Components.TryGet<Collider>( out _ ) )
+            {
+                var relay = child.Components.GetOrCreate<InteractableRelay>();
+
+                relay.TargetInteractable = this;
+            }
+        }
+    }
+
     public bool Press( IPressable.Event e )
     {
         if ( e.Source == null ) return false;
