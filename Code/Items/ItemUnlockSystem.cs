@@ -59,19 +59,21 @@ public sealed class ItemUnlockSystem : Component
         return UnlockedUtilities.Contains( utilityId );
     }
 
-    public void UnlockWeapon( string weaponId )
+    public void UnlockWeapon( string weaponId, string steamId )
     {
         if ( !Networking.IsHost ) return;
 
         if ( !UnlockedWeapons.Contains( weaponId ) )
         {
             UnlockedWeapons.Add( weaponId );
+            GameStats.OnWeaponUnlocked( steamId, weaponId );
+
             SaveChanges();
             Log.Info( $"[ItemUnlockSystem] Weapon unlocked: {weaponId}" );
         }
     }
 
-    public void UnlockUtility( string utilityId )
+    public void UnlockUtility( string utilityId, string steamId )
     {
         if ( !Networking.IsHost ) return;
 

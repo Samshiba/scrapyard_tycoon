@@ -1,8 +1,8 @@
 {
-  "Title": "ScrapYard Tcoon",
+  "Title": "ScrapYard Tycoon",
   "Type": "game",
-  "Org": "local",
-  "Ident": "scrapyard_tcoon",
+  "Org": "exponentia",
+  "Ident": "scrapyard_tycoon",
   "Schema": 1,
   "IncludeSourceFiles": false,
   "Resources": null,

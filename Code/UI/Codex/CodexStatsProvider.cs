@@ -6,206 +6,141 @@ using static Sandbox.Services.Stats;
 
 /// <summary>
 /// Provides clean access to player and factory statistics for the Codex UI.
-/// Handles all data retrieval and formatting in one place.
+/// All player stats come from Sbox (lifetime accumulated).
+/// Factory stats come from local session data.
 /// </summary>
 public static class CodexStatsProvider
 {
-    // --- LIFETIME STATS ---
+    // --- STAT TYPE ENUM ---
+    private enum StatType { Sum, Value, Max, Min, Avg }
 
-    public static double GetLifetimePlaytime()
+    // --- GENERIC SBOX STAT GETTER ---
+    /// <summary>
+    /// Generic getter for any Sbox player stat.
+    /// </summary>
+    private static double GetSboxStat( string statName, StatType type = StatType.Sum )
     {
-        PlayerStat playtimeStat = LocalPlayer.Get( "lifetime_playtime" );
-        return playtimeStat.Value;
-    }
-
-    public static double GetTotalScrapCollected()
-    {
-        PlayerStat playerStats = LocalPlayer.Get( "total_scrap_collected" );
-        return playerStats.Value;
-    }
-
-    public static double GetTotalDamageDealt()
-    {
-        PlayerStat damageStat = LocalPlayer.Get( "total_damage_dealt" );
-        return damageStat.Value;
-    }
-
-    public static double GetTotalPropsDestroyed()
-    {
-        PlayerStat propStat = LocalPlayer.Get( "total_props_destroyed" );
-        return propStat.Value;
-    }
-
-    public static double GetHighestPeakScrap()
-    {
-        PlayerStat peakScrapStat = LocalPlayer.Get( "peak_scrap" );
-        return peakScrapStat.Value;
-    }
-
-    public static double GetTotalAttacks()
-    {
-        PlayerStat attacksStat = LocalPlayer.Get( "total_attacks" );
-        return attacksStat.Value;
-    }
-
-    public static double GetWeaponsUnlockedCount()
-    {
-        if ( SaveManager.Instance?.CurrentFactory?.UnlockedWeapons == null )
+        try
+        {
+            var stat = LocalPlayer.Get( statName );
+            return type switch
+            {
+                StatType.Sum => stat.Sum,
+                StatType.Value => stat.Value,
+                StatType.Max => stat.Max,
+                StatType.Min => stat.Min,
+                StatType.Avg => stat.Avg,
+                _ => stat.Sum
+            };
+        }
+        catch
+        {
             return 0;
-        return SaveManager.Instance.CurrentFactory.UnlockedWeapons.Count;
+        }
     }
 
-    public static double GetUpgradesPurchased()
+    // --- FACTORY STAT HELPER ---
+    /// <summary>
+    /// Generic getter for factory session stats.
+    /// </summary>
+    private static T GetFactoryStat<T>( Func<FactoryStatsData, T> getter, T defaultValue = default )
     {
-        if ( SaveManager.Instance?.CurrentFactory?.GlobalUpgrades == null )
-            return 0;
-        return SaveManager.Instance.CurrentFactory.GlobalUpgrades.Values.Sum();
+        if ( SaveManager.Instance?.CurrentFactory?.Stats == null )
+            return defaultValue;
+        return getter( SaveManager.Instance.CurrentFactory.Stats );
     }
 
-    public static double GetPrestiges()
-    {
-        if ( SaveManager.Instance?.CurrentFactory == null )
-            return 0;
-        return SaveManager.Instance.CurrentFactory.PrestigeLevel;
-    }
+    // --- PLAYER LIFETIME STATS (FROM SBOX) ---
 
-    // --- FACTORY STATS (SESSION) ---
+    public static double GetLifetimePlaytime() => GetSboxStat( "total_playtime_seconds" );
+    public static double GetTotalScrapCollected() => GetSboxStat( "lifetime_scrap" );
+    public static double GetTotalDamageDealt() => GetSboxStat( "total_damage" );
+    public static double GetHighestDamageHit() => GetSboxStat( "highest_damage_hit", StatType.Max );
+    public static double GetTargetsDestroyed() => GetSboxStat( "targets_destroyed" );
+    public static double GetTotalAttacks() => GetSboxStat( "total_attacks" );
+    public static double GetTotalCriticalHits() => GetSboxStat( "total_critical_hits" );
+    public static double GetCriticalDamage() => GetSboxStat( "critical_damage" );
+    public static double GetHighestPeakScrap() => GetSboxStat( "largest_scrap_gain", StatType.Max );
+    public static double GetTimesPrestiged() => GetSboxStat( "times_prestiged" );
+    public static double GetPrestigePoints() => GetSboxStat( "prestige_points" );
+    public static double GetFactoryResets() => GetSboxStat( "factory_resets" );
+    public static double GetWeaponsUnlockedCount() => GetSboxStat( "weapons_unlocked" );
+    public static double GetUpgradesUnlockedCount() => GetSboxStat( "upgrades_unlocked" );
+    public static double GetTotalMoneySpent() => GetSboxStat( "total_money_spent" );
+    public static double GetLargestSinglePurchase() => GetSboxStat( "largest_single_purchase", StatType.Max );
+    public static double GetTotalGibsDropped() => GetSboxStat( "total_gibs_dropped" );
 
-    public static double GetFactoryTier()
+    // --- FACTORY STATS (SESSION ONLY) ---
+
+    public static int GetFactoryTier()
     {
         if ( SaveManager.Instance?.CurrentFactory == null )
             return 1;
         return SaveManager.Instance.CurrentFactory.Tier;
     }
 
+    public static double GetScrapGainedSession() => GetFactoryStat( s => s.ScrapGainedSession, 0 );
+    public static float GetSessionPlaytime() => GetFactoryStat( s => s.TimePlayed, 0f );
+    public static double GetMaxDamageHitSession() => GetFactoryStat( s => s.MaxDamageHit, 0 );
+    public static long GetPropsDestroyedSession() => GetFactoryStat( s => s.PropsDestroyed, 0L );
+    public static int GetGibsDroppedSession() => GetFactoryStat( s => s.GibsDroppedSession, 0 );
+
     public static double GetScrapPerSecond()
     {
-        // TODO: Implement scrap per second calculation based on seller machine
-        return 0;
-    }
-
-    public static double GetScrapGainedSession()
-    {
-        if ( SaveManager.Instance?.CurrentFactory?.Stats == null )
-            return 0;
-        return SaveManager.Instance.CurrentFactory.Stats.ScrapGainedSession;
-    }
-
-    public static float GetSessionPlaytime()
-    {
-        if ( SaveManager.Instance?.CurrentFactory?.Stats == null )
-            return 0f;
-        return SaveManager.Instance.CurrentFactory.Stats.TimePlayed;
-    }
-
-    public static double GetMaxDamageHit()
-    {
-        if ( SaveManager.Instance?.CurrentFactory?.Stats == null )
-            return 0;
-        return SaveManager.Instance.CurrentFactory.Stats.MaxDamageHit;
-    }
-
-    public static long GetPropsDestroyedSession()
-    {
-        if ( SaveManager.Instance?.CurrentFactory?.Stats == null )
-            return 0;
-        return SaveManager.Instance.CurrentFactory.Stats.PropsDestroyed;
+        return FactoryStats.Instance?.CurrentSPS ?? 0;
     }
 
     public static double GetPropsUnlockedCount()
     {
-        // Props are unlocked by tier - count how many tiers are accessible
         if ( SaveManager.Instance?.CurrentFactory == null )
             return 0;
-
         var tier = SaveManager.Instance.CurrentFactory.Tier;
         var allProps = ResourceLibrary.GetAll<PropDefinition>();
         return allProps.Count( p => p.Tier <= tier );
     }
 
-    public static double GetWeaponsUnlocked()
-    {
-        return GetWeaponsUnlockedCount();
-    }
-
-    // --- WEAPON VANITY STATS ---
+    // --- WEAPON VANITY STATS (FROM SBOX ONLY) ---
 
     public static int GetWeaponKills( string weaponId )
     {
-        var playerData = GetCurrentPlayerData();
-        if ( playerData?.Stats.WeaponVanity == null )
-            return 0;
-
-        if ( playerData.Stats.WeaponVanity.TryGetValue( weaponId, out var stat ) )
-            return stat.Count;
-
-        return 0;
+        return (int)GetSboxStat( $"targets_destroyed_with_{weaponId}" );
     }
 
     public static double GetWeaponDamageDealt( string weaponId )
     {
-        var playerData = GetCurrentPlayerData();
-        if ( playerData?.Stats.WeaponVanity == null )
-            return 0;
-
-        if ( playerData.Stats.WeaponVanity.TryGetValue( weaponId, out var stat ) )
-            return stat.Value;
-
-        return 0;
+        return GetSboxStat( $"damage_with_{weaponId}" );
     }
 
-    // --- PROP VANITY STATS ---
+    public static double GetWeaponHighestDamageHit( string weaponId )
+    {
+        return GetSboxStat( $"highest_damage_hit_with_{weaponId}", StatType.Value );
+    }
+
+    public static int GetWeaponCriticalHits( string weaponId )
+    {
+        return (int)GetSboxStat( $"crits_with_{weaponId}" );
+    }
+
+    public static int GetWeaponTargetsDestroyed( string weaponId )
+    {
+        return (int)GetSboxStat( $"targets_destroyed_with_{weaponId}" );
+    }
+
+    // --- PROP VANITY STATS (FROM SBOX ONLY) ---
 
     public static int GetPropDestroyedCount( string propId )
     {
-        var playerData = GetCurrentPlayerData();
-        if ( playerData?.Stats.PropVanity == null )
-            return 0;
-
-        if ( playerData.Stats.PropVanity.TryGetValue( propId, out var stat ) )
-            return stat.Count;
-
-        return 0;
+        return (int)GetSboxStat( $"targets_destroyed_{propId}" );
     }
 
-    public static double GetPropScrapGained( string propId )
+    public static double GetPropScrapDropped( string propId )
     {
-        var playerData = GetCurrentPlayerData();
-        if ( playerData?.Stats.PropVanity == null )
-            return 0;
-
-        if ( playerData.Stats.PropVanity.TryGetValue( propId, out var stat ) )
-            return stat.Value;
-
-        return 0;
+        return GetSboxStat( $"scrap_dropped_{propId}" );
     }
 
-    // --- HELPERS ---
-
-    /// <summary>
-    /// Gets the current player's session data from the save manager.
-    /// Returns null if player data is not available.
-    /// </summary>
-    private static PlayerSessionData GetCurrentPlayerData()
+    public static int GetPropGibsDropped( string propId )
     {
-        if ( SaveManager.Instance == null )
-            return null;
-
-        // If only one player, return their data (for offline/testing)
-        if ( SaveManager.Instance.ActivePlayers.Count == 1 )
-            return SaveManager.Instance.ActivePlayers.Values.First();
-
-        // Try to get from the local player's backpack
-        var backpack = PlayerBackpack.Local;
-        if ( backpack != null && backpack.Network.Owner != null )
-        {
-            var steamId = backpack.Network.Owner.SteamId.ToString();
-            if ( SaveManager.Instance.ActivePlayers.TryGetValue( steamId, out var playerData ) )
-                return playerData;
-        }
-
-        // Fallback: return first player if available
-        return SaveManager.Instance.ActivePlayers.Values.FirstOrDefault();
+        return (int)GetSboxStat( $"gibs_dropped_{propId}" );
     }
 
     /// <summary>

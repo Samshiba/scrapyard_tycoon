@@ -21,9 +21,13 @@ public sealed class PlayerFactoryActions : Component, Component.INetworkListener
         var weaponDef = ResourceLibrary.GetAll<WeaponDefinition>().FirstOrDefault( w => w.Id == weaponId );
         if ( weaponDef == null ) return;
 
+        string callerId = Rpc.Caller.SteamId.ToString();
+
         if ( FactoryStats.Instance != null && FactoryStats.Instance.SpendScrap( weaponDef.UnlockCost ) )
         {
-            ItemUnlockSystem.Instance?.UnlockWeapon( weaponId );
+            GameStats.OnMoneySpent( callerId, weaponDef.UnlockCost );
+
+            ItemUnlockSystem.Instance?.UnlockWeapon( weaponId, callerId );
 
             Log.Info( $"[PlayerFactoryActions] Weapon purchase successful: {weaponId} for {weaponDef.UnlockCost} scrap" );
         }
@@ -38,7 +42,9 @@ public sealed class PlayerFactoryActions : Component, Component.INetworkListener
     {
         if ( !Networking.IsHost ) return;
 
-        if ( GlobalUpgradesSystem.Instance != null && GlobalUpgradesSystem.Instance.TryPurchaseUpgrade( upgradeId ) )
+        string callerId = Rpc.Caller.SteamId.ToString();
+
+        if ( GlobalUpgradesSystem.Instance != null && GlobalUpgradesSystem.Instance.TryPurchaseUpgrade( upgradeId, callerId ) )
         {
             Log.Info( $"[PlayerFactoryActions] Global upgrade purchased: {upgradeId}" );
         }

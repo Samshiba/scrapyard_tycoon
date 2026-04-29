@@ -13,6 +13,7 @@ public class SaveThrottler : Component
 
 	private float _timeSinceLastSave = 0f;
 	private bool _forceImmediateSave = false;
+	private float _playtimeAccumulator = 0f;
 
 	// Dirty flags
 	private bool _isFactoryDirty = false;
@@ -36,6 +37,19 @@ public class SaveThrottler : Component
 			return;
 
 		_timeSinceLastSave += Time.Delta;
+		_playtimeAccumulator += Time.Delta;
+
+		if ( _playtimeAccumulator >= 5f )
+		{
+			GameStats.OnPlayTimeAccumulated( _playtimeAccumulator );
+
+			if ( SaveManager.Instance?.CurrentFactory != null )
+			{
+				SaveManager.Instance.CurrentFactory.Stats.TimePlayed += _playtimeAccumulator;
+			}
+
+			_playtimeAccumulator = 0f;
+		}
 
 		// Check if we should flush pending changes
 		if ( (_isFactoryDirty || _dirtyPlayers.Count > 0) &&

@@ -127,7 +127,7 @@ public sealed class GlobalUpgradesSystem : Component
         return SyncedUpgrades.TryGetValue( upgradeId, out var level ) ? level : 0;
     }
 
-    public bool TryPurchaseUpgrade( string upgradeId )
+    public bool TryPurchaseUpgrade( string upgradeId, string steamId )
     {
         // 1. Validate server-side dependencies
         if ( !Networking.IsHost ) return false;
@@ -149,7 +149,6 @@ public sealed class GlobalUpgradesSystem : Component
         if ( FactoryStats.Instance.SpendScrap( cost ) )
         {
             factoryUpgrades[upgradeId] = currentLevel + 1;
-
             SyncedUpgrades[upgradeId] = currentLevel + 1;
 
             // 4. Apply tier upgrade bonus
@@ -157,6 +156,9 @@ public sealed class GlobalUpgradesSystem : Component
             {
                 SaveManager.Instance.CurrentFactory.Tier++;
             }
+
+            GameStats.OnMoneySpent( steamId, cost );
+            GameStats.OnUpgradeUnlocked( steamId, upgradeId );
 
             RebuildCache();
 

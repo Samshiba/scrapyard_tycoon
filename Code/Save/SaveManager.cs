@@ -63,7 +63,7 @@ public sealed class SaveManager : Component, Component.INetworkListener
         if ( channel != null && channel.IsActive )
         {
             string playerSteamId = channel.SteamId.ToString();
-            
+
             if ( !ActivePlayers.ContainsKey( playerSteamId ) )
             {
                 Log.Info( $"[SaveManager] New player joined: {playerSteamId}. Creating default player data." );
@@ -77,11 +77,12 @@ public sealed class SaveManager : Component, Component.INetworkListener
                         EquippedWeapons = new[] { "bat", null, null, null },
                         ActiveWeaponIndex = 0,
                         CollectedItems = new()
-                    }
+                    },
+                    Stats = new PlayerStatsData()
                 };
 
                 ActivePlayers[playerSteamId] = newPlayerData;
-                
+
                 // Mark player as dirty so their initial data gets synced to backend
                 SaveEventBus.NotifyChange( SaveEventBus.SaveReason.DataMigration, "New player initialized with default bat weapon", playerSteamId );
 
@@ -109,17 +110,31 @@ public sealed class SaveManager : Component, Component.INetworkListener
             {
                 FactoryId = _currentFactoryId,
                 HostSteamId = Connection.Local.SteamId.ToString(),
-                SaveName = "New Factory"
+                SaveName = "New Factory",
+                WorldState = new WorldStateData(),
+                Stats = new FactoryStatsData()
             };
         }
         else
         {
             CurrentFactory = factory;
 
+            // Ensure Stats is initialized (defensive against deserialization issues)
+            if ( CurrentFactory.Stats == null )
+                CurrentFactory.Stats = new FactoryStatsData();
+            if ( CurrentFactory.WorldState == null )
+                CurrentFactory.WorldState = new WorldStateData();
+
             if ( players != null )
             {
                 foreach ( var p in players )
                 {
+                    // Ensure each player has initialized Stats
+                    if ( p.Stats == null )
+                        p.Stats = new PlayerStatsData();
+                    if ( p.Inventory == null )
+                        p.Inventory = new InventoryStateData();
+                    
                     ActivePlayers[p.PlayerSteamId] = p;
                 }
             }

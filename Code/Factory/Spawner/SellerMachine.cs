@@ -70,7 +70,8 @@ public sealed class SellerMachine : Component, Component.IPressable
 
         int itemsTransferred = 0;
         string playerSteamId = backpack.Network.Owner?.SteamId.ToString() ?? "unknown";
-        double scrapGained = 0;
+        double totalScrapValue = 0;
+        double largestItemValue = 0;
 
         while ( backpack.CollectedItems.Count > 0 && ProcessingQueue.Count < MaxQueueSize )
         {
@@ -78,15 +79,17 @@ public sealed class SellerMachine : Component, Component.IPressable
             backpack.CollectedItems.RemoveAt( backpack.CollectedItems.Count - 1 );
 
             ProcessingQueue.Enqueue( item );
-            scrapGained += item.Value;
+            double itemValue = item.Value * ValueMultiplier;
+            totalScrapValue += itemValue;
+            largestItemValue = Math.Max( largestItemValue, itemValue );
             itemsTransferred++;
         }
 
         if ( itemsTransferred > 0 )
         {
             backpack.SaveChanges();
-            GameStats.OnScrapGained( playerSteamId, scrapGained );
-            Log.Info( $"[SellerMachine] Items deposited: {itemsTransferred} items transferred to machine" );
+            GameStats.OnScrapGained( playerSteamId, totalScrapValue, largestItemValue );
+            Log.Info( $"[SellerMachine] Items deposited: {itemsTransferred} items transferred to machine (largest item: {largestItemValue})" );
             return true;
         }
 

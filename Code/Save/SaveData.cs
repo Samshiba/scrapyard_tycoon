@@ -69,24 +69,60 @@ public class FactoryStatsData
     [JsonPropertyName( "max_damage_hit" )] public double MaxDamageHit { get; set; }
     [JsonPropertyName( "props_destroyed" )] public long PropsDestroyed { get; set; }
     [JsonPropertyName( "scrap_gained_session" )] public double ScrapGainedSession { get; set; }
+    [JsonPropertyName( "gibs_dropped_session" )] public int GibsDroppedSession { get; set; }
 }
 
 public class PlayerStatsData
 {
+    // --- LIFETIME CORE STATS ---
     [JsonPropertyName( "lifetime_playtime" )] public float LifetimePlaytime { get; set; }
     [JsonPropertyName( "total_scrap_collected" )] public double TotalScrapCollected { get; set; }
-    [JsonPropertyName( "total_damage_dealt" )] public double TotalDamageDealt { get; set; }
-    [JsonPropertyName( "total_props_destroyed" )] public long TotalPropsDestroyed { get; set; }
-    [JsonPropertyName( "total_attacks" )] public int TotalAttacks { get; set; }
-    [JsonPropertyName( "highest_peak_scrap" )] public double HighestPeakScrap { get; set; }
+    [JsonPropertyName( "largest_scrap_gain" )] public double LargestScrapGain { get; set; }
 
-    // Dictionnaires pour la Vanity (ex: {"bat": {kills: 10, dmg: 500}})
-    [JsonPropertyName( "weapon_vanity" )] public Dictionary<string, VanityStat> WeaponVanity { get; set; } = new();
-    [JsonPropertyName( "prop_vanity" )] public Dictionary<string, VanityStat> PropVanity { get; set; } = new();
+    // --- COMBAT STATS ---
+    [JsonPropertyName( "total_damage_dealt" )] public double TotalDamageDealt { get; set; }
+    [JsonPropertyName( "highest_damage_hit" )] public double HighestDamageHit { get; set; }
+    [JsonPropertyName( "total_attacks" )] public int TotalAttacks { get; set; }
+    [JsonPropertyName( "total_critical_hits" )] public int TotalCriticalHits { get; set; }
+    [JsonPropertyName( "critical_damage" )] public double CriticalDamage { get; set; }
+
+    // --- TARGETS/PROPS ---
+    [JsonPropertyName( "total_targets_destroyed" )] public long TotalTargetsDestroyed { get; set; }
+    [JsonPropertyName( "total_props_destroyed" )] public long TotalPropsDestroyed { get; set; }
+
+    // --- PROGRESSION ---
+    [JsonPropertyName( "times_prestiged" )] public int TimesPrestiged { get; set; }
+    [JsonPropertyName( "prestige_points" )] public int PrestigePoints { get; set; }
+    [JsonPropertyName( "factory_resets" )] public int FactoryResets { get; set; }
+
+    // --- UNLOCKS & PURCHASES ---
+    [JsonPropertyName( "upgrades_unlocked" )] public int UpgradesUnlocked { get; set; }
+    [JsonPropertyName( "weapons_unlocked" )] public int WeaponsUnlocked { get; set; }
+    [JsonPropertyName( "total_money_spent" )] public double TotalMoneySpent { get; set; }
+    [JsonPropertyName( "largest_single_purchase" )] public double LargestSinglePurchase { get; set; }
+
+    // --- VANITY STATS (Per-weapon and Per-prop breakdown) ---
+    [JsonPropertyName( "weapon_vanity" )] public Dictionary<string, WeaponVanityStat> WeaponVanity { get; set; } = new();
+    [JsonPropertyName( "prop_vanity" )] public Dictionary<string, PropVanityStat> PropVanity { get; set; } = new();
 }
 
-public class VanityStat
+/// <summary>
+/// Per-weapon breakdown stats (targets destroyed, damage dealt, etc).
+/// </summary>
+public class WeaponVanityStat
 {
-    [JsonPropertyName( "kills_or_destroys" )] public int Count { get; set; }
-    [JsonPropertyName( "value" )] public double Value { get; set; } // Dégâts pour les armes, Scrap pour les props
+    [JsonPropertyName( "targets_destroyed" )] public int TargetsDestroyed { get; set; }
+    [JsonPropertyName( "total_damage" )] public double TotalDamage { get; set; }
+    [JsonPropertyName( "max_damage_hit" )] public double MaxDamageHit { get; set; }
+    [JsonPropertyName( "critical_hits" )] public int CriticalHits { get; set; }
+}
+
+/// <summary>
+/// Per-prop breakdown stats (times destroyed, scrap gained, etc).
+/// </summary>
+public class PropVanityStat
+{
+    [JsonPropertyName( "times_destroyed" )] public int TimesDestroyed { get; set; }
+    [JsonPropertyName( "total_scrap_dropped" )] public double TotalScrapDropped { get; set; }
+    [JsonPropertyName( "number_of_gibs_dropped" )] public int NumberOfGibsDropped { get; set; }
 }

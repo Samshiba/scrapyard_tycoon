@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Sandbox;
 
 public sealed class FactoryStats : Component, Component.INetworkListener
@@ -6,7 +8,15 @@ public sealed class FactoryStats : Component, Component.INetworkListener
 
     [Sync][Property] public double TotalScrap { get; private set; } = 0;
 
+    [Sync][Property] public double CurrentSPS { get; private set; } = 0;
+
     private bool _isLoaded = false;
+
+    // --- Variables pour le calcul du SPS ---
+    private Queue<double> _scrapHistory = new();
+    private TimeSince _timeSinceLastTick = 0;
+    private double _scrapSinceLastTick = 0;
+    private const int SPS_WINDOW_SECONDS = 10;
 
     protected override void OnAwake()
     {
@@ -15,10 +25,28 @@ public sealed class FactoryStats : Component, Component.INetworkListener
 
     protected override void OnUpdate()
     {
-        if ( Networking.IsHost && !_isLoaded && SaveManager.Instance?.IsFactoryReady == true )
+        if ( Networking.IsHost )
         {
-            TotalScrap = SaveManager.Instance.CurrentFactory.TotalScrap;
-            _isLoaded = true;
+            if ( !_isLoaded && SaveManager.Instance?.IsFactoryReady == true )
+            {
+                TotalScrap = SaveManager.Instance.CurrentFactory.TotalScrap;
+                _isLoaded = true;
+            }
+
+            if ( _isLoaded && _timeSinceLastTick >= 1f )
+            {
+                _scrapHistory.Enqueue( _scrapSinceLastTick );
+
+                if ( _scrapHistory.Count > SPS_WINDOW_SECONDS )
+                {
+                    _scrapHistory.Dequeue();
+                }
+
+                CurrentSPS = _scrapHistory.Average();
+
+                _scrapSinceLastTick = 0;
+                _timeSinceLastTick = 0;
+            }
         }
     }
 
@@ -27,6 +55,7 @@ public sealed class FactoryStats : Component, Component.INetworkListener
         if ( !Networking.IsHost ) return;
 
         TotalScrap += amount;
+        _scrapSinceLastTick += amount;
 
         SaveManager.Instance.CurrentFactory.TotalScrap = TotalScrap;
 

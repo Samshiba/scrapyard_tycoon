@@ -52,8 +52,8 @@ public sealed class PropHealth : Component, Component.IDamageable
         _lastAttackerSteamId = steamId;
         _lastWeaponId = weaponId;
 
-        // Call stats immediately for damage dealt event
-        GameStats.OnDamageDealt( steamId, weaponId, damage );
+        // Call stats immediately for damage dealt event, passing isCrit info
+        GameStats.OnDamageDealt( steamId, weaponId, damage, isCrit );
     }
 
     private Color GetFlashColor()
@@ -88,10 +88,7 @@ public sealed class PropHealth : Component, Component.IDamageable
 
     private void OnBreak()
     {
-        // Call stats for prop destroyed
-        GameStats.OnPropDestroyed( _lastAttackerSteamId, Data.PropID, _lastWeaponId, TotalValue );
-
-        // 1. Check if there are SubProps to spawn instead of gibs
+        // Check if there are SubProps to spawn instead of gibs
         if ( Data.SubProps != null && Data.SubProps.Count > 0 )
         {
             foreach ( var drop in Data.SubProps )
@@ -104,11 +101,13 @@ public sealed class PropHealth : Component, Component.IDamageable
                 }
             }
         }
-        // 2. Else, break into gibs
+        // Else, break into gibs
         else
         {
             BreakIntoGibs();
         }
+
+        GameStats.OnPropDestroyed( _lastAttackerSteamId, Data.PropID, _lastWeaponId, TotalValue, FinalGibCount );
 
         GameObject.Destroy();
     }
