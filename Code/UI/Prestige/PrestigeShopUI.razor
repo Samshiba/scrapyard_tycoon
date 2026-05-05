@@ -10,10 +10,10 @@
 <root>
 @if ( IsOpen )
 {
-    <div class="prestige-bg">
-        <div class="prestige-window">
+    <div class="prst-bg">
+        <div class="prst-window">
             
-            <!-- HEADER : Minimaliste, laisse la place au visuel -->
+            <!-- HEADER (Identique au Codex) -->
             <div class="prst-header">
                 <span class="prst-title">#ui.prestige.title</span>
                 <div class="prst-close" onclick=@CloseMenu>#ui.prestige.button.close</div>
@@ -21,49 +21,47 @@
 
             <div class="prst-body">
                 <!-- ========================================== -->
-                <!-- COLONNE GAUCHE : LE TERMINAL DE SINGULARITÉ-->
+                <!-- COLONNE GAUCHE (Terminal)                  -->
                 <!-- ========================================== -->
-                <div class="col-ascension">
+                <div class="col-terminal" candragscroll="false">
                     
-                    <!-- 1. LA BANQUE & LE DILEMME (Bonus Passifs) -->
                     <div class="terminal-block core-power">
                         <div class="block-title">
-                            <i>bolt</i>
                             <span>#ui.prestige.widget.core_power</span>
                         </div>
+                        
+                        <!-- Les montants (le CSS va corriger l'alignement) -->
                         <div class="core-amount">
                             <span class="val">@NumberFormatter.FormatWithSuffix(GetAvailablePrestigePoints())</span>
-                            <span class="cur">#common.currency.prestige</span>
+                            <span class="cur">PR</span>
                         </div>
                         
-                        <div class="passive-list">
-                            <div class="list-header">#ui.prestige.widget.passive_effects</div>
-                            <!-- ICI TU PEUX RENTRER TES RATIOS MANUELLEMENT -->
+                        <!-- NOUVEAU PANNEAU DE STATS HARMONISÉ -->
+                        <div class="inspect-stats-box">
+                            <div class="section-header">#ui.prestige.widget.passive_effects</div>
                             @{
                                 int pts = GetAvailablePrestigePoints();
-                                float dmgBonus = pts * 1.5f;   // Ex: 1 point = 1.5% Dégâts
-                                float scrapBonus = pts * 0.5f; // Ex: 1 point = 0.5% Scrap
-                                float atkSpeed = pts * 0.2f;   // Ex: 1 point = 0.2% Attack Speed
+                                float dmgBonus = pts * 1.5f;
+                                float scrapBonus = pts * 0.5f;
+                                float atkSpeed = pts * 0.2f;
                             }
-                            <div class="passive-row">
-                                <span class="lbl">#ui.prestige.stat.damage</span>
-                                <span class="val text-critical">1000</span>
+                            <div class="stat-row">
+                                <span class="stat-label">#ui.prestige.stat.damage</span>
+                                <span class="stat-value text-critical">+@(Math.Round(dmgBonus, 1))%</span>
                             </div>
-                            <div class="passive-row">
-                                <span class="lbl">#ui.prestige.stat.scrap</span>
-                                <span class="val text-gold">+@(Math.Round(scrapBonus, 1))%</span>
+                            <div class="stat-row">
+                                <span class="stat-label">#ui.prestige.stat.scrap</span>
+                                <span class="stat-value text-gold">+@(Math.Round(scrapBonus, 1))%</span>
                             </div>
-                            <div class="passive-row">
-                                <span class="lbl">#ui.prestige.stat.attackspeed</span>
-                                <span class="val text-cyan">+@(Math.Round(atkSpeed, 1))%</span>
+                            <div class="stat-row">
+                                <span class="stat-label">#ui.prestige.stat.attackspeed</span>
+                                <span class="stat-value text-cyan">+@(Math.Round(atkSpeed, 1))%</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 2. LA JAUGE DE DOPAMINE (Projection) -->
                     <div class="terminal-block projection">
                         <div class="block-title">
-                            <i>update</i>
                             <span>#ui.prestige.widget.projection</span>
                         </div>
                         <div class="projected-gain">
@@ -79,19 +77,16 @@
                             </div>
                             <div class="dopa-bar-track">
                                 <div class="dopa-bar-fill" style="width: @GetDopamineFillPct()%;"></div>
-                                <!-- Le pourcentage textuel par dessus la barre -->
                                 <div class="dopa-pct-text">@(Math.Round(GetDopamineFillPct(), 1))%</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 3. ACTIONS CRITIQUES (Wipe & Respec) -->
                     <div class="action-section">
                         @if (Networking.IsHost)
                         {
-                            <!-- Bouton Respec avec calcul de coût -->
                             int spentPoints = GetSpentPrestigePoints();
-                            int respecCost = Math.Max(1, (int)(spentPoints * 0.10f)); // Ex: 10% de taxe, minimum 1
+                            int respecCost = Math.Max(1, (int)(spentPoints * 0.10f));
                             bool canRespec = spentPoints > 0;
                             
                             <div class="btn-respec @(canRespec ? "" : "locked")" onclick=@(canRespec ? OnRespecClicked : null)>
@@ -102,9 +97,7 @@
                                 <i>settings_backup_restore</i>
                             </div>
 
-                            <!-- Gros Bouton Ascension -->
                             <div class="btn-ascension" onclick=@OnPrestigeClicked>
-                                <div class="stripes"></div>
                                 <div class="content">
                                     <span class="btn-title">#ui.prestige.button.reset</span>
                                     <span class="btn-sub">#ui.prestige.button.warning</span>
@@ -123,7 +116,7 @@
                 </div>
 
                 <!-- ========================================== -->
-                <!-- COLONNE DROITE : LE GRAPHE (Constellation) -->
+                <!-- COLONNE DROITE (Le Graphe)                 -->
                 <!-- ========================================== -->
                 <div class="col-graph">
                     <zoomgraphpanel @ref="GraphPanel" class="prst-graph"
@@ -136,12 +129,10 @@
                         <div style="position: absolute; left: 50%; top: 50%; width: 0; height: 0; overflow: visible;">
                             <div class="prst-canvas" style="position: absolute; width: 100%; height: 100%; left: 0; top: 0;">
                             
-                            <!-- Noeuds en Constellation -->
                             @foreach ( var node in VisibleNodes() )
                             {
                                 bool isOwned   = IsOwned( node.Id );
                                 bool canAfford = GetAvailablePrestigePoints() >= node.BaseCost;
-
                                 string capturedId = node.Id;
                                 string cls = "prst-node";
 
@@ -160,13 +151,10 @@
                                     onclick=@( () => { HoveredId = capturedId; OnNodeClick( capturedId ); } )>
                                     
                                     <div class="node-icon" style="font-size: @(FS_DISPLAY_ICON * Zoom)px;">@node.Icon</div>
-                                    <!-- Effet de glow stellaire -->
-                                    <div class="node-glow"></div>
                                 </div>
                             }
                             </div>
 
-                            <!-- Tooltip -->
                             @if ( HoveredId != null && UpgradeManager.Instance.Database.TryGetValue( HoveredId, out var hNode ) )
                             {
                                 bool isOwned = IsOwned( hNode.Id );
@@ -189,9 +177,8 @@
                                         else
                                         {
                                             <div class="tt-price">
-                                                <span class="lbl">#ui.prestige.tooltip.cost</span>
                                                 <span class="val">@hNode.BaseCost</span>
-                                                <span class="cur">PR</span>
+                                                <span class="val">PR</span>
                                             </div>
                                         }
                                     </div>
@@ -268,11 +255,11 @@
     }
 
     // --- Graph Controls ---
-    void StartDrag() { if (HoveringGraph) { IsDragging = true; LastMousePos = Mouse.Position; DragDistance = 0f; } }
+    void StartDrag() { IsDragging = true; LastMousePos = Mouse.Position; DragDistance = 0f; }
     void EndDrag() { IsDragging = false; }
     public void OnScroll( float delta )
     {
-        if ( !IsOpen || delta == 0f || GraphPanel == null || !HoveringGraph ) return;
+        if ( !IsOpen || delta == 0f || GraphPanel == null ) return;
         float zoomDelta = -delta * 0.1f;
         float oldZoom = Zoom;
         Zoom = Math.Clamp( Zoom + zoomDelta, 0.3f, 2.0f );
@@ -297,8 +284,7 @@
 
         if ( GraphPanel != null && GraphPanel.OnZoomScroll == null ) GraphPanel.OnZoomScroll = OnScroll;
         if ( !IsOpen ) return;
-        
-        if ( IsDragging && HoveringGraph )
+        if ( IsDragging )
         {
             var delta = (Mouse.Position - LastMousePos) * GraphPanel.ScaleFromScreen;
             if ( delta.LengthSquared > 0 )
@@ -317,7 +303,7 @@
     IEnumerable<UpgradeDefinition> VisibleNodes()
     {
         if ( UpgradeManager.Instance?.Database == null ) yield break;
-        foreach ( var node in UpgradeManager.Instance.Database.Values )
+        foreach ( UpgradeDefinition node in UpgradeManager.Instance.Database.Values )
             if ( node.Type == UpgradeType.Prestige ) yield return node;
     }
     
@@ -328,12 +314,12 @@
     int GetSpentPrestigePoints()
     {
         int spent = 0;
-        var factory = SaveManager.Get( Scene )?.CurrentFactory;
+        FactoryWorldData factory = SaveManager.Get( Scene )?.CurrentFactory;
         if (factory == null || UpgradeManager.Instance?.Database == null) return 0;
 
         foreach ( var kvp in factory.GlobalUpgrades )
         {
-            if ( UpgradeManager.Instance.Database.TryGetValue( kvp.Key, out var def ) && def.Type == UpgradeType.Prestige )
+            if ( UpgradeManager.Instance.Database.TryGetValue( kvp.Key, out UpgradeDefinition def ) && def.Type == UpgradeType.Prestige )
             {
                 spent += (int)def.BaseCost * kvp.Value;
             }

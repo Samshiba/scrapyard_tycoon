@@ -1,60 +1,59 @@
-// ============================================================================
-// Ascension Terminal Styles (High-Tech / Mystic Vibe)
-// ============================================================================
-@import '../_design-system.scss';
-@import '../_mixins.scss';
-@import '../_animations.scss';
+@import "../_design-system.scss";
+@import "../_mixins.scss";
+@import "../_animations.scss";
 
-.prestige-bg {
+// ============================================================================
+// STRUCTURE PRINCIPALE (Identique au Codex)
+// ============================================================================
+.prst-bg {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: rgba(5, 5, 8, 0.9);
-    backdrop-filter: blur(12px);
+    background-color: $bg-modal; // Gris flouté standard
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
     pointer-events: all;
 }
 
-.prestige-window {
-    background-image: radial-gradient(rgba(168, 85, 247, 0.05), #0f1419);
-    border: 1px solid rgba(168, 85, 247, 0.3);
-    box-shadow: 0 0 100px rgba(168, 85, 247, 0.15);
+.prst-window {
+    background-color: $bg-primary; // Gris foncé industriel standard
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
 }
 
-// ============================================================================
-// HEADER MINIMALISTE
-// ============================================================================
 .prst-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: $spacing-xl $spacing-3xl;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    background-image: linear-gradient(90deg, rgba(168, 85, 247, 0.1), transparent);
+    padding: 0 $spacing-2xl;
+    background-color: $bg-secondary;
+    border-bottom: 1px solid $border-standard;
+    min-height: 80px;
     flex-shrink: 0;
 
     .prst-title {
-        font-size: $fs-h1;
-        color: $text-primary;
-        font-weight: 900;
-        letter-spacing: 6px;
-        text-transform: uppercase;
         font-family: $font-heading;
-        text-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+        font-size: $fs-h2;
+        color: $text-primary;
+        font-weight: $fw-h2;
+        letter-spacing: 4px;
+        text-transform: uppercase;
     }
 
     .prst-close {
-        color: $text-secondary;
+        color: $text-tertiary;
         cursor: pointer;
-        font-size: $fs-icon-lg;
-        transition: color 150ms ease-out;
-        &:hover { color: $status-critical; }
+        font-size: $fs-icon-md;
+        font-weight: 700;
+        transition: color 100ms ease-out;
+
+        &:hover {
+            color: $status-critical;
+        }
     }
 }
 
@@ -62,32 +61,35 @@
     display: flex;
     flex-direction: row;
     flex: 1;
-    overflow: hidden;
+    overflow: visible;
 }
 
 // ============================================================================
-// COLONNE GAUCHE (Terminal de Singularité)
+// COLONNE GAUCHE (Terminal)
 // ============================================================================
-.col-ascension {
-    width: 28%;
-    min-width: 360px;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+.col-terminal {
+    width: 32%;
+    min-width: 400px;
+    background-color: $bg-secondary;
+    border-right: 1px solid $border-standard;
     display: flex;
     flex-direction: column;
     padding: $spacing-2xl;
     gap: $spacing-2xl;
     overflow-y: scroll;
-    box-shadow: -10px 0 20px rgba(0, 0, 0, 0.5);
+    overflow-x: hidden;
+    overflow: visible;
 
     .terminal-block {
-        background-color: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background-color: $bg-primary;
+        border: 1px solid $border-standard;
         border-radius: $radius-md;
         padding: $spacing-xl;
         display: flex;
         flex-direction: column;
         gap: $spacing-md;
+        flex-shrink: 0;
+        min-width: 0;
 
         .block-title {
             display: flex;
@@ -97,74 +99,107 @@
             font-size: $fs-badge;
             text-transform: uppercase;
             letter-spacing: 2px;
-            font-family: $font-heading;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid $border-standard;
             padding-bottom: $spacing-sm;
+            font-family: $font-heading;
 
-            i { font-size: $fs-icon-sm; color: $tag-magical; }
+            i {
+                font-size: $fs-icon-sm;
+                color: $tag-magical;
+                font-family: unset;
+            }
         }
     }
 
-    .core-power {
-        border-top: 3px solid $tag-magical;
-        box-shadow: 0 10px 30px rgba(168, 85, 247, 0.05);
+    // Dans .col-terminal, remplace la partie .core-power et .projection par ceci :
 
-        .core-amount {
-            display: flex;
-            align-items: baseline;
-            gap: $spacing-sm;
+    // --- ALIGNEMENT DES MONTANTS (Montant + Devise) ---
+    .core-amount, .projected-gain {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        margin-bottom: $spacing-md;
+        font-family: $font-mono;
+        white-space: nowrap;
+        flex-shrink: 0;
+        overflow: visible;
+
+        .sign {
+            font-size: $fs-h2;
+            color: $status-success;
+            font-weight: 900;
+        }
+        .val {
+            font-size: $fs-stat-numbers;
+            font-weight: 900;
+            color: $tag-magical;
+            font-family: $font-mono;
+        }
+        .cur {
+            font-size: $fs-ui-label;
+            color: $text-secondary;
+            font-weight: 800;
+            font-family: $font-mono;
+            letter-spacing: 1px;
+        }
+    }
+
+    // --- PANNEAU DE STATS (Style WeaponShop) ---
+    .inspect-stats-box {
+        background: $bg-secondary;
+        border: 1px solid $border-standard;
+        border-radius: $radius-md;
+        padding: $spacing-lg;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-md;
+        flex-shrink: 0;
+        border-left: 4px solid $tag-magical;
+
+        .section-header {
+            color: $text-primary;
+            font-size: $fs-body-lg;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-bottom: $spacing-sm;
-            
-            .val { font-size: 48px; font-weight: 900; color: $tag-magical; font-family: $font-mono; text-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
-            .cur { font-size: $fs-h3; color: $text-secondary; font-weight: 700; font-family: $font-mono; }
+            font-family: $font-heading;
         }
 
-        .passive-list {
+        .stat-row {
             display: flex;
-            flex-direction: column;
-            gap: $spacing-sm;
-            background-color: rgba(0, 0, 0, 0.4);
-            padding: $spacing-md;
-            border-radius: $radius-sm;
-            border-left: 2px solid $blue-slate;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: $spacing-md;
+            flex-shrink: 0;
+            line-height: 20px;
+            padding: $spacing-sm 0;
+            font-family: $font-body;
+            border-bottom: 1px solid rgba($border-standard, 0.3);
 
-            .list-header {
-                font-size: $fs-body-sm;
-                color: $text-muted;
-                text-transform: uppercase;
-                margin-bottom: $spacing-xs;
-                font-family: $font-body;
+            &:last-child {
+                border-bottom: none;
             }
 
-            .passive-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05); // Pas de dashed
-                padding-bottom: 4px;
-                
-                &:last-child { border-bottom: none; padding-bottom: 0; }
+            .stat-label {
+                color: $text-secondary;
+                font-size: $fs-body;
+                font-weight: 600;
+                flex: 1;
+            }
 
-                .lbl { color: $text-secondary; font-size: $fs-body; font-family: $font-body; }
-                .val { font-weight: 800; font-family: $font-mono; font-size: $fs-body-lg; }
+            .stat-value {
+                color: $text-primary;
+                font-size: $fs-body-lg;
+                font-weight: 700;
+                font-family: $font-mono;
+                white-space: nowrap;
             }
         }
     }
 
     .projection {
-        .projected-gain {
-            display: flex;
-            align-items: baseline;
-            gap: 4px;
-            color: $text-primary;
-            font-family: $font-mono;
-            font-weight: 900;
-
-            .sign { font-size: $fs-h2; color: $status-success; }
-            .val { font-size: 42px; text-shadow: 0 0 15px rgba(255, 255, 255, 0.3); }
-            .cur { font-size: $fs-body-lg; color: $text-secondary; }
-        }
-
         .dopa-container {
             display: flex;
             flex-direction: column;
@@ -179,18 +214,16 @@
             }
 
             .dopa-bar-track {
-                position: relative; 
+                position: relative;
                 height: 24px;
-                background-color: #000;
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                background-color: $bg-primary;
+                border: 1px solid $border-standard;
                 border-radius: $radius-sm;
                 overflow: hidden;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
 
                 .dopa-bar-fill {
                     height: 100%;
-                    background-image: linear-gradient(90deg, #3b0764, $tag-magical);
-                    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+                    background-color: $tag-magical;
                     transition: width 300ms ease-out;
                 }
 
@@ -224,7 +257,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: rgba(217, 119, 6, 0.05); // $orange-copper RGB
+            background-color: rgba(217, 119, 6, 0.05);
             border: 1px solid rgba(217, 119, 6, 0.3);
             padding: $spacing-md $spacing-lg;
             border-radius: $radius-md;
@@ -234,37 +267,59 @@
             .respec-info {
                 display: flex;
                 flex-direction: column;
-                
-                .title { color: $text-secondary; font-weight: 700; font-family: $font-body; font-size: $fs-body; }
-                .cost { color: $orange-copper; font-weight: 800; font-family: $font-mono; font-size: $fs-body-sm; margin-top: 2px; }
+
+                .title {
+                    color: $text-secondary;
+                    font-weight: 700;
+                    font-family: $font-body;
+                    font-size: $fs-body;
+                }
+                .cost {
+                    color: $orange-copper;
+                    font-weight: 800;
+                    font-family: $font-mono;
+                    font-size: $fs-body-sm;
+                    margin-top: 2px;
+                }
             }
 
-            i { color: $orange-copper; font-size: $fs-icon-md; transition: transform 200ms ease-out; }
+            i {
+                color: $orange-copper;
+                font-size: $fs-icon-md;
+                transition: transform 200ms ease-out;
+            }
 
             &:hover {
                 background-color: rgba(217, 119, 6, 0.15);
                 border-color: $orange-copper;
-                i { transform: rotate(-90deg); }
+                i {
+                    transform: rotate(-90deg);
+                }
             }
 
             &.locked {
                 opacity: 0.5;
                 cursor: not-allowed;
                 filter: grayscale(100%);
-                &:hover { background-color: rgba(217, 119, 6, 0.05); border-color: rgba(217, 119, 6, 0.3); i { transform: none; } }
+                &:hover {
+                    background-color: rgba(217, 119, 6, 0.05);
+                    border-color: rgba(217, 119, 6, 0.3);
+                    i {
+                        transform: none;
+                    }
+                }
             }
         }
 
         .btn-ascension {
             position: relative;
-            background-color: rgba(239, 68, 68, 0.1); // $status-critical RGB
+            background-color: rgba(239, 68, 68, 0.1);
             border: 2px solid $status-critical;
             border-radius: $radius-md;
             padding: $spacing-xl;
             cursor: pointer;
             overflow: hidden;
             transition: all 150ms ease-out;
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
 
             .content {
                 position: relative;
@@ -281,11 +336,10 @@
                     font-family: $font-heading;
                     letter-spacing: 4px;
                     text-transform: uppercase;
-                    text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
                 }
 
                 .btn-sub {
-                    color: rgba(255, 255, 255, 0.6);
+                    color: $text-secondary;
                     font-size: $fs-body-sm;
                     font-family: $font-body;
                     margin-top: $spacing-sm;
@@ -295,40 +349,57 @@
             &:hover {
                 background-color: $status-critical;
                 transform: scale(1.02);
-                box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4);
-                
-                .btn-title { color: $bg-primary; text-shadow: none; }
-                .btn-sub { color: rgba(0, 0, 0, 0.8); }
+
+                .btn-title {
+                    color: $bg-primary;
+                }
+                .btn-sub {
+                    color: rgba(0, 0, 0, 0.8);
+                }
             }
 
             &.locked {
                 border-color: $border-standard;
                 background-color: $bg-secondary;
                 cursor: not-allowed;
-                box-shadow: none;
-                .btn-title { color: $text-muted; font-size: $fs-h3; letter-spacing: 1px; }
-                &:hover { transform: none; background-color: $bg-secondary; }
+                .btn-title {
+                    color: $text-muted;
+                    font-size: $fs-h3;
+                    letter-spacing: 1px;
+                }
+                &:hover {
+                    transform: none;
+                    background-color: $bg-secondary;
+                }
             }
         }
     }
 }
 
 // ============================================================================
-// COLONNE DROITE (Le Graphe Constellation)
+// COLONNE DROITE (Graphe)
 // ============================================================================
 .col-graph {
     flex: 1;
+    background-color: $bg-primary; // Harmonisé avec le reste du jeu
     position: relative;
     overflow: hidden;
-    
-    .prst-graph {
-        width: 100%;
-        height: 100%;
-        background-color: transparent; 
-        background-image: radial-gradient(rgba(255, 255, 255, 0.02), transparent);
-        background-size: 40px 40px;
-        cursor: grab;
-        &:active { cursor: grabbing; }
+}
+
+.prst-graph {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1%, transparent 1%),
+        linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 1%,
+        transparent 1%
+    ); // Même grille que le skill tree
+    cursor: grab;
+    &:active {
+        cursor: grabbing;
     }
 }
 
@@ -338,7 +409,7 @@
 }
 
 // ============================================================================
-// NOEUDS STELLAIRES
+// NOEUDS DU GRAPHE
 // ============================================================================
 .prst-node {
     position: absolute;
@@ -347,123 +418,122 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 200ms ease-out; 
+    transition: all 200ms ease-out;
     z-index: 2;
+    border: 2px solid transparent;
 
     .node-icon {
         pointer-events: none;
-        color: white;
         z-index: 2;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    }
-
-    .node-glow {
-        position: absolute;
-        top: -10px; left: -10px; right: -10px; bottom: -10px;
-        border-radius: 50%;
-        z-index: 1;
-        opacity: 0;
-        transition: opacity 200ms ease-out;
-        pointer-events: none;
     }
 
     &.node-expensive {
-        background-image: radial-gradient(#2d333f, #1a1f28);
-        border: 2px solid rgba(255, 255, 255, 0.1);
+        background-color: $bg-secondary;
+        border-color: $border-standard;
+        color: $blue-slate;
         opacity: 0.6;
-        .node-icon { color: rgba(255, 255, 255, 0.3); }
     }
 
     &.node-buyable {
-        background-image: radial-gradient(#4c1d95, #2e1065);
-        border: 2px solid $tag-magical;
-        box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
-        
+        background-color: #3b0764; // Purple base
+        border-color: $tag-magical;
+        color: white;
+
         &:hover {
             transform: scale(1.15);
-            box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
-            .node-glow {
-                opacity: 1;
-                background-image: radial-gradient(rgba(168, 85, 247, 0.4), transparent);
-            }
+            background-color: lighten(#3b0764, 10%);
         }
     }
 
     &.node-owned {
-        background-image: radial-gradient(#facc15, #ca8a04);
-        border: 2px solid white;
-        box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
-        .node-icon { color: #422006; text-shadow: none; }
+        background-color: #431407; // Gold/Brown base
+        border-color: $currency-gibs;
+        color: $currency-gibs;
     }
 }
 
 // ============================================================================
-// TOOLTIP HIGH-TECH
+// TOOLTIP (Harmonisé avec le SkillTree)
 // ============================================================================
 .prst-tooltip {
     position: absolute;
     display: flex;
     flex-direction: column;
-    background-color: rgba(10, 12, 16, 0.95);
-    border: 1px solid rgba(168, 85, 247, 0.4);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(168, 85, 247, 0.1);
+    background-color: $bg-primary;
+    border: 1px solid $border-standard;
+    border-left: 5px solid $tag-magical;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9);
     border-radius: $radius-md;
-    min-width: 300px;
-    max-width: 380px;
+    padding: $spacing-xl;
+    min-width: 320px;
+    max-width: 450px;
     pointer-events: none;
     z-index: 100;
-    backdrop-filter: blur(4px);
 
     .tt-header {
         display: flex;
         align-items: center;
         gap: $spacing-md;
-        padding: $spacing-lg;
-        background-image: linear-gradient(180deg, rgba(168, 85, 247, 0.1), transparent);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: $spacing-md;
 
-        .tt-icon { font-size: $fs-h2; }
+        .tt-icon {
+            font-size: $fs-h2;
+            color: $tag-magical;
+        }
         .tt-name {
-            color: white;
-            font-size: $fs-body-lg;
-            font-weight: 900;
+            color: $text-primary;
+            font-size: $fs-h3;
+            font-weight: $fw-h2;
             text-transform: uppercase;
             font-family: $font-heading;
-            letter-spacing: 1px;
         }
     }
 
     .tt-desc {
-        padding: $spacing-lg;
         color: $text-secondary;
-        font-size: $fs-body;
+        font-size: $fs-body-lg;
         line-height: 24px;
+        margin-bottom: $spacing-lg;
+        padding-bottom: $spacing-lg;
+        border-bottom: 1px solid $bg-secondary;
         font-family: $font-body;
     }
 
     .tt-footer {
-        padding: $spacing-md $spacing-lg;
-        background-color: rgba(0, 0, 0, 0.5);
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
         display: flex;
-        justify-content: flex-end;
+        justify-content: flex-start;
 
         .tag-owned {
-            color: #facc15;
-            font-weight: 900;
-            font-family: $font-heading;
-            letter-spacing: 2px;
+            color: $currency-gibs;
+            font-size: $fs-body;
+            font-weight: 800;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: $font-heading;
         }
 
         .tt-price {
             display: flex;
-            align-items: baseline;
+            align-items: center;
             gap: $spacing-sm;
-            
-            .lbl { color: $text-tertiary; font-size: $fs-body-sm; font-family: $font-body; text-transform: uppercase; }
-            .val { color: $tag-magical; font-family: $font-mono; font-weight: 900; font-size: $fs-h3; text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
-            .cur { font-size: $fs-body-sm; color: $text-secondary; font-family: $font-mono; }
+            background-color: $bg-tertiary;
+            border: 1px solid $border-standard;
+            padding: $spacing-sm $spacing-lg;
+            border-radius: $radius-sm;
+            font-family: $font-mono;
+            font-weight: 800;
+
+            .lbl {
+                display: none;
+            } // Caché pour coller au style SkillTree
+            .val {
+                color: $currency-gibs;
+                font-size: $fs-body-lg;
+            }
+            .cur {
+                color: $text-secondary;
+                font-size: $fs-body-lg;
+            }
         }
     }
 }

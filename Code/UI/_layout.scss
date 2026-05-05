@@ -1,30 +1,30 @@
 // ============================================================================
-// GLOBAL LAYOUT — Fullscreen Interfaces
+// GLOBAL LAYOUT — _layout.scss
 // ============================================================================
 @import '_design-system.scss';
-@import '_mixins.scss';
 
-// Le conteneur racine plein écran (remplace .shop-bg, .codex-bg, etc.)
+// Le conteneur racine plein écran
 .ui-fullscreen {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: $bg-primary; // Correction s&box: background-color
+    width: 100%;
+    height: 100%;
+    background-color: $bg-primary;
     display: flex;
     flex-direction: column;
     pointer-events: all;
     font-family: $font-body;
     color: $text-primary;
     
-    // Thème mystique (Prestige)
     &.theme-mystic {
+        background-color: rgba(5, 5, 8, 0.95);
         background-image: radial-gradient(rgba(168, 85, 247, 0.05), transparent);
-        background-color: #050508;
     }
 }
 
-// L'en-tête commun (remplace .shop-header, .codex-header, etc.)
+// L'en-tête commun
 .ui-header {
     display: flex;
+    flex-direction: row;
     align-items: center;
     padding: $spacing-xl $spacing-2xl;
     background-color: $bg-secondary;
@@ -42,8 +42,8 @@
     .ui-title {
         flex: 1;
         font-family: $font-heading;
-        font-size: $fs-h2;
-        font-weight: $fw-h2;
+        font-size: $fs-h1;
+        font-weight: 900;
         color: $text-primary;
         letter-spacing: 4px;
         text-transform: uppercase;
@@ -57,7 +57,7 @@
         color: $text-secondary;
         cursor: pointer;
         font-size: $fs-icon-lg;
-        transition: color $transition-fast;
+        transition: color 150ms ease-out;
         flex-shrink: 0;
 
         &:hover { color: $status-critical; }
@@ -72,37 +72,32 @@
     overflow: hidden;
 }
 
-// Les barres latérales (Filtres, Inspecteur, NavBar)
+// Les barres latérales (Terminal, Filtres, Inspecteur)
 .ui-sidebar {
     background-color: $bg-secondary;
     display: flex;
     flex-direction: column;
-    overflow-y: scroll; // Correction s&box: pas de overflow: auto
+    overflow-y: scroll; 
     flex-shrink: 0;
 
     &.left { border-right: 1px solid $border-standard; }
     &.right { border-left: 1px solid $border-standard; }
 
-    // Tailles standardisées
-    &.size-sm { width: 18%; min-width: 220px; } // Ex: Filtres Shop, NavBar Menu
-    &.size-md { width: 28%; min-width: 320px; } // Ex: Inspecteurs, Ascension Terminal
+    &.size-sm { width: 18%; min-width: 220px; } 
+    &.size-md { width: 28%; min-width: 360px; } 
 
     .theme-mystic & {
         background-color: rgba(0, 0, 0, 0.3);
-        border-color: rgba(255, 255, 255, 0.05);
+        border-right-color: rgba(255, 255, 255, 0.05);
         box-shadow: -10px 0 20px rgba(0, 0, 0, 0.5);
     }
 }
 
-// La zone centrale (Grilles, Graphes)
+// La zone centrale (Graphe, Grille)
 .ui-main {
     flex: 1;
     position: relative;
     display: flex;
     flex-direction: column;
-    background-color: $bg-primary;
-    overflow-x: hidden; // Correction s&box
-    
-    // Si la zone centrale a besoin de scroller (ex: Grille d'objets)
-    &.scrollable { overflow-y: scroll; }
+    overflow: hidden;
 }
