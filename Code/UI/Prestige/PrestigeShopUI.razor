@@ -1,0 +1,404 @@
+@using Sandbox
+@using Sandbox.UI
+@using Sandbox.Utils
+@using System
+@using System.Collections.Generic
+@using System.Linq
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+@if ( IsOpen )
+{
+    <div class="prestige-bg">
+        <div class="prestige-window">
+            
+            <!-- HEADER : Minimaliste, laisse la place au visuel -->
+            <div class="prst-header">
+                <span class="prst-title">#ui.prestige.title</span>
+                <div class="prst-close" onclick=@CloseMenu>#ui.prestige.button.close</div>
+            </div>
+
+            <div class="prst-body">
+                <!-- ========================================== -->
+                <!-- COLONNE GAUCHE : LE TERMINAL DE SINGULARITÉ-->
+                <!-- ========================================== -->
+                <div class="col-ascension">
+                    
+                    <!-- 1. LA BANQUE & LE DILEMME (Bonus Passifs) -->
+                    <div class="terminal-block core-power">
+                        <div class="block-title">
+                            <i>bolt</i>
+                            <span>#ui.prestige.widget.core_power</span>
+                        </div>
+                        <div class="core-amount">
+                            <span class="val">@NumberFormatter.FormatWithSuffix(GetAvailablePrestigePoints())</span>
+                            <span class="cur">#common.currency.prestige</span>
+                        </div>
+                        
+                        <div class="passive-list">
+                            <div class="list-header">#ui.prestige.widget.passive_effects</div>
+                            <!-- ICI TU PEUX RENTRER TES RATIOS MANUELLEMENT -->
+                            @{
+                                int pts = GetAvailablePrestigePoints();
+                                float dmgBonus = pts * 1.5f;   // Ex: 1 point = 1.5% Dégâts
+                                float scrapBonus = pts * 0.5f; // Ex: 1 point = 0.5% Scrap
+                                float atkSpeed = pts * 0.2f;   // Ex: 1 point = 0.2% Attack Speed
+                            }
+                            <div class="passive-row">
+                                <span class="lbl">#ui.prestige.stat.damage</span>
+                                <span class="val text-critical">1000</span>
+                            </div>
+                            <div class="passive-row">
+                                <span class="lbl">#ui.prestige.stat.scrap</span>
+                                <span class="val text-gold">+@(Math.Round(scrapBonus, 1))%</span>
+                            </div>
+                            <div class="passive-row">
+                                <span class="lbl">#ui.prestige.stat.attackspeed</span>
+                                <span class="val text-cyan">+@(Math.Round(atkSpeed, 1))%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. LA JAUGE DE DOPAMINE (Projection) -->
+                    <div class="terminal-block projection">
+                        <div class="block-title">
+                            <i>update</i>
+                            <span>#ui.prestige.widget.projection</span>
+                        </div>
+                        <div class="projected-gain">
+                            <span class="sign">+</span>
+                            <span class="val">@GetProjectedPoints()</span>
+                            <span class="cur">PR</span>
+                        </div>
+                        
+                        <div class="dopa-container">
+                            <div class="dopa-labels">
+                                <span>#ui.prestige.widget.progress</span>
+                                <span class="text-gold">@NumberFormatter.FormatWithSuffix(GetRunScrap(), 1) / @NumberFormatter.FormatWithSuffix(GetScrapNeededForNextPoint(), 1) SC</span>
+                            </div>
+                            <div class="dopa-bar-track">
+                                <div class="dopa-bar-fill" style="width: @GetDopamineFillPct()%;"></div>
+                                <!-- Le pourcentage textuel par dessus la barre -->
+                                <div class="dopa-pct-text">@(Math.Round(GetDopamineFillPct(), 1))%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. ACTIONS CRITIQUES (Wipe & Respec) -->
+                    <div class="action-section">
+                        @if (Networking.IsHost)
+                        {
+                            <!-- Bouton Respec avec calcul de coût -->
+                            int spentPoints = GetSpentPrestigePoints();
+                            int respecCost = Math.Max(1, (int)(spentPoints * 0.10f)); // Ex: 10% de taxe, minimum 1
+                            bool canRespec = spentPoints > 0;
+                            
+                            <div class="btn-respec @(canRespec ? "" : "locked")" onclick=@(canRespec ? OnRespecClicked : null)>
+                                <div class="respec-info">
+                                    <span class="title">#ui.prestige.button.respec</span>
+                                    @if(canRespec) { <span class="cost">Taxe : -@respecCost PR</span> }
+                                </div>
+                                <i>settings_backup_restore</i>
+                            </div>
+
+                            <!-- Gros Bouton Ascension -->
+                            <div class="btn-ascension" onclick=@OnPrestigeClicked>
+                                <div class="stripes"></div>
+                                <div class="content">
+                                    <span class="btn-title">#ui.prestige.button.reset</span>
+                                    <span class="btn-sub">#ui.prestige.button.warning</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="btn-ascension locked">
+                                <div class="content">
+                                    <span class="btn-title"><i>lock</i> #ui.prestige.button.hostonly</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- COLONNE DROITE : LE GRAPHE (Constellation) -->
+                <!-- ========================================== -->
+                <div class="col-graph">
+                    <zoomgraphpanel @ref="GraphPanel" class="prst-graph"
+                        onmouseenter=@(() => HoveringGraph = true)
+                        onmouseleave=@(() => { HoveringGraph = false; IsDragging = false; })
+                        onmousedown=@StartDrag
+                        onmouseup=@EndDrag
+                        style="background-position: @(PanOffset.x)px @(PanOffset.y)px; background-size: @(80 * Zoom)px @(80 * Zoom)px;">
+                        
+                        <div style="position: absolute; left: 50%; top: 50%; width: 0; height: 0; overflow: visible;">
+                            <div class="prst-canvas" style="position: absolute; width: 100%; height: 100%; left: 0; top: 0;">
+                            
+                            <!-- Noeuds en Constellation -->
+                            @foreach ( var node in VisibleNodes() )
+                            {
+                                bool isOwned   = IsOwned( node.Id );
+                                bool canAfford = GetAvailablePrestigePoints() >= node.BaseCost;
+
+                                string capturedId = node.Id;
+                                string cls = "prst-node";
+
+                                if ( isOwned )         cls += " node-owned";
+                                else if ( canAfford )  cls += " node-buyable";
+                                else                   cls += " node-expensive";
+
+                                float zoomedRadius = NodeRadius * Zoom;
+                                float posX = (GetPos( node.Id ).x * Zoom) + PanOffset.x;
+                                float posY = (GetPos( node.Id ).y * Zoom) + PanOffset.y;
+                                
+                                <div class="@cls"
+                                    style="left: @((int)posX)px; top: @((int)posY)px; width: @((int)(zoomedRadius*2))px; height: @((int)(zoomedRadius*2))px;"
+                                    onmouseover=@( () => { HoveredId = capturedId; StateHasChanged(); } )
+                                    onmouseout=@( () => { HoveredId = null; StateHasChanged(); } )
+                                    onclick=@( () => { HoveredId = capturedId; OnNodeClick( capturedId ); } )>
+                                    
+                                    <div class="node-icon" style="font-size: @(FS_DISPLAY_ICON * Zoom)px;">@node.Icon</div>
+                                    <!-- Effet de glow stellaire -->
+                                    <div class="node-glow"></div>
+                                </div>
+                            }
+                            </div>
+
+                            <!-- Tooltip -->
+                            @if ( HoveredId != null && UpgradeManager.Instance.Database.TryGetValue( HoveredId, out var hNode ) )
+                            {
+                                bool isOwned = IsOwned( hNode.Id );
+                                float zoomedRadius = NodeRadius * Zoom;
+                                float ttX = (GetPos( hNode.Id ).x * Zoom) + PanOffset.x + (zoomedRadius * 2) + 24;
+                                float ttY = (GetPos( hNode.Id ).y * Zoom) + PanOffset.y;
+
+                                <div class="prst-tooltip" style="left: @(ttX)px; top: @(ttY)px;">
+                                    <div class="tt-header">
+                                        <span class="tt-icon">@hNode.Icon</span>
+                                        <span class="tt-name">@UpgradeManager.Instance.GetUpgradeName(hNode.Id)</span>
+                                    </div>
+                                    <div class="tt-desc">@UpgradeManager.Instance.GetUpgradeDescription(hNode.Id)</div>
+                                    
+                                    <div class="tt-footer">
+                                        @if ( isOwned )
+                                        {
+                                            <span class="tag tag-owned">#ui.prestige.tooltip.maxed</span>
+                                        }
+                                        else
+                                        {
+                                            <div class="tt-price">
+                                                <span class="lbl">#ui.prestige.tooltip.cost</span>
+                                                <span class="val">@hNode.BaseCost</span>
+                                                <span class="cur">PR</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </zoomgraphpanel>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+</root>
+
+@code {
+    public static PrestigeShopUI Local { get; private set; }
+
+    const float FS_DISPLAY_ICON = 36f;
+    const float NodeRadius = 40f;
+
+    public bool IsOpen { get; set; } = false;
+    string HoveredId = null;
+
+    Vector2 PanOffset = Vector2.Zero;
+    float Zoom = 1f;
+    bool IsDragging = false;
+    bool HoveringGraph = false;
+    Vector2 LastMousePos;
+    float DragDistance = 0f;
+    Dictionary<string, Vector2> _positions = new();
+    public ZoomGraphPanel GraphPanel { get; set; }
+
+    TimeSince TimeSinceOpened;
+    TimeSince TimeSinceClosed = 10f;
+
+    protected override void OnAwake() { Local = this; }
+
+    Vector2 GetPos( string id ) => _positions.TryGetValue( id, out var p ) ? p : Vector2.Zero;
+
+    public void OpenMenu()
+    {
+        if ( IsOpen || TimeSinceClosed < 0.2f ) return;
+        if ( WeaponShopUI.Local != null ) WeaponShopUI.Local.CloseMenu();
+        if ( SkillTreeUI.Local != null ) SkillTreeUI.Local.CloseMenu();
+        if ( CodexUI.Local != null ) CodexUI.Local.CloseMenu();
+        
+        Mouse.Visibility = MouseVisibility.Visible;
+        Panel.Style.PointerEvents = PointerEvents.All;
+        IsOpen = true;
+        Mouse.Position = new Vector2( Screen.Width / 2f, Screen.Height / 2f );
+        Zoom = 1f;
+
+        var prestigeUpgrades = UpgradeManager.Instance?.Database?
+            .Where(kvp => kvp.Value.Type == UpgradeType.Prestige)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        if ( _positions.Count == 0 && prestigeUpgrades != null )
+            _positions = PrestigeShopLayout.Compute( prestigeUpgrades );
+
+        PanOffset = Vector2.Zero;
+        TimeSinceOpened = 0;
+        StateHasChanged();
+    }
+
+    public void CloseMenu()
+    {
+        Panel.Style.PointerEvents = PointerEvents.None;
+        Mouse.Visibility = MouseVisibility.Hidden;
+        IsOpen = false;
+        HoveredId = null;
+        IsDragging = false;
+        TimeSinceClosed = 0;
+        StateHasChanged();
+    }
+
+    // --- Graph Controls ---
+    void StartDrag() { if (HoveringGraph) { IsDragging = true; LastMousePos = Mouse.Position; DragDistance = 0f; } }
+    void EndDrag() { IsDragging = false; }
+    public void OnScroll( float delta )
+    {
+        if ( !IsOpen || delta == 0f || GraphPanel == null || !HoveringGraph ) return;
+        float zoomDelta = -delta * 0.1f;
+        float oldZoom = Zoom;
+        Zoom = Math.Clamp( Zoom + zoomDelta, 0.3f, 2.0f );
+        if ( Zoom == oldZoom ) return;
+        Vector2 screenCenter = GraphPanel.Box.Rect.Center;
+        Vector2 mouseFromCenter = (Mouse.Position - screenCenter) * GraphPanel.ScaleFromScreen;
+        Vector2 offsetToMouse = mouseFromCenter - PanOffset;
+        float ratio = Zoom / oldZoom;
+        PanOffset = mouseFromCenter - (offsetToMouse * ratio);
+        StateHasChanged();
+    }
+
+    protected override void OnUpdate()
+    {
+        base.OnUpdate();
+        if ( IsOpen && TimeSinceOpened > 0.1f && (Input.Pressed( "use" ) || Input.EscapePressed) )
+        {
+            Input.EscapePressed = false;
+            CloseMenu();
+            return;
+        }
+
+        if ( GraphPanel != null && GraphPanel.OnZoomScroll == null ) GraphPanel.OnZoomScroll = OnScroll;
+        if ( !IsOpen ) return;
+        
+        if ( IsDragging && HoveringGraph )
+        {
+            var delta = (Mouse.Position - LastMousePos) * GraphPanel.ScaleFromScreen;
+            if ( delta.LengthSquared > 0 )
+            {
+                PanOffset += delta;
+                DragDistance += delta.Length;
+                StateHasChanged();
+            }
+        }
+        LastMousePos = Mouse.Position;
+    }
+
+    // --- Logic ---
+    bool IsOwned( string id ) => (GlobalUpgradesSystem.Instance?.GetUpgradeLevel( id ) ?? 0) >= 1;
+
+    IEnumerable<UpgradeDefinition> VisibleNodes()
+    {
+        if ( UpgradeManager.Instance?.Database == null ) yield break;
+        foreach ( var node in UpgradeManager.Instance.Database.Values )
+            if ( node.Type == UpgradeType.Prestige ) yield return node;
+    }
+    
+    int GetAvailablePrestigePoints() => SaveManager.Get( Scene )?.CurrentFactory?.PrestigePoints ?? 0;
+    
+    double GetRunScrap() => SaveManager.Get( Scene )?.CurrentFactory?.WorldState?.RunScrapGained ?? 0;
+
+    int GetSpentPrestigePoints()
+    {
+        int spent = 0;
+        var factory = SaveManager.Get( Scene )?.CurrentFactory;
+        if (factory == null || UpgradeManager.Instance?.Database == null) return 0;
+
+        foreach ( var kvp in factory.GlobalUpgrades )
+        {
+            if ( UpgradeManager.Instance.Database.TryGetValue( kvp.Key, out var def ) && def.Type == UpgradeType.Prestige )
+            {
+                spent += (int)def.BaseCost * kvp.Value;
+            }
+        }
+        return spent;
+    }
+
+    int GetProjectedPoints()
+    {
+        double scrap = GetRunScrap();
+        if (scrap < 10000) return 0;
+        return (int)(System.Math.Sqrt(scrap) / 100);
+    }
+
+    double GetScrapNeededForNextPoint()
+    {
+        int currentProj = GetProjectedPoints();
+        return Math.Pow((currentProj + 1) * 100, 2);
+    }
+
+    float GetDopamineFillPct()
+    {
+        double runScrap = GetRunScrap();
+        int currentProj = GetProjectedPoints();
+        double currentTierScrap = currentProj == 0 ? 0 : Math.Pow(currentProj * 100, 2);
+        double nextTierScrap = Math.Pow((currentProj + 1) * 100, 2);
+        if (currentProj == 0) { currentTierScrap = 0; nextTierScrap = 10000; }
+
+        double progress = (runScrap - currentTierScrap) / (nextTierScrap - currentTierScrap);
+        return (float)Math.Clamp(progress * 100.0, 0, 100);
+    }
+
+    void OnNodeClick( string id )
+    {
+        if ( DragDistance > 5f ) return;
+        if ( IsOwned( id ) ) return; 
+        PlayerFactoryActions.Get( Scene )?.RpcRequestBuyGlobalUpgrade( id );
+    }
+
+    void OnPrestigeClicked()
+    {
+        if (!Networking.IsHost) return;
+        PrestigeSystem.Instance?.ExecutePrestigeReset();
+        CloseMenu(); 
+    }
+
+    void OnRespecClicked()
+    {
+        if (!Networking.IsHost) return;
+        PrestigeSystem.Instance?.Respec();
+        // Optionnel : Gérer la soustraction de la "taxe" côté serveur dans ta méthode Respec() !
+    }
+
+    protected override int BuildHash()
+    {
+        var h = new System.HashCode();
+        h.Add( IsOpen );
+        h.Add( HoveredId );
+        h.Add( GetAvailablePrestigePoints() );
+        h.Add( GetRunScrap() );
+        h.Add( PanOffset );
+        h.Add( Zoom );
+        if ( UpgradeManager.Instance?.Database != null )
+            foreach ( var kvp in UpgradeManager.Instance.Database.Where(x => x.Value.Type == UpgradeType.Prestige) )
+                h.Add( IsOwned( kvp.Key ) );
+        return h.ToHashCode();
+    }
+}

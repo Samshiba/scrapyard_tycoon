@@ -169,5 +169,25 @@
     "ui.codex.stats.lifetime.totalpropsdestroyed": "Total Targets Destroyed",
     "ui.codex.stats.lifetime.weaponsbought": "Total Weapons Bought",
     "ui.codex.stats.lifetime.upgradesbought": "Total Upgrades Bought",
-    "ui.codex.stats.lifetime.propsunlocked": "Targets Discovered"
-}
+    "ui.codex.stats.lifetime.propsunlocked": "Targets Discovered",
+
+    "ui.prestige.title": "SINGULARITY TERMINAL",
+    "ui.prestige.button.close": "CLOSE",
+    
+    "ui.prestige.widget.core_power": "CORE POWER",
+    "ui.prestige.widget.passive_effects": "PASSIVE EFFECTS",
+    "ui.prestige.stat.damage": "Global Damage",
+    "ui.prestige.stat.scrap": "Scrap Yield",
+    "ui.prestige.stat.attackspeed": "Attack Speed",
+    
+    "ui.prestige.widget.projection": "PROJECTION",
+    "ui.prestige.widget.progress": "Next Point Progress",
+    
+    "ui.prestige.button.respec": "REBOOT CORE",
+    "ui.prestige.button.reset": "INITIATE ASCENSION",
+    "ui.prestige.button.warning": "CRITICAL WARNING: Wipes factory, scrap, and standard upgrades.",
+    "ui.prestige.button.hostonly": "HOST ONLY",
+    
+    "ui.prestige.tooltip.maxed": "ACQUIRED",
+    "ui.prestige.tooltip.cost": "COST"
+    }

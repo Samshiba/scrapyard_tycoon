@@ -163,5 +163,25 @@
     "ui.codex.stats.lifetime.totalpropsdestroyed": "Total des Cibles Détruites",
     "ui.codex.stats.lifetime.weaponsbought": "Total des Armes Achetées",
     "ui.codex.stats.lifetime.upgradesbought": "Total des Améliorations Achetées",
-    "ui.codex.stats.lifetime.propsunlocked": "Cibles Découvertes"
+    "ui.codex.stats.lifetime.propsunlocked": "Cibles Découvertes",
+
+    "ui.prestige.title": "TERMINAL DE SINGULARITÉ",
+    "ui.prestige.button.close": "FERMER",
+    
+    "ui.prestige.widget.core_power": "ÉNERGIE DU CŒUR",
+    "ui.prestige.widget.passive_effects": "EFFETS PASSIFS",
+    "ui.prestige.stat.damage": "Dégâts Globaux",
+    "ui.prestige.stat.scrap": "Rendement de Scrap",
+    "ui.prestige.stat.attackspeed": "Vitesse d'Attaque",
+    
+    "ui.prestige.widget.projection": "PROJECTION",
+    "ui.prestige.widget.progress": "Progression (Prochain Point)",
+    
+    "ui.prestige.button.respec": "RÉINITIALISER LE CŒUR",
+    "ui.prestige.button.reset": "DÉCLENCHER L'ASCENSION",
+    "ui.prestige.button.warning": "ALERTE CRITIQUE : Détruit l'usine, le scrap et les améliorations standard.",
+    "ui.prestige.button.hostonly": "HÔTE UNIQUEMENT",
+    
+    "ui.prestige.tooltip.maxed": "ACQUIS",
+    "ui.prestige.tooltip.cost": "COÛT"
 }

@@ -19,7 +19,10 @@
     "common.emoji.warning": "⚠️",
     "common.emoji.factory": "🏭",
     "common.emoji.wrench": "🔧",
+
     "common.currency.scrap": "Scrap",
+    "common.currency.prestige": "Prestige Points",
+
     "common.time.just_now": "Just now",
     "common.time.minutes_ago": "m ago",
     "common.time.hours_ago": "h ago",
