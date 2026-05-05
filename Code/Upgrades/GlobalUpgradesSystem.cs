@@ -40,50 +40,64 @@ public sealed class GlobalUpgradesSystem : Component
     {
         _statCache.Clear();
 
+        // 1. Load Upgrades
         foreach ( var kvp in SyncedUpgrades )
         {
-            string upgradeId = kvp.Key;
-            int level = kvp.Value;
+            ApplyDefToCache( kvp.Key, kvp.Value );
+        }
 
-            if ( level <= 0 ) continue;
+        // 2. Aplly Prestige Points bonuses
+        var factory = SaveManager.Get( Scene )?.CurrentFactory;
+        Log.Info( factory );
+        if ( factory != null && factory.PrestigePoints > 0 )
+        {
+            if ( !_statCache.ContainsKey( "all_stats" ) )
+                _statCache["all_stats"] = new StatModifiers();
 
-            if ( UpgradeManager.Instance.Database.TryGetValue( upgradeId, out var def ) )
-            {
-                string stat = def.StatModified;
-
-                if ( !_statCache.ContainsKey( stat ) )
-                    _statCache[stat] = new StatModifiers();
-
-                float effect = def.EffectValuePerLevel * level;
-
-                switch ( def.ValueType )
-                {
-                    case UpgradeValueType.Additive:
-                        _statCache[stat].Additive += effect;
-                        break;
-                    case UpgradeValueType.Multiplicative:
-                        _statCache[stat].Multiplicative += effect;
-                        break;
-                    case UpgradeValueType.Reductive:
-                        _statCache[stat].Multiplicative -= effect;
-                        break;
-                    case UpgradeValueType.CompoundMultiplicative:
-                        _statCache[stat].Compound *= MathF.Pow( 1 + def.EffectValuePerLevel, level );
-                        break;
-                    case UpgradeValueType.Conversion:
-                        if ( !string.IsNullOrEmpty( def.StatSource ) )
-                        {
-                            if ( !_statCache[stat].Conversions.ContainsKey( def.StatSource ) )
-                                _statCache[stat].Conversions[def.StatSource] = 0f;
-
-                            _statCache[stat].Conversions[def.StatSource] += effect;
-                        }
-                        break;
-                }
-            }
+            _statCache["all_stats"].Multiplicative += (factory.PrestigePoints * 0.01f);
         }
 
         Log.Info( $"[GlobalUpgradesSystem] Cache rebuilt for {_statCache.Count} stats." );
+    }
+
+    private void ApplyDefToCache( string upgradeId, int level )
+    {
+        if ( level <= 0 ) return;
+
+        if ( UpgradeManager.Instance.Database.TryGetValue( upgradeId, out var def ) )
+        {
+            string stat = def.StatModified;
+
+            if ( !_statCache.ContainsKey( stat ) )
+                _statCache[stat] = new StatModifiers();
+
+            float effect = def.EffectValuePerLevel * level;
+
+            switch ( def.ValueType )
+            {
+                case UpgradeValueType.Additive:
+                    _statCache[stat].Additive += effect;
+                    break;
+                case UpgradeValueType.Multiplicative:
+                    _statCache[stat].Multiplicative += effect;
+                    break;
+                case UpgradeValueType.Reductive:
+                    _statCache[stat].Multiplicative -= effect;
+                    break;
+                case UpgradeValueType.CompoundMultiplicative:
+                    _statCache[stat].Compound *= MathF.Pow( 1 + def.EffectValuePerLevel, level );
+                    break;
+                case UpgradeValueType.Conversion:
+                    if ( !string.IsNullOrEmpty( def.StatSource ) )
+                    {
+                        if ( !_statCache[stat].Conversions.ContainsKey( def.StatSource ) )
+                            _statCache[stat].Conversions[def.StatSource] = 0f;
+
+                        _statCache[stat].Conversions[def.StatSource] += effect;
+                    }
+                    break;
+            }
+        }
     }
 
     public StatModifiers GetModifiersForStat( string statTarget )
@@ -129,47 +143,18 @@ public sealed class GlobalUpgradesSystem : Component
 
     public bool TryPurchaseUpgrade( string upgradeId, string steamId )
     {
-        // 1. Validate server-side dependencies
         if ( !Networking.IsHost ) return false;
 
-        var factoryUpgrades = SaveManager.Get( Scene )?.CurrentFactory?.GlobalUpgrades;
-        if ( factoryUpgrades == null || UpgradeManager.Instance == null || FactoryStats.Get( Scene ) == null ) return false;
-
-        if ( !UpgradeManager.Instance.Database.TryGetValue( upgradeId, out var node ) ) return false;
-
-        int currentLevel = GetUpgradeLevel( upgradeId );
-        if ( currentLevel >= node.MaxLevel ) return false;
-
-        // 2. Verify all parent upgrade requirements are met
-        if ( !UpgradeManager.Instance.IsNodeUnlocked( upgradeId, SaveManager.Get( Scene ).CurrentFactory ) ) return false;
-
-        double cost = node.GetCostForLevel( currentLevel );
-
-        // 3. Attempt payment
-        if ( FactoryStats.Get( Scene ).SpendScrap( cost ) )
-        {
-            factoryUpgrades[upgradeId] = currentLevel + 1;
-            SyncedUpgrades[upgradeId] = currentLevel + 1;
-
-            // 4. Apply tier upgrade bonus
-            if ( upgradeId == "root_node" )
-            {
-                SaveManager.Get( Scene ).CurrentFactory.Tier++;
-                FactoryStats.Get( Scene ).Tier++;
-            }
-
-            GameStats.OnMoneySpent( Scene, steamId, cost );
-            GameStats.OnUpgradeBought( Scene, steamId );
-
-            RebuildCache();
-
-            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.GlobalUpgradeChanged, $"{node.Id} → Level {currentLevel + 1}" );
-            Log.Info( $"[GlobalUpgradesSystem] Upgrade purchased: {node.Id} (Level {currentLevel + 1}) for {cost} scrap" );
-            return true;
-        }
-
-        Log.Warning( $"[GlobalUpgradesSystem] Insufficient funds for {node.Id}." );
-        return false;
+        // Use centralized FactoryStats which handles:
+        // 1. Validation of upgrade and player requirements
+        // 2. Payment handling (SpendScrap or SpendPrestige)
+        // 3. SaveManager updates
+        // 4. [Sync] updates (SyncedUpgrades, Tier)
+        // 5. Tier increment for root_node
+        // 6. GameStats tracking (OnMoneySpent, OnUpgradeBought)
+        // 7. SaveEventBus notifications
+        // 8. Cache rebuild
+        return FactoryStats.Get( Scene )?.PurchaseUpgrade( upgradeId, steamId ) ?? false;
     }
 
     public bool IsUpgraded( string upgradeId, int requiredLevel = 1 )

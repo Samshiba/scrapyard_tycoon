@@ -6,6 +6,7 @@ export interface ItemStack {
 
 export interface WorldStateData {
     tier: number;
+    run_scrap_gained: number;
     global_upgrades: Record<string, number>;
     unlocked_prestige_upgrades: Record<string, boolean>;
     unlocked_weapons: string[];
@@ -21,7 +22,7 @@ export interface FactoryWorldData {
     version: string;
     is_sandbox: boolean;
     current_scrap: number;
-    prestige_level: number;
+    prestige_points: number;
     world_state: WorldStateData;
     statistics: any; // TODO: Define the structure
 }

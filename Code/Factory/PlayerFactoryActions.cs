@@ -16,16 +16,22 @@ public sealed class PlayerFactoryActions : Component, Component.INetworkListener
         var weaponDef = ResourceLibrary.GetAll<WeaponDefinition>().FirstOrDefault( w => w.Id == weaponId );
         if ( weaponDef == null ) return;
 
-        // string callerId = Rpc.Caller.SteamId.ToString();
         string callerId = Rpc.Caller.GetUniqueId() ?? Rpc.Caller.SteamId.ToString();
 
-        if ( FactoryStats.Get( Scene ) != null && FactoryStats.Get( Scene ).SpendScrap( weaponDef.UnlockCost ) )
+        // Use centralized FactoryStats which handles:
+        // 1. Payment validation + execution (SpendScrap)
+        // 2. SaveManager updates
+        // 3. [Sync] updates
+        // 4. ItemUnlockSystem updates
+        // 5. GameStats tracking
+        // 6. SaveEventBus notifications
+        var factoryStats = FactoryStats.Get( Scene );
+        if ( factoryStats != null && factoryStats.SpendScrap( weaponDef.UnlockCost ) )
         {
-            GameStats.OnMoneySpent( Scene, callerId, weaponDef.UnlockCost );
-
-            ItemUnlockSystem.Get( Scene )?.UnlockWeapon( weaponId, callerId );
-
-            Log.Info( $"[PlayerFactoryActions] Weapon purchase successful: {weaponId} for {weaponDef.UnlockCost} scrap" );
+            if ( factoryStats.UnlockWeapon( weaponId, callerId ) )
+            {
+                Log.Info( $"[PlayerFactoryActions] Weapon purchase successful: {weaponId} for {weaponDef.UnlockCost} scrap" );
+            }
         }
         else
         {
@@ -49,6 +55,15 @@ public sealed class PlayerFactoryActions : Component, Component.INetworkListener
         {
             Log.Warning( $"[PlayerFactoryActions] Global upgrade purchase failed: {upgradeId}" );
         }
+    }
+
+    // NOTE: Prestige upgrades are now purchased through RpcRequestBuyGlobalUpgrade() 
+    // which routes to GlobalUpgradesSystem.TryPurchaseUpgrade() for both SkillTree and Prestige types
+
+    [Rpc.Broadcast]
+    public void RpcRequestRespec()
+    {
+        if ( Networking.IsHost ) PrestigeSystem.Instance?.Respec();
     }
 
     // Tu pourras ajouter d'autres RPC ici plus tard !

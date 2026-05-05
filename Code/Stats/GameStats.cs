@@ -295,7 +295,7 @@ public static class GameStats
         if ( FactoryStats.Get( scene ) != null )
         {
             FactoryStats.Get( scene ).TimesPrestiged = save.CurrentFactory.Stats.TimesPrestiged;
-            FactoryStats.Get( scene ).PrestigePoints = save.CurrentFactory.Stats.PrestigePoints;
+            FactoryStats.Get( scene ).TotalPrestigePoints = save.CurrentFactory.Stats.PrestigePoints;
         }
 
         SaveEventBus.NotifyChange( SaveEventBus.SaveReason.WorldStatUpdate, "Stats: Prestige" );

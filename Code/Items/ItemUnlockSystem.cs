@@ -65,8 +65,6 @@ public sealed class ItemUnlockSystem : Component
         if ( !UnlockedWeapons.Contains( weaponId ) )
         {
             UnlockedWeapons.Add( weaponId );
-            GameStats.OnWeaponBought( Scene, steamId );
-
             SaveChanges();
             Log.Info( $"[ItemUnlockSystem] Weapon unlocked: {weaponId}" );
         }

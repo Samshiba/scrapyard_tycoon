@@ -13,7 +13,7 @@ public class FactoryWorldData
 
     // Economy and progression
     [JsonPropertyName( "current_scrap" )] public double TotalScrap { get; set; } = 0;
-    [JsonPropertyName( "prestige_level" )] public int PrestigeLevel { get; set; } = 0;
+    [JsonPropertyName( "prestige_points" )] public int PrestigePoints { get; set; } = 0;
 
     // World state
     [JsonPropertyName( "world_state" )] public WorldStateData WorldState { get; set; } = new();
@@ -36,6 +36,7 @@ public class FactoryWorldData
 public class WorldStateData
 {
     [JsonPropertyName( "tier" )] public int Tier { get; set; } = 1;
+    [JsonPropertyName( "run_scrap_gained" )] public double RunScrapGained { get; set; } = 0;
     [JsonPropertyName( "global_upgrades" )] public Dictionary<string, int> GlobalUpgrades { get; set; } = new();
     [JsonPropertyName( "unlocked_prestige_upgrades" )] public Dictionary<string, bool> UnlockedPrestigeUpgrades { get; set; } = new();
     [JsonPropertyName( "unlocked_weapons" )] public List<string> UnlockedWeapons { get; set; } = ["bat"];

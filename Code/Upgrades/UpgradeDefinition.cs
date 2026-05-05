@@ -6,6 +6,7 @@ using Sandbox;
 public enum UpgradeType
 {
     SkillTree,
+    Prestige,
 }
 
 public enum UpgradeValueType

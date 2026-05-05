@@ -24,11 +24,12 @@ public static class WeaponStatsCalculator
 
         string statName = stat.ToString().ToLower();
 
+        string allStatsTag = $"all_stats";
         string globalTag = $"weapon_{statName}";
         string categoryTag = $"{weapon.Category.ToString().ToLower()}_{statName}";
         string elementTag = $"{weapon.DamageType.ToString().ToLower()}_{statName}";
 
-        return CalculateFormula( baseValue, globalTag, categoryTag, elementTag );
+        return CalculateFormula( baseValue, allStatsTag, globalTag, categoryTag, elementTag );
     }
 
     /// <summary>

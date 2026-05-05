@@ -41,6 +41,8 @@ public static class SaveEventBus
         PlayerStatUpdate,
         /// <summary>World statistics updated</summary>
         WorldStatUpdate,
+        /// <summary>Prestige points changed</summary>
+        PrestigePointsChanged
     }
 
     /// <summary>
