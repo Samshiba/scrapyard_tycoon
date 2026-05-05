@@ -2,8 +2,6 @@ using Sandbox;
 
 public sealed class PlayerStats : Component
 {
-    public static PlayerStats Local { get; private set; }
-
     // --- Energy System ---
     [Property, Group( "Energy" )] public float MaxEnergy { get; set; } = 100f;
     [Property, Group( "Energy" )] public float RechargeRate { get; set; } = 10f;
@@ -13,13 +11,4 @@ public sealed class PlayerStats : Component
 
     public TimeSince TimeSinceLastAttack { get; set; }
     public RealTimeSince TimeSinceExhausted { get; set; }
-
-
-    protected override void OnAwake()
-    {
-        if ( !IsProxy )
-        {
-            Local = this;
-        }
-    }
 }

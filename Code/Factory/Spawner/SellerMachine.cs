@@ -6,7 +6,6 @@ using System.Linq;
 
 public sealed class SellerMachine : Component, Component.IPressable
 {
-    public static SellerMachine Instance { get; private set; }
     [Property, Group( "Stats Tycoon" )] public float ProcessRateBase { get; set; } = 0.4f;
     [Property, Group( "Stats Tycoon" )] public float ValueMultiplierBase { get; set; } = 1.0f;
     [Property, Group( "Stats Tycoon" )] public int MaxQueueSizeBase { get; set; } = 10;
@@ -16,10 +15,13 @@ public sealed class SellerMachine : Component, Component.IPressable
     private Color _baseLightColor = (Color)Color.Parse( "#FEBA1B" );
     private Vector3 _baseLightPosition;
 
+    public static SellerMachine Get( Scene scene )
+    {
+        return scene.GetAllComponents<SellerMachine>().FirstOrDefault();
+    }
+
     protected override void OnAwake()
     {
-        Instance = this;
-
         if ( SellerLight != null )
         {
             _baseLightColor = SellerLight.LightColor;
@@ -69,7 +71,8 @@ public sealed class SellerMachine : Component, Component.IPressable
         if ( backpack == null ) return false;
 
         int itemsTransferred = 0;
-        string playerSteamId = backpack.Network.Owner?.SteamId.ToString() ?? "unknown";
+        // string playerSteamId = backpack.Network.Owner?.SteamId.ToString() ?? "unknown";
+        string playerSteamId = backpack.Network.Owner?.GetUniqueId() ?? backpack.Network.Owner?.SteamId.ToString() ?? "unknown";
         double totalScrapValue = 0;
         double largestItemValue = 0;
 
@@ -88,7 +91,7 @@ public sealed class SellerMachine : Component, Component.IPressable
         if ( itemsTransferred > 0 )
         {
             backpack.SaveChanges();
-            GameStats.OnScrapGained( playerSteamId, totalScrapValue, largestItemValue );
+            GameStats.OnScrapGained( Scene, playerSteamId, totalScrapValue, largestItemValue );
             Log.Info( $"[SellerMachine] Items deposited: {itemsTransferred} items transferred to machine (largest item: {largestItemValue})" );
             return true;
         }
@@ -111,11 +114,11 @@ public sealed class SellerMachine : Component, Component.IPressable
     {
         if ( !Networking.IsHost ) return;
 
-        if ( !_isLoaded && SaveManager.Instance?.IsFactoryReady == true )
+        if ( !_isLoaded && SaveManager.Get( Scene )?.IsFactoryReady == true )
         {
             ProcessingQueue = new Queue<ItemData>();
 
-            foreach ( var stack in SaveManager.Instance.CurrentFactory.SellerQueue )
+            foreach ( var stack in SaveManager.Get( Scene ).CurrentFactory.SellerQueue )
             {
                 for ( int i = 0; i < stack.Count; i++ )
                 {
@@ -138,15 +141,15 @@ public sealed class SellerMachine : Component, Component.IPressable
             ItemData item = ProcessingQueue.Dequeue();
             float finalValue = item.Value * ValueMultiplier;
 
-            FactoryStats.Instance.AddScrap( finalValue );
+            FactoryStats.Get( Scene ).AddScrap( finalValue );
 
             // Trigger light pulse on sell
             _isPulsing = true;
             _timeSincePulseStart = 0;
 
-            if ( SaveManager.Instance != null )
+            if ( SaveManager.Get( Scene ) != null )
             {
-                SaveManager.Instance.CurrentFactory.SellerQueue = ProcessingQueue
+                SaveManager.Get( Scene ).CurrentFactory.SellerQueue = ProcessingQueue
                 .GroupBy( item => new { item.Type, item.Value } )
                 .Select( group => new ItemStack
                 {

@@ -121,9 +121,9 @@ public static class PropStatsCalculator
     /// <summary>
     /// Get the current seller value multiplier from upgrades
     /// </summary>
-    public static float GetSellerValueMultiplier()
+    public static float GetSellerValueMultiplier( Scene scene )
     {
-        var sellerMachine = SellerMachine.Instance;
+        var sellerMachine = SellerMachine.Get( scene );
         if ( sellerMachine != null )
             return sellerMachine.ValueMultiplier;
 

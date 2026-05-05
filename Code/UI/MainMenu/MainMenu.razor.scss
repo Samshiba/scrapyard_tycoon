@@ -119,70 +119,131 @@
     }
 
     .save-list {
-        flex-direction: column;
-        gap: $spacing-sm;
-        overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    overflow-y: scroll;
+    padding-right: $spacing-md; // <--- C'est ça qui empêche le bord droit de disparaître au hover
+    padding-left: $spacing-xs;
 
-        .loading {
-            padding: $spacing-xl;
-            color: $text-muted;
-            justify-content: center;
-            font-family: $font-body;
+    .loading {
+        padding: $spacing-xl;
+        color: $text-muted;
+        display: flex;
+        justify-content: center;
+        font-family: $font-body;
+    }
+
+    .save-card {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        background-color: $bg-hud-overlay;
+        padding: $spacing-lg;
+        border-radius: $radius-md;
+        cursor: pointer;
+        border: 1px solid $border-subtle;
+        transition: all 200ms ease-out;
+        font-family: $font-body;
+        gap: $spacing-md;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
         }
 
-        .save-card {
-            flex-shrink: 0;
-            background-color: $bg-hud-overlay;
-            padding: $spacing-lg;
-            border-radius: $radius-md;
-            flex-direction: column;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: background-color 200ms ease-out;
-            font-family: $font-body;
+        &.selected {
+            background-color: rgba($orange-copper, 0.1);
+            border: 1px solid $orange-copper;
+            @include metal-glow($orange-copper);
+            transform: translateX(8px);
+        }
 
-            &:hover {
-                background-color: rgba(255, 255, 255, 0.1);
-            }
-
-            &.selected {
-                background-color: rgba($orange-copper, 0.1);
-                border: 1px solid $orange-copper;
-            }
+        .card-header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: baseline;
 
             .save-name {
                 font-weight: 700;
                 font-size: $fs-body-lg;
-                margin-bottom: $spacing-xs;
                 color: $text-primary;
+                @include text-truncate();
+                max-width: 60%;
             }
 
-            .save-meta {
-                font-size: $fs-body; /* Increased from $fs-body-sm */
-                color: $text-secondary; /* Changed from $text-tertiary for better contrast */
+            .save-date {
+                display: flex;
+                flex-direction: row;
+                gap: 4px;
+                font-size: $fs-tiny;
+                color: $text-tertiary;
+                font-family: $font-mono;
+
+                .time-val {
+                    color: $text-secondary;
+                    font-weight: 700;
+                }
+            }
+        }
+
+        .card-stats {
+            display: flex;
+            flex-direction: row;
+            gap: $spacing-sm;
+            flex-wrap: wrap;
+
+            .stat-pill {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                background-color: $bg-tertiary;
+                padding: $spacing-xs $spacing-sm;
+                border-radius: $radius-sm;
+                gap: $spacing-xs;
+                border: 1px solid $border-standard;
+
+                i { font-size: $fs-icon-sm; color: $text-secondary; }
+                span { font-size: $fs-extra-small; font-weight: 600; color: $text-primary; font-family: $font-mono; }
+
+                &.scrap i { color: $currency-gibs; }
+                &.prestige i { color: $currency-xp; }
             }
         }
     }
 }
+}
 
 .detail-view {
-    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1.5;
     background-color: $bg-hud-overlay;
     border-radius: $radius-md;
     border: 1px solid $border-subtle;
-    flex-direction: column;
     padding: $spacing-2xl;
+    gap: $spacing-xl;
 
     .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         margin: auto;
-        color: $text-secondary; /* Changed from $text-tertiary for better contrast */
-        font-size: $fs-body-lg; /* Increased from $fs-body-lg */
-        font-family: $font-body;
+        color: $text-secondary;
+        gap: $spacing-md;
+
+        i { font-size: $fs-display-2xl; opacity: 0.2; }
+        span { font-size: $fs-body-lg; font-weight: 800; letter-spacing: 2px; font-family: $font-heading; text-transform: uppercase; }
     }
 
     .detail-header {
+        display: flex;
         flex-direction: column;
-        margin-bottom: auto;
+        flex-shrink: 0;
+        gap: $spacing-md;
 
         .input-name {
             font-size: $fs-h1;
@@ -192,146 +253,221 @@
             color: $text-primary;
             padding: $spacing-sm 0;
             width: 100%;
-            margin-bottom: $spacing-xl;
             font-family: $font-heading;
             font-weight: 900;
+            &:focus { border-bottom: 2px solid $orange-copper; outline: none; }
+        }
 
-            &:focus {
-                border-bottom: 2px solid $orange-copper;
-                outline: none;
+        .section-tag {
+            font-size: $fs-body;
+            font-family: $font-heading;
+            font-weight: 800;
+            color: $orange-copper;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .title-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: $spacing-md;
+
+            .factory-title {
+                font-size: $fs-display-xl;
+                font-weight: 900;
+                font-family: $font-heading;
+                color: $text-primary;
+            }
+
+            .version-tag {
+                background-color: $bg-tertiary;
+                padding: 4px 8px;
+                border-radius: $radius-sm;
+                font-size: $fs-body-sm;
+                font-weight: 700;
+                color: $orange-copper;
+                font-family: $font-mono;
             }
         }
 
-        .factory-title {
-            font-size: 42px;
-            font-weight: 900;
-            margin-bottom: $spacing-lg;
-            font-family: $font-heading;
-            color: $text-primary;
-        }
-
         .sandbox-warning {
+            display: flex;
+            flex-direction: row;
             background-color: rgba($status-critical, 0.15);
             border: 1px solid $status-critical;
             color: $status-critical;
             padding: $spacing-md $spacing-lg;
             border-radius: $radius-sm;
             font-weight: 700;
-            margin-bottom: $spacing-xl;
             align-items: center;
             gap: $spacing-sm;
             font-family: $font-body;
             font-size: $fs-body;
         }
+    }
 
-        .stats-grid {
+    .detail-body {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        gap: $spacing-xl;
+        overflow-y: scroll;
+
+        // --- SECTION KPI (SCALÉE COMME LE CODEX) ---
+        .kpi-row {
+            display: flex;
             flex-direction: row;
-            gap: $spacing-lg;
+            width: 100%;
+            gap: $spacing-md;
 
-            .stat-box {
-                background-color: $bg-tertiary;
-                padding: $spacing-lg;
-                border-radius: $radius-md;
+            .kpi-card {
+                display: flex;
                 flex-direction: column;
-                min-width: 150px;
+                flex: 1;
+                background-color: $bg-tertiary;
                 border: 1px solid $border-standard;
+                border-radius: $radius-md;
+                padding: $spacing-lg;
+                justify-content: center;
 
-                .label {
-                    font-size: $fs-body-sm; /* Increased from $fs-badge */
+                .kpi-label {
+                    font-size: $fs-badge;
                     text-transform: uppercase;
-                    color: $text-secondary; /* Changed from $text-tertiary */
-                    font-weight: 700;
-                    letter-spacing: 1px;
+                    color: $text-secondary;
+                    font-weight: 800;
                     font-family: $font-heading;
+                    margin-bottom: $spacing-sm;
                 }
 
-                .value {
-                    font-size: $fs-stat-numbers;
+                .kpi-val {
+                    font-size: $fs-display-lg;
                     font-weight: 900;
                     color: $text-primary;
                     font-family: $font-mono;
                 }
-            }
-        }
-    }
 
-    .lobby-settings {
-        flex-direction: column;
-        gap: $spacing-lg;
-        background-color: $bg-secondary;
-        padding: $spacing-xl;
-        border-radius: $radius-md;
-        margin-bottom: $spacing-2xl;
-        border: 1px solid $border-standard;
-
-        .setting-row {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-
-            label {
-                font-size: $fs-body-lg;
-                color: $text-secondary;
-                font-weight: 600;
-                font-family: $font-body;
-            }
-
-            .mock-dropdown {
-                background-color: $bg-tertiary;
-                padding: $spacing-md $spacing-xl;
-                border-radius: $radius-sm;
-                cursor: pointer;
-                font-weight: 700;
-                transition: background-color 200ms ease-out;
-                border: 1px solid $border-standard;
-                color: $text-primary;
-                font-family: $font-body;
-
-                &:hover {
-                    background-color: $blue-slate-dark;
-                    border-color: $blue-slate;
+                &.gold {
+                    border-color: $currency-gibs;
+                    background-color: rgba(212, 175, 55, 0.05);
+                    .kpi-val { color: $currency-gibs; }
                 }
             }
+        }
 
-            .player-selector {
+        // --- SECTIONS INFOS (ANALYTICS ET SETTINGS) ---
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid $border-subtle;
+            border-radius: $radius-sm;
+            padding: $spacing-lg;
+
+            .section-header {
+                display: flex;
                 flex-direction: row;
                 align-items: center;
-                background-color: $bg-tertiary;
-                border-radius: $radius-sm;
-                border: 1px solid $border-standard;
+                gap: $spacing-sm;
+                margin-bottom: $spacing-md;
 
-                .btn-adjust {
-                    padding: $spacing-md $spacing-xl;
-                    cursor: pointer;
-                    font-weight: 700;
-                    font-size: 20px;
-                    transition: background-color 200ms ease-out;
-                    color: $text-primary;
-                    font-family: $font-body;
+                i { font-size: $fs-icon-md; color: $orange-copper; }
+                span {
+                    font-family: $font-heading;
+                    font-size: $fs-body;
+                    font-weight: 800;
+                    color: $text-secondary;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+            }
 
-                    &:hover {
-                        background-color: $blue-slate-dark;
-                    }
+            .info-row {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: $spacing-sm 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+                &:last-child { border-bottom: none; padding-bottom: 0; }
+
+                .row-label { 
+                    font-family: $font-body; 
+                    font-size: $fs-body; 
+                    color: $text-secondary; 
+                    font-weight: 500;
+                }
+                .row-val { 
+                    font-family: $font-mono; 
+                    font-size: $fs-body-lg; 
+                    color: $text-primary; 
+                    font-weight: 700; 
                 }
 
-                .val {
-                    width: 40px;
-                    text-align: center;
-                    font-weight: 900;
-                    font-size: 20px;
-                    justify-content: center;
+                // Pour la partie Settings
+                .mock-dropdown {
+                    background-color: $bg-tertiary;
+                    padding: $spacing-md $spacing-xl;
+                    border-radius: $radius-sm;
+                    cursor: pointer;
+                    font-weight: 700;
+                    font-family: $font-body;
                     color: $text-primary;
-                    font-family: $font-mono;
+                    border: 1px solid $border-standard;
+                    transition: background-color 200ms ease-out;
+
+                    &:hover { background-color: $blue-slate-dark; border-color: $blue-slate; }
+                }
+
+                .player-selector {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+                    gap: $spacing-sm;
+                    background-color: $bg-tertiary;
+                    border-radius: $radius-sm;
+                    border: 1px solid $border-standard;
+
+                    .btn-adjust {
+                        padding: $spacing-xs $spacing-xl;
+                        cursor: pointer;
+                        font-weight: 700;
+                        font-size: $fs-icon-md;
+                        color: $text-primary;
+                        font-family: $font-body;
+                        transition: background-color 200ms ease-out;
+
+                        &:hover { background-color: $blue-slate-dark; }
+                    }
+
+                    .val {
+                        flex: 1;
+                        text-align: center;
+                        font-weight: 900;
+                        font-size: $fs-h3;
+                        color: $text-primary;
+                        font-family: $font-mono;
+                        padding-left: $spacing-sm;
+                        padding-right: $spacing-sm;
+                    }
                 }
             }
         }
     }
 
-    .launch-footer {
+    .detail-footer {
+        display: flex;
         flex-direction: row;
         justify-content: flex-end;
-
+        flex-shrink: 0;
+        padding-top: $spacing-md;
+        
         .btn-launch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background-color: $orange-copper;
             color: $bg-primary;
             padding: $spacing-lg $spacing-2xl;
@@ -339,19 +475,26 @@
             font-weight: 900;
             border-radius: $radius-md;
             cursor: pointer;
-            transition: transform 100ms ease-out, background-color 100ms ease-out;
             font-family: $font-heading;
             text-transform: uppercase;
             letter-spacing: 1px;
+            transition: transform 100ms ease-out, background-color 100ms ease-out, opacity 100ms ease-out;
 
             &:hover {
                 transform: scale(1.05);
                 background-color: $orange-copper-hover;
             }
+
+            &.disabled {
+                background-color: $bg-tertiary;
+                color: $text-secondary;
+                opacity: 0.6;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
         }
     }
 }
-
 // ============================================================================
 // TAB 2: SERVER BROWSER
 // ============================================================================

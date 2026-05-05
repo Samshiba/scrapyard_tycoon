@@ -205,16 +205,22 @@ class SyncRepository {
     validator: SyncValidator,
   ): Promise<void> {
     const { factory_data, players_data } = payload;
-    const results = [];
 
+    // Save Factory first
     if (factory_data) {
       const oldFactory = validator.getOldFactoryData();
-      const factoryUpdate = this.saveFactory(factory_data, oldFactory);
-      results.push(factoryUpdate);
+      const factoryRes = await this.saveFactory(factory_data, oldFactory);
+
+      if (factoryRes.error) {
+        throw new Error(
+          `Database Error (Factory): ${factoryRes.error.message}`,
+        );
+      }
     }
 
+    // Then save players in parallel
     if (players_data && players_data.length > 0) {
-      const playerUpdates = players_data.map((player) => {
+      const playerPromises = players_data.map((player) => {
         if (!player.steam_id || !player.factory_id) {
           console.log(
             `[Repository] Error that should have been caught by validation for player: ${player.steam_id}`,
@@ -230,13 +236,14 @@ class SyncRepository {
         );
         return this.savePlayer(player, oldPlayer);
       });
-      results.push(...playerUpdates);
-    }
 
-    const allResults = await Promise.all(results);
+      const playerResults = await Promise.all(playerPromises);
 
-    for (const res of allResults) {
-      if (res.error) throw new Error(`Database Error: ${res.error.message}`);
+      for (const res of playerResults) {
+        if (res.error) {
+          throw new Error(`Database Error (Player): ${res.error.message}`);
+        }
+      }
     }
   }
 

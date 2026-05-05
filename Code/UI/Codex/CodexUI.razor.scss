@@ -79,7 +79,7 @@
     .codex-close {
         color: $text-tertiary;
         cursor: pointer;
-        font-size: 20px;
+        font-size: $fs-icon-md;
         font-weight: 700;
         transition: color 100ms ease-out;
 
@@ -200,7 +200,7 @@
         justify-content: center;
         text-align: center;
         color: $blue-slate;
-        font-size: 16px;
+        font-size: $fs-ui-label;
         font-weight: 800;
         font-family: $font-heading;
         padding: $spacing-2xl;
@@ -293,7 +293,7 @@
                     .stat-final { 
                         color: $text-primary; 
                         font-weight: 900; 
-                        font-size: 16px; 
+                        font-size: $fs-ui-label; 
                         font-family: $font-mono; 
                     }
                 }
@@ -340,7 +340,7 @@
                 }
                 
                 .dps-val {
-                    font-size: 20px;
+                    font-size: $fs-icon-md;
                     font-family: $font-mono;
                 }
             }
@@ -438,7 +438,7 @@
 
                 .kpi-val {
                     color: $text-primary;
-                    font-size: 36px;
+                    font-size: $fs-display-icon;
                     font-weight: 900;
                     font-family: $font-mono;
                 }
@@ -446,7 +446,7 @@
                 // Les classes de taille ne gèrent plus que le padding et la police
                 &.kpi-large { 
                     padding: $spacing-2xl;
-                    .kpi-val { font-size: 42px; }
+                    .kpi-val { font-size: $fs-display-xl; }
                 }
                 
                 &.kpi-medium { 
@@ -456,7 +456,7 @@
                 &.kpi-small { 
                     padding: $spacing-xl; 
                     .kpi-label { font-size: $fs-body-sm; }
-                    .kpi-val { font-size: 28px; }
+                    .kpi-val { font-size: $fs-display-md; }
                 }
 
                 // ==============================

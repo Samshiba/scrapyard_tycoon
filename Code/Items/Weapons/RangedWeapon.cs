@@ -30,8 +30,8 @@ public abstract class RangedWeapon : BaseWeapon
 
             if ( health != null )
             {
-                bool isCrit = ShouldHit();
-                float finalDamage = (float)GetFinalDamage( isCrit );
+                bool isCrit = ShouldCrit();
+                float finalDamage = GetFinalDamage( isCrit );
                 var damageInfo = new DamageInfo
                 {
                     Damage = finalDamage,
@@ -41,10 +41,11 @@ public abstract class RangedWeapon : BaseWeapon
                 damageInfo.Tags.Add( Data.Id );
                 if ( isCrit ) damageInfo.Tags.Add( "critical" );
                 health.OnDamage( damageInfo );
-                
+
                 // Track damage for stats
                 var backpack = Components.GetInAncestors<PlayerBackpack>();
-                var playerSteamId = backpack?.Network.Owner?.SteamId.ToString() ?? "unknown";
+                // var playerSteamId = backpack?.Network.Owner?.SteamId.ToString() ?? "unknown";
+                var playerSteamId = backpack?.Network.Owner?.GetUniqueId() ?? backpack?.Network.Owner?.SteamId.ToString() ?? "unknown";
                 health.OnDamageDealt( playerSteamId, Data.Id, finalDamage, isCrit );
 
                 if ( Data.HitEffectPrefab != null )
@@ -67,7 +68,7 @@ public abstract class RangedWeapon : BaseWeapon
         if ( projectileLogic != null )
         {
             var playerGo = Components.GetInAncestors<PlayerController>()?.GameObject ?? GameObject.Root;
-            bool isCrit = ShouldHit();
+            bool isCrit = ShouldCrit();
             float finalDamage = GetFinalDamage( isCrit );
             projectileLogic.Initialize( finalDamage, playerGo, Data.Id );
             if ( isCrit )

@@ -4,14 +4,14 @@ using System.Linq;
 
 public sealed class PlayerBackpack : Component, Component.INetworkListener
 {
-    public static PlayerBackpack Local { get; private set; }
     [Property, Group( "Stats" )] public int BaseMaxItems { get; set; } = 10;
 
     [Sync]
     [Property, Group( "Items" )]
     public NetList<ItemData> CollectedItems { get; set; } = new();
 
-    private string MySteamId => Network.Owner.SteamId.ToString();
+    // private string MySteamId => Network.Owner.SteamId.ToString();
+    private string MySteamId => Network.Owner.GetUniqueId() ?? Network.Owner.SteamId.ToString();
 
     public int MaxItems
     {
@@ -21,19 +21,11 @@ public sealed class PlayerBackpack : Component, Component.INetworkListener
         }
     }
 
-    protected override void OnAwake()
-    {
-        if ( !IsProxy )
-        {
-            Local = this;
-        }
-    }
-
     protected override void OnStart()
     {
         if ( !Networking.IsHost ) return;
 
-        if ( SaveManager.Instance?.ActivePlayers.TryGetValue( MySteamId, out var playerData ) == true )
+        if ( SaveManager.Get( Scene )?.ActivePlayers.TryGetValue( MySteamId, out var playerData ) == true )
         {
             CollectedItems.Clear();
 
@@ -76,9 +68,9 @@ public sealed class PlayerBackpack : Component, Component.INetworkListener
 
     public void SaveChanges()
     {
-        if ( !Networking.IsHost || SaveManager.Instance == null ) return;
+        if ( !Networking.IsHost || SaveManager.Get( Scene ) == null ) return;
 
-        if ( SaveManager.Instance.ActivePlayers.TryGetValue( MySteamId, out var playerData ) )
+        if ( SaveManager.Get( Scene ).ActivePlayers.TryGetValue( MySteamId, out var playerData ) )
         {
             playerData.CollectedItems = CollectedItems
             .GroupBy( item => new { item.Type, item.Value } )

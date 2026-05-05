@@ -5,8 +5,6 @@ using System.Collections.Generic;
 
 public sealed class PlayerInventory : Component
 {
-    public static PlayerInventory Local { get; private set; }
-
     [Property] public WeaponDefinition[] EquippedWeapons { get; set; } = new WeaponDefinition[4];
     [Property] public int ActiveSlotIndex { get; set; } = 0;
     [Property] public SkinnedModelRenderer PlayerBody { get; set; }
@@ -19,15 +17,8 @@ public sealed class PlayerInventory : Component
     private Dictionary<string, WeaponDefinition> _weaponCache = new();
     private bool _weaponsLoaded = false;
 
-    private string MySteamId => Connection.Local.SteamId.ToString();
-
-    protected override void OnAwake()
-    {
-        if ( !IsProxy )
-        {
-            Local = this;
-        }
-    }
+    // private string MySteamId => Connection.Local.SteamId.ToString();
+    private string MySteamId => Network.Owner?.GetUniqueId() ?? Connection.Local.SteamId.ToString();
 
     protected override void OnStart()
     {
@@ -44,7 +35,7 @@ public sealed class PlayerInventory : Component
 
     private void LoadEquippedWeapons()
     {
-        if ( SaveManager.Instance?.ActivePlayers.TryGetValue( MySteamId, out var pData ) != true ) return;
+        if ( SaveManager.Get( Scene )?.ActivePlayers.TryGetValue( MySteamId, out var pData ) != true ) return;
 
         var savedWeaponIds = pData.EquippedWeapons;
         if ( savedWeaponIds == null ) return;
@@ -166,11 +157,11 @@ public sealed class PlayerInventory : Component
 
     private void SaveChanges()
     {
-        if ( !Networking.IsHost || SaveManager.Instance == null ) return;
+        if ( !Networking.IsHost || SaveManager.Get( Scene ) == null ) return;
 
         var weaponIds = EquippedWeapons.Select( w => w?.Id ).ToArray();
 
-        if ( SaveManager.Instance.ActivePlayers.TryGetValue( MySteamId, out var pData ) )
+        if ( SaveManager.Get( Scene ).ActivePlayers.TryGetValue( MySteamId, out var pData ) )
         {
             pData.EquippedWeapons = weaponIds;
             pData.ActiveWeaponIndex = ActiveSlotIndex;

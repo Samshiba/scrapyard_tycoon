@@ -53,7 +53,7 @@
 
     .skt-wallet {
         color: $currency-gibs;
-        font-size: 16px;
+        font-size: $fs-ui-label;
         font-weight: 800;
         background: $bg-tertiary;
         padding: $spacing-sm $spacing-lg;
@@ -73,7 +73,7 @@
     .skt-close {
         color: $text-tertiary;
         cursor: pointer;
-        font-size: 24px;
+        font-size: $fs-icon-lg;
         padding: $spacing-xs $spacing-sm;
         transition: color 100ms ease-out;
 
@@ -155,7 +155,7 @@
         border-radius: $radius-sm;
         pointer-events: none;
         letter-spacing: 1px;
-        font-size: $fs-body-sm;
+        font-size: $fs-badge;
     }
 
     // Locked state

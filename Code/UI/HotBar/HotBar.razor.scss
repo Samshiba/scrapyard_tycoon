@@ -50,7 +50,7 @@
 	position: absolute;
 	top: 4px;
 	left: 7px;
-	font-size: 12px;
+	font-size: $fs-tiny;
 	font-weight: 700;
 	color: rgba(255, 255, 255, 0.5);
 	font-family: $font-mono;
@@ -64,7 +64,7 @@
 
 /* Fallback si pas d'icône */
 .slot-name {
-	font-size: 14px;
+	font-size: $fs-badge;
 	font-family: $font-body;
 	color: rgba(255, 255, 255, 0.7);
 	text-align: center;

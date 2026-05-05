@@ -3,71 +3,112 @@ using static Sandbox.Services.Stats;
 
 public static class GameStats
 {
-    // Vérification de sécurité (Anti-cheat custom + Natif)
-    private static bool CanSendToSbox()
+    // ANTI CHEAT CHECK
+    public static bool CanSendToSbox( Scene scene )
     {
-        return SaveManager.Instance != null && !SaveManager.Instance.CurrentFactory.IsSandbox;
+        return SaveManager.Get( scene ) != null && !SaveManager.Get( scene ).CurrentFactory.IsSandbox;
     }
 
-    public static void OnScrapGained( string steamId, double totalAmount, double largestItemValue = 0 )
+    // ==========================================
+    // 1. ECONOMY STATS
+    // ==========================================
+
+    public static void OnScrapGained( Scene scene, string steamId, double totalAmount, double largestItemValue )
     {
-        var save = SaveManager.Instance;
+        var save = SaveManager.Get( scene );
         if ( save == null || !save.IsFactoryReady ) return;
 
-        save.CurrentFactory.Stats.ScrapGainedSession += totalAmount;
+        // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
+        var fStats = save.CurrentFactory.Stats;
+        fStats.ScrapGained += totalAmount;
+        if ( largestItemValue > fStats.LargestScrapGain )
+            fStats.LargestScrapGain = largestItemValue;
+
+        if ( FactoryStats.Get( scene ) != null )
+        {
+            FactoryStats.Get( scene ).ScrapGained = fStats.ScrapGained;
+            FactoryStats.Get( scene ).LargestScrapGain = fStats.LargestScrapGain;
+        }
         SaveEventBus.NotifyChange( SaveEventBus.SaveReason.WorldStatUpdate, "Stats: Scrap" );
 
-        // ARCHIVE: Update player local stats for archiving
-        if ( save.ActivePlayers.TryGetValue( steamId, out var pData ) )
-        {
-            pData.Stats.TotalScrapCollected += totalAmount;
-            if ( largestItemValue > 0 && largestItemValue > pData.Stats.LargestScrapGain )
-                pData.Stats.LargestScrapGain = largestItemValue;
-            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Scrap", steamId );
-        }
-
-        if ( CanSendToSbox() )
+        // --- 3. API S&BOX (JOUEUR) ---
+        if ( CanSendToSbox( scene ) )
         {
             Increment( "lifetime_scrap", totalAmount );
             if ( largestItemValue > 0 )
                 SetValue( "largest_scrap_gain", largestItemValue );
         }
-    }
 
-    public static void OnPropDestroyed( string steamId, string propId, string weaponId, double scrapYield, int gibsDropped )
-    {
-        var save = SaveManager.Instance;
-        if ( save == null || !save.IsFactoryReady ) return;
-
-        save.CurrentFactory.Stats.PropsDestroyed++;
-        if ( gibsDropped > 0 )
-            save.CurrentFactory.Stats.GibsDroppedSession += gibsDropped;
-
+        // --- 4. ARCHIVE LOCALE (JOUEUR) ---
         if ( save.ActivePlayers.TryGetValue( steamId, out var pData ) )
         {
-            pData.Stats.TotalPropsDestroyed++;
-            pData.Stats.TotalTargetsDestroyed++;
+            pData.Stats.LifetimeScrapGained += totalAmount;
+            if ( largestItemValue > pData.Stats.LargestScrapGain )
+                pData.Stats.LargestScrapGain = largestItemValue;
 
-            // ARCHIVE: Per-prop breakdown
-            if ( !pData.Stats.PropVanity.ContainsKey( propId ) )
-                pData.Stats.PropVanity[propId] = new PropVanityStat();
-            pData.Stats.PropVanity[propId].TimesDestroyed++;
-            pData.Stats.PropVanity[propId].TotalScrapDropped += scrapYield;
-            pData.Stats.PropVanity[propId].NumberOfGibsDropped += gibsDropped;
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Scrap", steamId );
+        }
+    }
 
-            // ARCHIVE: Per-weapon breakdown
-            if ( !string.IsNullOrEmpty( weaponId ) )
-            {
-                if ( !pData.Stats.WeaponVanity.ContainsKey( weaponId ) )
-                    pData.Stats.WeaponVanity[weaponId] = new WeaponVanityStat();
-                pData.Stats.WeaponVanity[weaponId].TargetsDestroyed++;
-            }
-            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Prop", steamId );
+    public static void OnMoneySpent( Scene scene, string steamId, double amount )
+    {
+        var save = SaveManager.Get( scene );
+        if ( save == null || !save.IsFactoryReady ) return;
+
+        // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
+        var fStats = save.CurrentFactory.Stats;
+        fStats.TotalMoneySpent += amount;
+        if ( amount > fStats.LargestSinglePurchase )
+            fStats.LargestSinglePurchase = amount;
+
+        if ( FactoryStats.Get( scene ) != null )
+        {
+            FactoryStats.Get( scene ).TotalMoneySpent = fStats.TotalMoneySpent;
+            FactoryStats.Get( scene ).LargestSinglePurchase = fStats.LargestSinglePurchase;
         }
 
-        if ( CanSendToSbox() )
+        // --- 3. API S&BOX (JOUEUR) ---
+        if ( CanSendToSbox( scene ) )
         {
-            // PLAYER: Total targets destroyed in lifetime
+            Increment( "total_money_spent", amount );
+            SetValue( "largest_single_purchase", amount );
+        }
+
+        // --- 4. ARCHIVE LOCALE (JOUEUR) ---
+        if ( save.ActivePlayers.TryGetValue( steamId, out var pData ) )
+        {
+            pData.Stats.TotalMoneySpent += amount;
+            if ( amount > pData.Stats.LargestSinglePurchase )
+                pData.Stats.LargestSinglePurchase = amount;
+
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Money", steamId );
+        }
+    }
+
+    // ==========================================
+    // 2. COMBAT & DESTRUCTION
+    // ==========================================
+
+    public static void OnPropDestroyed( Scene scene, string steamId, string propId, string weaponId, double scrapYield, int gibsDropped )
+    {
+        var save = SaveManager.Get( scene );
+        if ( save == null || !save.IsFactoryReady ) return;
+
+        // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
+        var fStats = save.CurrentFactory.Stats;
+        fStats.TargetsDestroyed++;
+        if ( gibsDropped > 0 )
+            fStats.GibsDropped += gibsDropped;
+
+        if ( FactoryStats.Get( scene ) != null )
+        {
+            FactoryStats.Get( scene ).TargetsDestroyed = fStats.TargetsDestroyed;
+            FactoryStats.Get( scene ).GibsDropped = fStats.GibsDropped;
+        }
+
+        // --- 3. API S&BOX (JOUEUR) ---
+        if ( CanSendToSbox( scene ) )
+        {
             Increment( "targets_destroyed", 1 );
             Increment( $"targets_destroyed_{propId}", 1 );
             Increment( $"targets_destroyed_with_{weaponId}", 1 );
@@ -78,51 +119,65 @@ public static class GameStats
                 Increment( $"gibs_dropped_{propId}", gibsDropped );
             }
         }
-    }
 
-    public static void OnDamageDealt( string steamId, string weaponId, double damage, bool isCrit = false )
-    {
-        var save = SaveManager.Instance;
-        if ( save == null || !save.IsFactoryReady ) return;
-
-        if ( damage > save.CurrentFactory.Stats.MaxDamageHit )
-            save.CurrentFactory.Stats.MaxDamageHit = damage;
-
+        // --- 4. ARCHIVE LOCALE (JOUEUR) ---
         if ( save.ActivePlayers.TryGetValue( steamId, out var pData ) )
         {
-            pData.Stats.TotalAttacks++;
-            pData.Stats.TotalDamageDealt += damage;
+            pData.Stats.TotalTargetsDestroyed++;
+            if ( gibsDropped > 0 )
+                pData.Stats.TotalGibsDropped += gibsDropped;
 
-            // ARCHIVE: Track highest damage hit overall
-            if ( damage > pData.Stats.HighestDamageHit )
-                pData.Stats.HighestDamageHit = damage;
+            // Vanity Prop
+            if ( !pData.Stats.PropVanity.ContainsKey( propId ) )
+                pData.Stats.PropVanity[propId] = new PropVanityStat();
 
-            // ARCHIVE: Track critical hits
-            if ( isCrit )
-            {
-                pData.Stats.TotalCriticalHits++;
-                pData.Stats.CriticalDamage += damage;
-            }
+            pData.Stats.PropVanity[propId].TimesDestroyed++;
+            pData.Stats.PropVanity[propId].TotalScrapDropped += scrapYield;
+            pData.Stats.PropVanity[propId].NumberOfGibsDropped += gibsDropped;
 
+            // Vanity Weapon
             if ( !string.IsNullOrEmpty( weaponId ) )
             {
                 if ( !pData.Stats.WeaponVanity.ContainsKey( weaponId ) )
                     pData.Stats.WeaponVanity[weaponId] = new WeaponVanityStat();
 
-                pData.Stats.WeaponVanity[weaponId].TotalDamage += damage;
-                // ARCHIVE: Track max damage with this weapon
-                if ( damage > pData.Stats.WeaponVanity[weaponId].MaxDamageHit )
-                    pData.Stats.WeaponVanity[weaponId].MaxDamageHit = damage;
-                // ARCHIVE: Track crits with this weapon
-                if ( isCrit )
-                    pData.Stats.WeaponVanity[weaponId].CriticalHits++;
+                pData.Stats.WeaponVanity[weaponId].TargetsDestroyed++;
             }
-            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Dmg", steamId );
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Prop", steamId );
+        }
+    }
+
+    public static void OnDamageDealt( Scene scene, string steamId, string weaponId, double damage, bool isCrit = false )
+    {
+        var save = SaveManager.Get( scene );
+        if ( save == null || !save.IsFactoryReady ) return;
+
+        // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
+        var fStats = save.CurrentFactory.Stats;
+        fStats.TotalDamage += damage;
+        fStats.TotalAttacks++;
+
+        if ( damage > fStats.HighestDamageHit )
+            fStats.HighestDamageHit = damage;
+
+        if ( isCrit )
+        {
+            fStats.TotalCriticalHits++;
+            fStats.CriticalDamage += damage;
         }
 
-        if ( CanSendToSbox() )
+        if ( FactoryStats.Get( scene ) != null )
         {
-            // PLAYER: Damage stats (lifetime)
+            FactoryStats.Get( scene ).TotalDamage = fStats.TotalDamage;
+            FactoryStats.Get( scene ).TotalAttacks = fStats.TotalAttacks;
+            FactoryStats.Get( scene ).HighestDamageHit = fStats.HighestDamageHit;
+            FactoryStats.Get( scene ).TotalCriticalHits = fStats.TotalCriticalHits;
+            FactoryStats.Get( scene ).CriticalDamage = fStats.CriticalDamage;
+        }
+
+        // --- 3. API S&BOX (JOUEUR) ---
+        if ( CanSendToSbox( scene ) )
+        {
             Increment( "total_damage", damage );
             SetValue( "highest_damage_hit", damage );
             Increment( "total_attacks", 1 );
@@ -137,115 +192,200 @@ public static class GameStats
             {
                 Increment( $"damage_with_{weaponId}", damage );
                 Increment( $"attacks_with_{weaponId}", 1 );
-                // PLAYER: Highest damage hit with this specific weapon
+
                 SetValue( $"highest_damage_hit_with_{weaponId}", damage );
                 if ( isCrit )
                     Increment( $"crits_with_{weaponId}", 1 );
             }
         }
+
+        // --- 4. ARCHIVE LOCALE (JOUEUR) ---
+        if ( save.ActivePlayers.TryGetValue( steamId, out var pData ) )
+        {
+            pData.Stats.TotalDamage += damage;
+            pData.Stats.TotalAttacks++;
+
+            if ( damage > pData.Stats.HighestDamageHit )
+                pData.Stats.HighestDamageHit = damage;
+
+            if ( isCrit )
+            {
+                pData.Stats.TotalCriticalHits++;
+                pData.Stats.CriticalDamage += damage;
+            }
+
+            if ( !string.IsNullOrEmpty( weaponId ) )
+            {
+                if ( !pData.Stats.WeaponVanity.ContainsKey( weaponId ) )
+                    pData.Stats.WeaponVanity[weaponId] = new WeaponVanityStat();
+
+                pData.Stats.WeaponVanity[weaponId].TotalDamage += damage;
+                pData.Stats.WeaponVanity[weaponId].TotalAttacks++;
+
+                if ( damage > pData.Stats.WeaponVanity[weaponId].MaxDamageHit )
+                    pData.Stats.WeaponVanity[weaponId].MaxDamageHit = damage;
+                if ( isCrit )
+                    pData.Stats.WeaponVanity[weaponId].CriticalHits++;
+            }
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Dmg", steamId );
+        }
     }
 
-    public static void OnPrestige( int newPrestigeLevel )
+    // ==========================================
+    // 3. BUYING STATS (WEAPONS & UPGRADES)
+    // ==========================================
+
+    public static void OnWeaponBought( Scene scene, string steamId )
     {
-        var save = SaveManager.Instance;
+        var save = SaveManager.Get( scene );
         if ( save == null || !save.IsFactoryReady ) return;
 
-        // ARCHIVE: Local prestige tracking
-        foreach ( var playerData in save.ActivePlayers.Values )
-        {
-            if ( playerData?.Stats == null ) continue;
-            playerData.Stats.TimesPrestiged++;
-            playerData.Stats.PrestigePoints += newPrestigeLevel;
-            playerData.Stats.FactoryResets++;
-        }
-        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Prestige" );
+        // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
+        save.CurrentFactory.Stats.WeaponsBought++;
+        if ( FactoryStats.Get( scene ) != null )
+            FactoryStats.Get( scene ).WeaponsBought = save.CurrentFactory.Stats.WeaponsBought;
 
-        if ( CanSendToSbox() )
+        // --- 3. API S&BOX (JOUEUR) ---
+        if ( CanSendToSbox( scene ) )
+            Increment( "total_weapons_bought", 1 );
+
+        // --- 4. ARCHIVE LOCALE (JOUEUR) ---
+        if ( save.ActivePlayers.TryGetValue( steamId, out var pData ) )
         {
-            Increment( "times_prestiged", 1 );
+            pData.Stats.TotalWeaponsBought++;
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Weapon Buy", steamId );
+        }
+    }
+
+    public static void OnUpgradeBought( Scene scene, string steamId )
+    {
+        var save = SaveManager.Get( scene );
+        if ( save == null || !save.IsFactoryReady ) return;
+
+        // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
+        save.CurrentFactory.Stats.UpgradesBought++;
+        if ( FactoryStats.Get( scene ) != null )
+            FactoryStats.Get( scene ).UpgradesBought = save.CurrentFactory.Stats.UpgradesBought;
+
+        // --- 3. API S&BOX (JOUEUR) ---
+        if ( CanSendToSbox( scene ) )
+            Increment( "total_upgrades_bought", 1 );
+
+        // --- 4. ARCHIVE LOCALE (JOUEUR) ---
+        if ( save.ActivePlayers.TryGetValue( steamId, out var pData ) )
+        {
+            pData.Stats.TotalUpgradesBought++;
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Upgrade Buy", steamId );
+        }
+    }
+
+    // ==========================================
+    // 4. TIME & META STATS
+    // ==========================================
+
+    public static void OnPrestige( Scene scene, int newPrestigeLevel )
+    {
+        var save = SaveManager.Get( scene );
+        if ( save == null || !save.IsFactoryReady ) return;
+
+        // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
+        save.CurrentFactory.Stats.TimesPrestiged++;
+        save.CurrentFactory.Stats.PrestigePoints += newPrestigeLevel;
+
+        if ( FactoryStats.Get( scene ) != null )
+        {
+            FactoryStats.Get( scene ).TimesPrestiged = save.CurrentFactory.Stats.TimesPrestiged;
+            FactoryStats.Get( scene ).PrestigePoints = save.CurrentFactory.Stats.PrestigePoints;
+        }
+
+        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.WorldStatUpdate, "Stats: Prestige" );
+
+        // --- 3. API S&BOX (JOUEUR) ---
+        if ( CanSendToSbox( scene ) )
+        {
+            Increment( "total_times_prestiged", 1 );
             Increment( "prestige_points", newPrestigeLevel );
         }
-    }
 
-    public static void OnPlayTimeAccumulated( float deltaSeconds, string steamId = null )
-    {
-        var save = SaveManager.Instance;
-        if ( save == null || !save.IsFactoryReady ) return;
-
-        // ARCHIVE: Update all players' lifetime playtime
+        // --- 4. ARCHIVE LOCALE (JOUEUR) ---
         foreach ( var playerData in save.ActivePlayers.Values )
         {
             if ( playerData?.Stats == null ) continue;
-            playerData.Stats.LifetimePlaytime += deltaSeconds;
+            playerData.Stats.TotalTimesPrestiged++;
+            playerData.Stats.TotalPrestigePoints += newPrestigeLevel;
         }
+        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Prestige" );
+    }
 
-        if ( CanSendToSbox() )
-        {
+    public static void OnPlayTimeAccumulated( Scene scene, float deltaSeconds, string steamId = null )
+    {
+        var save = SaveManager.Get( scene );
+        if ( save == null || !save.IsFactoryReady ) return;
+
+        // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
+        save.CurrentFactory.Stats.TimePlayed += deltaSeconds;
+        if ( FactoryStats.Get( scene ) != null )
+            FactoryStats.Get( scene ).TimePlayed = save.CurrentFactory.Stats.TimePlayed;
+
+        // --- 3. API S&BOX (JOUEUR) ---
+        if ( CanSendToSbox( scene ) )
             Increment( "total_playtime_seconds", deltaSeconds );
+
+        // --- 4. ARCHIVE LOCALE (JOUEUR) ---
+        foreach ( var playerData in save.ActivePlayers.Values )
+        {
+            if ( playerData?.Stats == null ) continue;
+            playerData.Stats.TotalTimePlayed += deltaSeconds;
         }
     }
 
-    public static void OnMoneySpent( string steamId, double amount )
+    // ==========================================
+    // 5. ENERGY STATS
+    // ==========================================
+
+    public static void OnEnergyConsumed( Scene scene, string steamId, float energyAmount )
     {
-        var save = SaveManager.Instance;
+        var save = SaveManager.Get( scene );
         if ( save == null || !save.IsFactoryReady ) return;
 
-        // ARCHIVE: Local spending tracking
+        // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
+        var fStats = save.CurrentFactory.Stats;
+        fStats.EnergyConsumed += energyAmount;
+        if ( FactoryStats.Get( scene ) != null )
+            FactoryStats.Get( scene ).EnergyConsumed = fStats.EnergyConsumed;
+
+        // --- 3. API S&BOX (JOUEUR) ---
+        if ( CanSendToSbox( scene ) )
+            Increment( "total_energy_consumed", energyAmount );
+
+        // --- 4. ARCHIVE LOCALE (JOUEUR) ---
         if ( save.ActivePlayers.TryGetValue( steamId, out var pData ) )
         {
-            pData.Stats.TotalMoneySpent += amount;
-            if ( amount > pData.Stats.LargestSinglePurchase )
-                pData.Stats.LargestSinglePurchase = amount;
-            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Money", steamId );
-        }
-
-        if ( CanSendToSbox() )
-        {
-            // PLAYER: Lifetime money spent across all factories/prestiges
-            Increment( "total_money_spent", amount );
-            SetValue( "largest_single_purchase", amount );
+            pData.Stats.TotalEnergyConsumed += energyAmount;
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Energy", steamId );
         }
     }
 
-    public static void OnUpgradeUnlocked( string steamId, string upgradeId )
+    public static void OnExhaustionPenalty( Scene scene, string steamId )
     {
-        var save = SaveManager.Instance;
+        var save = SaveManager.Get( scene );
         if ( save == null || !save.IsFactoryReady ) return;
 
-        // ARCHIVE: Local upgrade unlock tracking
+        // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
+        var fStats = save.CurrentFactory.Stats;
+        fStats.ExhaustionPenalties++;
+        if ( FactoryStats.Get( scene ) != null )
+            FactoryStats.Get( scene ).ExhaustionPenalties = fStats.ExhaustionPenalties;
+
+        // --- 3. API S&BOX (JOUEUR) ---
+        if ( CanSendToSbox( scene ) )
+            Increment( "total_exhaustion_penalties", 1 );
+
+        // --- 4. ARCHIVE LOCALE (JOUEUR) ---
         if ( save.ActivePlayers.TryGetValue( steamId, out var pData ) )
         {
-            pData.Stats.UpgradesUnlocked++;
-            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Upgrade", steamId );
-        }
-
-        if ( CanSendToSbox() )
-        {
-            // PLAYER: Total upgrades unlocked (cumule même après reset)
-            Increment( "upgrades_unlocked", 1 );
-            // PLAYER: Per-upgrade unlock count
-            Increment( $"upgrade_{upgradeId}_unlocked", 1 );
-        }
-    }
-
-    public static void OnWeaponUnlocked( string steamId, string weaponId )
-    {
-        var save = SaveManager.Instance;
-        if ( save == null || !save.IsFactoryReady ) return;
-
-        // ARCHIVE: Local weapon unlock tracking
-        if ( save.ActivePlayers.TryGetValue( steamId, out var pData ) )
-        {
-            pData.Stats.WeaponsUnlocked++;
-            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Weapon Unlock", steamId );
-        }
-
-        if ( CanSendToSbox() )
-        {
-            // PLAYER: Total weapons unlocked (cumule même après reset)
-            Increment( "weapons_unlocked", 1 );
-            // PLAYER: Per-weapon unlock count
-            Increment( $"weapon_{weaponId}_unlocked", 1 );
+            pData.Stats.ExhaustionPenalties++;
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerStatUpdate, "Stats: Exhaustion", steamId );
         }
     }
 }

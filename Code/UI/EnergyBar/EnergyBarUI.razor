@@ -10,7 +10,7 @@
     @{
         float energy = ActiveWeapon?.GetEnergyPercentage() ?? 1f;
         bool show = ActiveWeapon?.ShouldShowEnergyBar() ?? false;
-        bool exhausted = PlayerStats.Local?.IsExhausted ?? false;
+        bool exhausted = GetPlayerStats()?.IsExhausted ?? false;
     }
 
     <div class="energy-container @(show ? "" : "hidden") @(exhausted ? "exhausted" : "")">
@@ -23,13 +23,23 @@
 @code {
     public static EnergyBarUI Local { get; private set; }
 
-    BaseWeapon ActiveWeapon => PlayerInventory.Local?.ActiveWeapon as BaseWeapon;
+    PlayerInventory GetLocalInventory()
+    {
+        return Scene.GetAllComponents<PlayerInventory>().FirstOrDefault(x => !x.IsProxy);
+    }
+
+    PlayerStats GetPlayerStats()
+    {
+        return Scene.GetAllComponents<PlayerStats>().FirstOrDefault(x => !x.IsProxy);
+    }
+
+    BaseWeapon ActiveWeapon => GetLocalInventory()?.ActiveWeapon as BaseWeapon;
 
 
     protected override int BuildHash()
     {
         if (ActiveWeapon is null) return 0;
         return HashCode.Combine(ActiveWeapon.GetEnergyPercentage(), ActiveWeapon.ShouldShowEnergyBar(),
-PlayerStats.Local?.IsExhausted ?? false);
+GetPlayerStats()?.IsExhausted ?? false);
     }
 }

@@ -41,11 +41,11 @@ public class SaveThrottler : Component
 
 		if ( _playtimeAccumulator >= 5f )
 		{
-			GameStats.OnPlayTimeAccumulated( _playtimeAccumulator );
+			GameStats.OnPlayTimeAccumulated( Scene, _playtimeAccumulator );
 
-			if ( SaveManager.Instance?.CurrentFactory != null )
+			if ( SaveManager.Get( Scene )?.CurrentFactory != null )
 			{
-				SaveManager.Instance.CurrentFactory.Stats.TimePlayed += _playtimeAccumulator;
+				SaveManager.Get( Scene ).CurrentFactory.Stats.TimePlayed += _playtimeAccumulator;
 			}
 
 			_playtimeAccumulator = 0f;
@@ -95,9 +95,9 @@ public class SaveThrottler : Component
 	public void ForceFlush()
 	{
 		Log.Info( "[SaveThrottler] ForceFlush() called - IMMEDIATELY flushing pending changes" );
-		if ( SaveManager.Instance != null )
+		if ( SaveManager.Get( Scene ) != null )
 		{
-			SaveManager.Instance.FlushDirtyData( _isFactoryDirty, _dirtyPlayers );
+			SaveManager.Get( Scene ).FlushDirtyData( _isFactoryDirty, _dirtyPlayers );
 		}
 
 		_isFactoryDirty = false;

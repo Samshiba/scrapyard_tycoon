@@ -8,10 +8,10 @@
 		@for (int i = 0; i < 4; i++)
 		{
 			var index = i;
-			var weapon = PlayerInventory.Local?.EquippedWeapons.Length > index
-				? PlayerInventory.Local.EquippedWeapons[index]
+			var weapon = GetLocalInventory()?.EquippedWeapons.Length > index
+				? GetLocalInventory().EquippedWeapons[index]
 				: null;
-			var isActive = PlayerInventory.Local?.ActiveSlotIndex == index && ActiveWeaponObject != null;
+			var isActive = GetLocalInventory()?.ActiveSlotIndex == index && ActiveWeaponObject != null;
 
 			<div class="hotbar-slot @(isActive ? "active" : "") @(weapon == null ? "empty" : "")">
 				<span class="slot-number">@(index + 1)</span>
@@ -33,7 +33,12 @@
 </root>
 
 @code {
-	GameObject ActiveWeaponObject => PlayerInventory.Local?.ActiveWeapon?.GameObject;
+	GameObject ActiveWeaponObject => GetLocalInventory()?.ActiveWeapon?.GameObject;
+
+	PlayerInventory GetLocalInventory()
+	{
+		return Scene.GetAllComponents<PlayerInventory>().FirstOrDefault(x => !x.IsProxy);
+	}
 
 	protected override void OnUpdate()
 	{
@@ -43,9 +48,9 @@
 	protected override int BuildHash()
 	{
 		return System.HashCode.Combine(
-			PlayerInventory.Local?.ActiveSlotIndex,
-			PlayerInventory.Local?.ActiveWeapon,
-			PlayerInventory.Local?.EquippedWeapons != null ? string.Join(",", PlayerInventory.Local.EquippedWeapons.Select(w =>
+			GetLocalInventory()?.ActiveSlotIndex,
+			GetLocalInventory()?.ActiveWeapon,
+			GetLocalInventory()?.EquippedWeapons != null ? string.Join(",", GetLocalInventory()?.EquippedWeapons.Select(w =>
 w?.Id ?? "null")) : "null"
 		);
 	}

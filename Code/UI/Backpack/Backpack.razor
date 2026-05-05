@@ -26,7 +26,7 @@
 					<div class="gibs-bar-fill" style="width: @(FillPercent)%; background-color: @FillColor;"></div>
 				</div>
 				<label class="gibs-label" style="color: @FillColor;">
-					@(PlayerBackpack.Local?.CurrentItemCount) / @(PlayerBackpack.Local?.MaxItems)
+					@(GetLocalBackpack()?.CurrentItemCount) / @(GetLocalBackpack()?.MaxItems)
 				</label>
 			</div>
 		</div>
@@ -35,9 +35,14 @@
 </root>
 
 @code {
-	float FillPercent => PlayerBackpack.Local == null || PlayerBackpack.Local.MaxItems == 0
+	PlayerBackpack GetLocalBackpack()
+	{
+		return Scene.GetAllComponents<PlayerBackpack>().FirstOrDefault(x => !x.IsProxy);
+	}
+
+	float FillPercent => GetLocalBackpack() == null || GetLocalBackpack().MaxItems == 0
 		? 0
-		: ((float)PlayerBackpack.Local.CurrentItemCount / PlayerBackpack.Local.MaxItems) * 100f;
+		: ((float)GetLocalBackpack().CurrentItemCount / GetLocalBackpack().MaxItems) * 100f;
 
 	// Vert → Jaune → Rouge selon remplissage
 	string FillColor
@@ -51,14 +56,14 @@
 		}
 	}
 
-	double GetScrap() => FactoryStats.Instance?.TotalScrap ?? 0;
+	double GetScrap() => FactoryStats.Get(Scene)?.TotalScrap ?? 0;
 
 	protected override int BuildHash()
 	{
 		var h = new System.HashCode();
 		h.Add(GetScrap());
-		h.Add(PlayerBackpack.Local?.CurrentItemCount);
-		h.Add(PlayerBackpack.Local?.MaxItems);
+		h.Add(GetLocalBackpack()?.CurrentItemCount);
+		h.Add(GetLocalBackpack()?.MaxItems);
 
 		return h.ToHashCode();
 	}

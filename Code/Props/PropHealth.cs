@@ -42,6 +42,11 @@ public sealed class PropHealth : Component, Component.IDamageable
             return;
         }
         Log.Info( $"[PropHealth] Damage received: {damage.Damage} from tags: {string.Join( ", ", damage.Tags )}" );
+        if ( damage.Damage <= 0 ) return;
+        if ( GameStats.CanSendToSbox( Scene ) && damage.Damage >= 10f * CurrentHealth )
+        {
+            Sandbox.Services.Achievements.Unlock( "scrt_overkill" );
+        }
         CurrentHealth -= damage.Damage;
         FlashDamage();
         if ( CurrentHealth <= 0 ) OnBreak();
@@ -53,7 +58,7 @@ public sealed class PropHealth : Component, Component.IDamageable
         _lastWeaponId = weaponId;
 
         // Call stats immediately for damage dealt event, passing isCrit info
-        GameStats.OnDamageDealt( steamId, weaponId, damage, isCrit );
+        GameStats.OnDamageDealt( Scene, steamId, weaponId, damage, isCrit );
     }
 
     private Color GetFlashColor()
@@ -88,6 +93,16 @@ public sealed class PropHealth : Component, Component.IDamageable
 
     private void OnBreak()
     {
+        // Achievements
+        if ( GameStats.CanSendToSbox( Scene ) )
+        {
+            Sandbox.Services.Achievements.Unlock( "first_blood" );
+            if ( Data.IsJackpot )
+            {
+                Sandbox.Services.Achievements.Unlock( "scrt_jackpot" );
+            }
+        }
+
         // Check if there are SubProps to spawn instead of gibs
         if ( Data.SubProps != null && Data.SubProps.Count > 0 )
         {
@@ -107,7 +122,7 @@ public sealed class PropHealth : Component, Component.IDamageable
             BreakIntoGibs();
         }
 
-        GameStats.OnPropDestroyed( _lastAttackerSteamId, Data.PropID, _lastWeaponId, TotalValue, FinalGibCount );
+        GameStats.OnPropDestroyed( Scene, _lastAttackerSteamId, Data.PropID, _lastWeaponId, TotalValue, FinalGibCount );
 
         GameObject.Destroy();
     }

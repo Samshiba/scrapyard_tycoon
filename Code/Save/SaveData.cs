@@ -12,12 +12,16 @@ public class FactoryWorldData
     [JsonPropertyName( "is_sandbox" )] public bool IsSandbox { get; set; } = false;
 
     // Economy and progression
-    [JsonPropertyName( "current_scrap" )] public double TotalScrap { get; set; } = 7929999798.9796;
+    [JsonPropertyName( "current_scrap" )] public double TotalScrap { get; set; } = 0;
     [JsonPropertyName( "prestige_level" )] public int PrestigeLevel { get; set; } = 0;
 
     // World state
     [JsonPropertyName( "world_state" )] public WorldStateData WorldState { get; set; } = new();
     [JsonPropertyName( "statistics" )] public FactoryStatsData Stats { get; set; } = new();
+
+    // Dates
+    [JsonPropertyName( "created_at" )] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    [JsonPropertyName( "last_updated" )] public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Accessors for easier data manipulation
     [JsonIgnore] public int Tier { get => WorldState.Tier; set => WorldState.Tier = value; }
@@ -65,41 +69,64 @@ public class InventoryStateData
 
 public class FactoryStatsData
 {
-    [JsonPropertyName( "time_played" )] public float TimePlayed { get; set; }
-    [JsonPropertyName( "max_damage_hit" )] public double MaxDamageHit { get; set; }
-    [JsonPropertyName( "props_destroyed" )] public long PropsDestroyed { get; set; }
-    [JsonPropertyName( "scrap_gained_session" )] public double ScrapGainedSession { get; set; }
-    [JsonPropertyName( "gibs_dropped_session" )] public int GibsDroppedSession { get; set; }
-}
-
-public class PlayerStatsData
-{
-    // --- LIFETIME CORE STATS ---
-    [JsonPropertyName( "lifetime_playtime" )] public float LifetimePlaytime { get; set; }
-    [JsonPropertyName( "total_scrap_collected" )] public double TotalScrapCollected { get; set; }
+    // Economy
+    [JsonPropertyName( "scrap_gained" )] public double ScrapGained { get; set; }
     [JsonPropertyName( "largest_scrap_gain" )] public double LargestScrapGain { get; set; }
+    [JsonPropertyName( "total_money_spent" )] public double TotalMoneySpent { get; set; }
+    [JsonPropertyName( "largest_single_purchase" )] public double LargestSinglePurchase { get; set; }
+    [JsonPropertyName( "gibs_dropped" )] public int GibsDropped { get; set; }
 
-    // --- COMBAT STATS ---
-    [JsonPropertyName( "total_damage_dealt" )] public double TotalDamageDealt { get; set; }
+    // Combat
+    [JsonPropertyName( "total_damage" )] public double TotalDamage { get; set; }
     [JsonPropertyName( "highest_damage_hit" )] public double HighestDamageHit { get; set; }
     [JsonPropertyName( "total_attacks" )] public int TotalAttacks { get; set; }
     [JsonPropertyName( "total_critical_hits" )] public int TotalCriticalHits { get; set; }
     [JsonPropertyName( "critical_damage" )] public double CriticalDamage { get; set; }
+    [JsonPropertyName( "targets_destroyed" )] public long TargetsDestroyed { get; set; }
 
-    // --- TARGETS/PROPS ---
-    [JsonPropertyName( "total_targets_destroyed" )] public long TotalTargetsDestroyed { get; set; }
-    [JsonPropertyName( "total_props_destroyed" )] public long TotalPropsDestroyed { get; set; }
+    // Time & Meta
+    [JsonPropertyName( "time_played" )] public float TimePlayed { get; set; }
+    [JsonPropertyName( "times_prestiged" )] public int TimesPrestiged { get; set; } = 0;
+    [JsonPropertyName( "prestige_points" )] public int PrestigePoints { get; set; } = 0;
 
-    // --- PROGRESSION ---
-    [JsonPropertyName( "times_prestiged" )] public int TimesPrestiged { get; set; }
-    [JsonPropertyName( "prestige_points" )] public int PrestigePoints { get; set; }
-    [JsonPropertyName( "factory_resets" )] public int FactoryResets { get; set; }
+    // Buying
+    [JsonPropertyName( "weapons_bought" )] public int WeaponsBought { get; set; }
+    [JsonPropertyName( "upgrades_bought" )] public int UpgradesBought { get; set; }
 
-    // --- UNLOCKS & PURCHASES ---
-    [JsonPropertyName( "upgrades_unlocked" )] public int UpgradesUnlocked { get; set; }
-    [JsonPropertyName( "weapons_unlocked" )] public int WeaponsUnlocked { get; set; }
+    // Energy
+    [JsonPropertyName( "energy_consumed" )] public double EnergyConsumed { get; set; }
+    [JsonPropertyName( "exhaustion_penalties" )] public int ExhaustionPenalties { get; set; }
+}
+
+public class PlayerStatsData
+{
+    // Economy
+    [JsonPropertyName( "lifetime_scrap_gained" )] public double LifetimeScrapGained { get; set; }
+    [JsonPropertyName( "largest_scrap_gain" )] public double LargestScrapGain { get; set; }
     [JsonPropertyName( "total_money_spent" )] public double TotalMoneySpent { get; set; }
     [JsonPropertyName( "largest_single_purchase" )] public double LargestSinglePurchase { get; set; }
+    [JsonPropertyName( "total_gibs_dropped" )] public int TotalGibsDropped { get; set; }
+
+    // Combat
+    [JsonPropertyName( "total_damage" )] public double TotalDamage { get; set; }
+    [JsonPropertyName( "highest_damage_hit" )] public double HighestDamageHit { get; set; }
+    [JsonPropertyName( "total_attacks" )] public int TotalAttacks { get; set; }
+    [JsonPropertyName( "total_critical_hits" )] public int TotalCriticalHits { get; set; }
+    [JsonPropertyName( "critical_damage" )] public double CriticalDamage { get; set; }
+    [JsonPropertyName( "total_targets_destroyed" )] public long TotalTargetsDestroyed { get; set; }
+
+    // Time & Meta
+    [JsonPropertyName( "total_time_played" )] public float TotalTimePlayed { get; set; }
+    [JsonPropertyName( "total_times_prestiged" )] public int TotalTimesPrestiged { get; set; }
+    [JsonPropertyName( "total_prestige_points" )] public int TotalPrestigePoints { get; set; }
+
+    // Buying
+    [JsonPropertyName( "total_weapons_bought" )] public int TotalWeaponsBought { get; set; }
+    [JsonPropertyName( "total_upgrades_bought" )] public int TotalUpgradesBought { get; set; }
+
+    // Energy
+    [JsonPropertyName( "total_energy_consumed" )] public double TotalEnergyConsumed { get; set; }
+    [JsonPropertyName( "exhaustion_penalties" )] public int ExhaustionPenalties { get; set; }
 
     // --- VANITY STATS (Per-weapon and Per-prop breakdown) ---
     [JsonPropertyName( "weapon_vanity" )] public Dictionary<string, WeaponVanityStat> WeaponVanity { get; set; } = new();
@@ -115,6 +142,7 @@ public class WeaponVanityStat
     [JsonPropertyName( "total_damage" )] public double TotalDamage { get; set; }
     [JsonPropertyName( "max_damage_hit" )] public double MaxDamageHit { get; set; }
     [JsonPropertyName( "critical_hits" )] public int CriticalHits { get; set; }
+    [JsonPropertyName( "total_attacks" )] public int TotalAttacks { get; set; }
 }
 
 /// <summary>

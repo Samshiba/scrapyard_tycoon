@@ -6,15 +6,8 @@ using System.Threading.Tasks;
 
 public sealed class GameState : Component, Component.INetworkListener
 {
-    public static GameState Instance { get; private set; }
-
     [Property] public List<BayComponent> AllBays { get; set; } = new();
     [Property] public GameObject PlayerPrefab { get; set; }
-
-    protected override void OnAwake()
-    {
-        Instance = this;
-    }
 
     protected override void OnStart()
     {
@@ -69,9 +62,10 @@ public sealed class GameState : Component, Component.INetworkListener
         }
 
         // Wait for SaveManager to load all player data before spawning visually
-        string steamId = channel.SteamId.ToString();
+        // string steamId = channel.SteamId.ToString();
+        string steamId = channel.GetUniqueId();
         var loadTimeout = System.Diagnostics.Stopwatch.StartNew();
-        while ( !SaveManager.Instance?.ActivePlayers.ContainsKey( steamId ) ?? true )
+        while ( !SaveManager.Get( Scene )?.ActivePlayers.ContainsKey( steamId ) ?? true )
         {
             if ( loadTimeout.ElapsedMilliseconds > 10000 )
             {
@@ -101,16 +95,17 @@ public sealed class GameState : Component, Component.INetworkListener
     {
         if ( !Networking.IsHost ) return;
 
-        string steamId = channel.SteamId.ToString();
+        // string steamId = channel.SteamId.ToString();
+        string steamId = channel.GetUniqueId();
 
         SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerDisconnect, $"Player {channel.DisplayName} disconnected", steamId );
 
         var playerBay = AllBays.FirstOrDefault( b => b.Owners.Contains( channel ) );
         playerBay?.RemoveOwner( channel );
 
-        if ( SaveManager.Instance != null && SaveManager.Instance.ActivePlayers.ContainsKey( steamId ) )
+        if ( SaveManager.Get( Scene ) != null && SaveManager.Get( Scene ).ActivePlayers.ContainsKey( steamId ) )
         {
-            SaveManager.Instance.ActivePlayers.Remove( steamId );
+            SaveManager.Get( Scene ).ActivePlayers.Remove( steamId );
         }
 
         Log.Info( $"[GameState] Player {channel.DisplayName} disconnected. Save triggered and removed from bay." );

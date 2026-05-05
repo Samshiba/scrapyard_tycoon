@@ -20,7 +20,7 @@ public sealed class BayComponent : Component
             Log.Info( $"[BayComponent] Bay {BayId} assigned to player {channel.DisplayName} ({Owners.Count} player(s) total)" );
         }
 
-        // TODO: Apply visual upgrades from SaveManager.Instance.CurrentFactory.UnlockedPrestigeUpgrades    
+        // TODO: Apply visual upgrades from SaveManager.Get( Scene ).CurrentFactory.UnlockedPrestigeUpgrades    
     }
 
     public void RemoveOwner( Connection channel )

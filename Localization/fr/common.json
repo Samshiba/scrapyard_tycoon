@@ -19,5 +19,13 @@
     "common.emoji.warning": "⚠️",
     "common.emoji.factory": "🏭",
     "common.emoji.wrench": "🔧",
-    "common.currency.scrap": "Scrap"
+    "common.currency.scrap": "Scrap",
+    "common.time.just_now": "À l'instant",
+    "common.time.minutes_ago": "min",
+    "common.time.hours_ago": "h",
+    "common.time.yesterday": "Hier",
+    "common.time.days_ago": "j",
+    "common.time.weeks_ago": "sem.",
+    "common.time.months_ago": "mois",
+    "common.time.years_ago": "ans"
 }

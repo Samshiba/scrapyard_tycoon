@@ -11,7 +11,7 @@ public sealed class PropSpawner : Component
     {
         get
         {
-            var upgrades = SaveManager.Instance?.CurrentFactory?.GlobalUpgrades;
+            var upgrades = SaveManager.Get( Scene )?.CurrentFactory?.GlobalUpgrades;
             if ( upgrades == null ) return -1.0f;
             if ( upgrades.GetValueOrDefault( "auto_spawn_unlocked", 0 ) == 0 ) return -1.0f;
 
@@ -59,7 +59,7 @@ public sealed class PropSpawner : Component
     {
         if ( _allProps == null || _allProps.Count == 0 ) return;
 
-        int maxTier = SaveManager.Instance?.CurrentFactory?.Tier ?? 1;
+        int maxTier = SaveManager.Get( Scene )?.CurrentFactory?.Tier ?? 1;
 
         int chosenTier = GetRandomTier( maxTier, 1, 2.0f );
 

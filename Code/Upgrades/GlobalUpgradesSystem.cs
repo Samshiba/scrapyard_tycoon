@@ -19,9 +19,9 @@ public sealed class GlobalUpgradesSystem : Component
 
     protected override void OnUpdate()
     {
-        if ( Networking.IsHost && !_isLoaded && SaveManager.Instance?.IsFactoryReady == true )
+        if ( Networking.IsHost && !_isLoaded && SaveManager.Get( Scene )?.IsFactoryReady == true )
         {
-            var factoryUpgrades = SaveManager.Instance.CurrentFactory.GlobalUpgrades;
+            var factoryUpgrades = SaveManager.Get( Scene ).CurrentFactory.GlobalUpgrades;
 
             SyncedUpgrades.Clear();
             foreach ( var kvp in factoryUpgrades )
@@ -132,8 +132,8 @@ public sealed class GlobalUpgradesSystem : Component
         // 1. Validate server-side dependencies
         if ( !Networking.IsHost ) return false;
 
-        var factoryUpgrades = SaveManager.Instance?.CurrentFactory?.GlobalUpgrades;
-        if ( factoryUpgrades == null || UpgradeManager.Instance == null || FactoryStats.Instance == null ) return false;
+        var factoryUpgrades = SaveManager.Get( Scene )?.CurrentFactory?.GlobalUpgrades;
+        if ( factoryUpgrades == null || UpgradeManager.Instance == null || FactoryStats.Get( Scene ) == null ) return false;
 
         if ( !UpgradeManager.Instance.Database.TryGetValue( upgradeId, out var node ) ) return false;
 
@@ -141,12 +141,12 @@ public sealed class GlobalUpgradesSystem : Component
         if ( currentLevel >= node.MaxLevel ) return false;
 
         // 2. Verify all parent upgrade requirements are met
-        if ( !UpgradeManager.Instance.IsNodeUnlocked( upgradeId, SaveManager.Instance.CurrentFactory ) ) return false;
+        if ( !UpgradeManager.Instance.IsNodeUnlocked( upgradeId, SaveManager.Get( Scene ).CurrentFactory ) ) return false;
 
         double cost = node.GetCostForLevel( currentLevel );
 
         // 3. Attempt payment
-        if ( FactoryStats.Instance.SpendScrap( cost ) )
+        if ( FactoryStats.Get( Scene ).SpendScrap( cost ) )
         {
             factoryUpgrades[upgradeId] = currentLevel + 1;
             SyncedUpgrades[upgradeId] = currentLevel + 1;
@@ -154,11 +154,12 @@ public sealed class GlobalUpgradesSystem : Component
             // 4. Apply tier upgrade bonus
             if ( upgradeId == "root_node" )
             {
-                SaveManager.Instance.CurrentFactory.Tier++;
+                SaveManager.Get( Scene ).CurrentFactory.Tier++;
+                FactoryStats.Get( Scene ).Tier++;
             }
 
-            GameStats.OnMoneySpent( steamId, cost );
-            GameStats.OnUpgradeUnlocked( steamId, upgradeId );
+            GameStats.OnMoneySpent( Scene, steamId, cost );
+            GameStats.OnUpgradeBought( Scene, steamId );
 
             RebuildCache();
 

@@ -26,8 +26,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
 
     protected override void OnUpdate()
     {
-        if ( _playerStats == null )
-            _playerStats = PlayerStats.Local;
+        if ( _playerStats == null ) _playerStats = Components.GetInAncestors<PlayerStats>();
 
         if ( IsProxy || Data == null || _playerStats == null ) return;
 
@@ -93,11 +92,18 @@ public abstract class BaseWeapon : Component, ITooltipProvider
 
         _playerStats.CurrentEnergy -= Data.EnergyCost;
 
+        // Track energy consumption
+        var playerSteamId = GetPlayerSteamId();
+        GameStats.OnEnergyConsumed( Scene, playerSteamId, Data.EnergyCost );
+
         if ( _playerStats.CurrentEnergy <= 0 )
         {
             _playerStats.CurrentEnergy = 0;
             _playerStats.IsExhausted = true;
             _playerStats.TimeSinceExhausted = 0;
+
+            // Track exhaustion penalty
+            GameStats.OnExhaustionPenalty( Scene, playerSteamId );
 
             if ( Data.ExhaustionSound != null )
                 Sound.Play( Data.ExhaustionSound, WorldPosition );
@@ -112,6 +118,13 @@ public abstract class BaseWeapon : Component, ITooltipProvider
         return _playerStats.CurrentEnergy / _playerStats.MaxEnergy;
     }
 
+    private string GetPlayerSteamId()
+    {
+        var backpack = Components.GetInAncestors<PlayerBackpack>();
+        if ( backpack == null ) return "unknown";
+        return backpack.Network.Owner?.GetUniqueId() ?? backpack.Network.Owner?.SteamId.ToString() ?? "unknown";
+    }
+
     public bool ShouldShowEnergyBar()
     {
         if ( _playerStats == null ) return false;
@@ -121,7 +134,7 @@ public abstract class BaseWeapon : Component, ITooltipProvider
              _playerStats.TimeSinceLastAttack < 1f);
     }
 
-    public bool ShouldHit()
+    public bool ShouldCrit()
     {
         float rollChance = Game.Random.Float( 0f, 100f );
         return rollChance < CriticalChance;

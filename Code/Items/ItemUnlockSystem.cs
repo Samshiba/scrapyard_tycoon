@@ -1,19 +1,18 @@
 using Sandbox;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Gère le déblocage des armes et outils
 /// </summary>
 public sealed class ItemUnlockSystem : Component
 {
-    public static ItemUnlockSystem Instance { get; private set; }
-
     [Sync] public NetList<string> UnlockedWeapons { get; private set; } = new();
     [Sync] public NetList<string> UnlockedUtilities { get; private set; } = new();
 
-    protected override void OnAwake()
+    public static ItemUnlockSystem Get( Scene scene )
     {
-        Instance = this;
+        return scene.GetAllComponents<ItemUnlockSystem>().FirstOrDefault();
     }
 
     protected override void OnStart()
@@ -26,14 +25,14 @@ public sealed class ItemUnlockSystem : Component
     private async System.Threading.Tasks.Task LoadUnlockedItemsAsync()
     {
         // Wait for SaveManager to load factory data
-        while ( !SaveManager.Instance?.IsFactoryReady ?? true )
+        while ( !SaveManager.Get( Scene )?.IsFactoryReady ?? true )
         {
             await System.Threading.Tasks.Task.Delay( 50 );
         }
 
-        if ( SaveManager.Instance?.CurrentFactory != null )
+        if ( SaveManager.Get( Scene )?.CurrentFactory != null )
         {
-            var factory = SaveManager.Instance.CurrentFactory;
+            var factory = SaveManager.Get( Scene ).CurrentFactory;
 
             if ( factory.UnlockedWeapons != null )
             {
@@ -66,7 +65,7 @@ public sealed class ItemUnlockSystem : Component
         if ( !UnlockedWeapons.Contains( weaponId ) )
         {
             UnlockedWeapons.Add( weaponId );
-            GameStats.OnWeaponUnlocked( steamId, weaponId );
+            GameStats.OnWeaponBought( Scene, steamId );
 
             SaveChanges();
             Log.Info( $"[ItemUnlockSystem] Weapon unlocked: {weaponId}" );
@@ -87,10 +86,10 @@ public sealed class ItemUnlockSystem : Component
 
     private void SaveChanges()
     {
-        if ( !Networking.IsHost || SaveManager.Instance?.CurrentFactory == null ) return;
+        if ( !Networking.IsHost || SaveManager.Get( Scene )?.CurrentFactory == null ) return;
 
-        SaveManager.Instance.CurrentFactory.UnlockedWeapons = [.. UnlockedWeapons];
-        SaveManager.Instance.CurrentFactory.UnlockedUtilities = [.. UnlockedUtilities];
+        SaveManager.Get( Scene ).CurrentFactory.UnlockedWeapons = [.. UnlockedWeapons];
+        SaveManager.Get( Scene ).CurrentFactory.UnlockedUtilities = [.. UnlockedUtilities];
 
         SaveEventBus.NotifyChange( SaveEventBus.SaveReason.ItemUnlocked, $"Weapons: {UnlockedWeapons.Count}, Utilities: {UnlockedUtilities.Count}" );
     }

@@ -12,9 +12,9 @@
 // - 'IBM Plex Sans' → falls back to -apple-system, BlinkMacSystemFont, Arial, etc.
 // - 'Roboto' → falls back to Segoe UI, sans-serif
 // - 'JetBrains Mono' → falls back to Courier New, monospace
-$font-heading: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-$font-body: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-$font-mono: 'JetBrains Mono', 'Monaco', 'Courier New', monospace;
+$font-heading: 'IBM Plex Sans';
+$font-body: 'Roboto';
+$font-mono: 'JetBrains Mono';
 
 // ============================================================================
 // COLOR PALETTE — BACKGROUNDS
@@ -109,22 +109,38 @@ $fw-h4: 600;
 $lh-h4: 20px;
 
 // BODY TEXT
-$fs-body-lg: 15px; // Main descriptions
-$fs-body: 14px;    // Standard paragraphs
-$fs-body-sm: 15px; // Metadata, secondary (was 13px, increased for readability)
+$fs-body-lg: 20px; // Main descriptions
+$fs-body: 18px;    // Standard paragraphs
+$fs-body-sm: 16px; // Metadata, secondary (was 13px, increased for readability)
 $fw-body: 400;
-$lh-body: 24px;    // Increased from 22px
-$lh-body-lg: 26px; // Increased from 24px
+$lh-body: 26px;    // Increased from 22px
+$lh-body-lg: 28px; // Increased from 24px
 
 // UI-SPECIFIC
-$fs-stat-numbers: 18px;  // Large values (currency, count)
+$fs-stat-numbers: 20px;  // Large values (currency, count)
 $fw-stat-numbers: 900;
 
-$fs-ui-label: 15px;      // Inventory counters, resource displays (was 13px)
+$fs-ui-label: 16px;      // Inventory counters, resource displays (was 13px)
 $fw-ui-label: 700;
 
 $fs-badge: 14px;         // Badge/Tag — Weapon types, stat icons (was 12px, increased from 12→14)
 $fw-badge: 600;
+
+// SMALL TEXT SIZES (for edge cases & backwards compatibility)
+$fs-extra-small: 17px;   // Small descriptive text (stat pills, metadata)
+$fs-tiny: 16px;          // Minimal text (slot numbers, captions)
+$fs-minimal: 14px;       // Ultra-small (rarely used)
+$fs-description: 18px;   // Slightly larger descriptions
+
+// DISPLAY & ICON SIZES (for large prominent elements)
+$fs-icon-sm: 16px;       // Small icons in stat rows
+$fs-icon-md: 20px;       // Medium icons (close buttons, buttons)
+$fs-icon-lg: 24px;       // Large icons (close buttons, large controls)
+$fs-display-lg: 32px;    // Large displays (KPI values, count displays)
+$fs-display-md: 28px;    // Medium-large displays (KPI alt size)
+$fs-display-xl: 42px;    // Extra large (factory titles, major sections)
+$fs-display-icon: 36px;  // Giant icons (skill tree nodes, major displays)
+$fs-display-2xl: 64px;   // Huge icons (empty state illustrations)
 
 // ============================================================================
 // Z-INDEX SCALE

@@ -9,3 +9,13 @@ pas de muzzle falsh sur le submachine gun (prefab rigle cassé)
 arme auto la barre d'enrgie ne devient pas rouge
 
 mauvaise arme spawn en assignant (bloquer sur bate)
+
+
+# stats
+manque prestige sur factory
+total targets destroyed sur player (move)
+highesdt damage factory fonctionne pas
+targets unlock sur player (move)
+manque total damage factory
+vanity bat fonctionne pas?
+le seen des armes lie au player et non la factory

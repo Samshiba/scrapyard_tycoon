@@ -3,14 +3,9 @@ using Sandbox;
 
 public sealed class PlayerFactoryActions : Component, Component.INetworkListener
 {
-    public static PlayerFactoryActions Local { get; private set; }
-
-    protected override void OnAwake()
+    public static PlayerFactoryActions Get( Scene scene )
     {
-        if ( !IsProxy )
-        {
-            Local = this;
-        }
+        return scene.GetAllComponents<PlayerFactoryActions>().FirstOrDefault();
     }
 
     [Rpc.Broadcast]
@@ -21,13 +16,14 @@ public sealed class PlayerFactoryActions : Component, Component.INetworkListener
         var weaponDef = ResourceLibrary.GetAll<WeaponDefinition>().FirstOrDefault( w => w.Id == weaponId );
         if ( weaponDef == null ) return;
 
-        string callerId = Rpc.Caller.SteamId.ToString();
+        // string callerId = Rpc.Caller.SteamId.ToString();
+        string callerId = Rpc.Caller.GetUniqueId() ?? Rpc.Caller.SteamId.ToString();
 
-        if ( FactoryStats.Instance != null && FactoryStats.Instance.SpendScrap( weaponDef.UnlockCost ) )
+        if ( FactoryStats.Get( Scene ) != null && FactoryStats.Get( Scene ).SpendScrap( weaponDef.UnlockCost ) )
         {
-            GameStats.OnMoneySpent( callerId, weaponDef.UnlockCost );
+            GameStats.OnMoneySpent( Scene, callerId, weaponDef.UnlockCost );
 
-            ItemUnlockSystem.Instance?.UnlockWeapon( weaponId, callerId );
+            ItemUnlockSystem.Get( Scene )?.UnlockWeapon( weaponId, callerId );
 
             Log.Info( $"[PlayerFactoryActions] Weapon purchase successful: {weaponId} for {weaponDef.UnlockCost} scrap" );
         }
@@ -42,7 +38,8 @@ public sealed class PlayerFactoryActions : Component, Component.INetworkListener
     {
         if ( !Networking.IsHost ) return;
 
-        string callerId = Rpc.Caller.SteamId.ToString();
+        // string callerId = Rpc.Caller.SteamId.ToString();
+        string callerId = Rpc.Caller.GetUniqueId() ?? Rpc.Caller.SteamId.ToString();
 
         if ( GlobalUpgradesSystem.Instance != null && GlobalUpgradesSystem.Instance.TryPurchaseUpgrade( upgradeId, callerId ) )
         {

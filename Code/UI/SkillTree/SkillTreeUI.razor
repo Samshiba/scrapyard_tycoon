@@ -93,8 +93,8 @@
                             onmouseout=@( () => { HoveredId = null; StateHasChanged(); } )
                             onclick=@( () => { HoveredId = capturedId; OnNodeClick( capturedId ); } )>
                             
-                            <div class="node-icon" style="font-size: @(36 * Zoom)px;">@displayIcon</div>
-                            <div class="node-lvl" style="font-size: @(14 * Zoom)px; padding: @(2*Zoom)px @(6*Zoom)px;">@displayLvl</div>
+                            <div class="node-icon" style="font-size: @(FS_DISPLAY_ICON * Zoom)px;">@displayIcon</div>
+                            <div class="node-lvl" style="font-size: @(FS_BADGE * Zoom)px; padding: @(2*Zoom)px @(6*Zoom)px;">@displayLvl</div>
                         </div>
                     }
 
@@ -147,6 +147,12 @@
 @code {
     public static SkillTreeUI Local { get; private set; }
 
+    // ============================================================================
+    // DESIGN SYSTEM CONSTANTS — Must sync with _design-system.scss
+    // ============================================================================
+    const float FS_DISPLAY_ICON = 36f;   // $fs-display-icon in _design-system.scss
+    const float FS_BADGE = 14f;          // $fs-badge in _design-system.scss
+    
     const float NodeRadius = 48f;
 
     public bool IsOpen { get; set; } = false;
@@ -355,13 +361,13 @@
     }
 
     int GetLevel( string id ) => GlobalUpgradesSystem.Instance?.GetUpgradeLevel( id ) ?? 0;
-    double GetScrap() => FactoryStats.Instance?.TotalScrap ?? 0;
+    double GetScrap() => FactoryStats.Get( Scene )?.TotalScrap ?? 0;
     void OnNodeClick( string id )
     {
         if ( DragDistance > 5f ) return; 
         if ( !IsUnlocked( id ) ) return;
 
-        PlayerFactoryActions.Local?.RpcRequestBuyGlobalUpgrade( id );
+        PlayerFactoryActions.Get( Scene )?.RpcRequestBuyGlobalUpgrade( id );
     }
 
     protected override int BuildHash()

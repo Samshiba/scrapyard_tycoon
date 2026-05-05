@@ -12,17 +12,20 @@ using System.Threading.Tasks;
 /// </summary>
 public sealed class SaveManager : Component, Component.INetworkListener
 {
-    public static SaveManager Instance { get; private set; }
-
     public bool IsFactoryReady { get; private set; } = false;
 
     public FactoryWorldData CurrentFactory { get; private set; }
     public Dictionary<string, PlayerSessionData> ActivePlayers { get; private set; } = new();
 
-    private string _currentFactoryId = "factory_demo_001";
+    private string _currentFactoryId = GameSession.TargetFactoryId;
 
     private SaveAuditLog _auditLog;
     private SaveThrottler _throttler;
+
+    public static SaveManager Get( Scene scene )
+    {
+        return scene.GetAllComponents<SaveManager>().FirstOrDefault();
+    }
 
     protected override void OnAwake()
     {
@@ -33,8 +36,6 @@ public sealed class SaveManager : Component, Component.INetworkListener
             GameObject.Destroy();
             return;
         }
-
-        Instance = this;
 
         _throttler = GameObject.GetComponent<SaveThrottler>() ?? GameObject.AddComponent<SaveThrottler>();
 
@@ -62,7 +63,8 @@ public sealed class SaveManager : Component, Component.INetworkListener
         // Initialize new player with default data if they don't exist yet
         if ( channel != null && channel.IsActive )
         {
-            string playerSteamId = channel.SteamId.ToString();
+            // string playerSteamId = channel.SteamId.ToString();
+            string playerSteamId = channel.GetUniqueId();
 
             if ( !ActivePlayers.ContainsKey( playerSteamId ) )
             {
@@ -97,7 +99,7 @@ public sealed class SaveManager : Component, Component.INetworkListener
 
     private async Task LoadFactoryWorldAsync()
     {
-        Log.Info( "[SaveManager] Fetching complete world state..." );
+        Log.Info( $"[SaveManager] Loading factory world... ({_currentFactoryId})" );
 
         string mySteamId = Connection.Local.SteamId.ToString();
         string myToken = await GetSboxToken( Connection.Local );
@@ -110,10 +112,12 @@ public sealed class SaveManager : Component, Component.INetworkListener
             {
                 FactoryId = _currentFactoryId,
                 HostSteamId = Connection.Local.SteamId.ToString(),
-                SaveName = "New Factory",
+                SaveName = GameSession.NewSaveName,
                 WorldState = new WorldStateData(),
                 Stats = new FactoryStatsData()
             };
+
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.DataMigration, "Initial factory creation" );
         }
         else
         {
@@ -134,7 +138,7 @@ public sealed class SaveManager : Component, Component.INetworkListener
                         p.Stats = new PlayerStatsData();
                     if ( p.Inventory == null )
                         p.Inventory = new InventoryStateData();
-                    
+
                     ActivePlayers[p.PlayerSteamId] = p;
                 }
             }

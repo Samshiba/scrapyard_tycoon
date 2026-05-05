@@ -50,7 +50,7 @@
 
     .shop-wallet {
         color: $currency-gibs;
-        font-size: 16px;
+        font-size: $fs-ui-label;
         font-weight: 800;
         background: $bg-tertiary;
         padding: $spacing-sm $spacing-lg;
@@ -71,7 +71,7 @@
     .shop-close {
         color: $text-secondary; /* Changed from $text-tertiary for better visibility */
         cursor: pointer;
-        font-size: 24px;
+        font-size: $fs-icon-lg;
         transition: color 100ms ease-out;
         flex-shrink: 0;
 
@@ -134,7 +134,7 @@
             background: $bg-tertiary;
             border: 2px solid $blue-slate;
             color: $text-secondary; /* Changed from $text-tertiary for better visibility */
-            font-size: 20px;
+            font-size: $fs-icon-md;
             font-weight: 900;
             border-radius: $radius-sm;
             cursor: pointer;
@@ -161,7 +161,7 @@
             background: #082f49;
             border: 2px solid #0ea5e9;
             color: #38bdf8;
-            font-size: 16px;
+            font-size: $fs-ui-label;
             font-weight: 900;
             border-radius: $radius-sm;
             letter-spacing: 2px;
@@ -388,7 +388,7 @@
         justify-content: center;
         text-align: center;
         color: $blue-slate;
-        font-size: 16px;
+        font-size: $fs-ui-label;
         font-weight: 800;
         letter-spacing: 2px;
         line-height: 1.5;
@@ -473,7 +473,7 @@
 
         .inspect-desc {
             color: $text-secondary; /* Changed from $text-tertiary for better contrast */
-            font-size: 15px; /* Increased from $fs-body (14px) */
+            font-size: $fs-description; /* Increased from $fs-body (14px) */
             line-height: 22px; /* Increased from 20px */
             white-space: normal;
             flex-shrink: 0;
@@ -712,7 +712,7 @@
                 background: $bg-tertiary;
                 border: 2px solid $blue-slate;
                 color: $text-secondary;
-                font-size: 18px;
+                font-size: $fs-h3;
                 font-weight: 900;
                 border-radius: $radius-md;
                 cursor: pointer;

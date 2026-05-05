@@ -7,6 +7,7 @@
 @inherits PanelComponent
 @namespace Sandbox
 @using System.Threading.Tasks;
+@using Sandbox.Utils
 
 <root class="menu-root">
     
@@ -37,15 +38,28 @@
                                 }
                                 else
                                 {
-                                    @foreach (var save in Saves)
+                                    @foreach (FactoryWorldData save in Saves)
                                     {
                                         var isSelected = SelectedSave?.FactoryId == save.FactoryId;
                                         <div class="save-card @(isSelected ? "selected" : "")" onclick=@(() => OnSelectedSave(save))>
-                                            <div class="save-name">@GetFactoryName(save)</div>
-                                            <div class="save-meta">
-                                                <span class="label">#ui.mainmenu.factory.tier</span> <span class="value">@(save.WorldState?.Tier ?? 1)</span>
-                                                <span class="separator">•</span>
-                                                <span class="label">#ui.mainmenu.factory.scrap</span> <span class="value">@save.TotalScrap</span>
+                                            <div class="card-header">
+                                                <div class="save-name">@GetFactoryName(save)</div>
+                                                <div class="save-date">
+                                                    @{ var relTime = TimeFormatter.GetRelativeTime(save.UpdatedAt); }
+                                                    @if (!string.IsNullOrEmpty(relTime.Value))
+                                                    {
+                                                        <span class="time-loc">@relTime.Value</span>
+                                                    }
+                                                    <span class="time-loc">@relTime.Token</span>
+                                                </div>
+                                            </div>
+                                            <div class="card-stats">
+                                                <div class="stat-pill tier">
+                                                    <span>Tier @(save.WorldState?.Tier ?? 1)</span>
+                                                </div>
+                                                <div class="stat-pill scrap">
+                                                    <span>@NumberFormatter.FormatWithSuffix(save.Stats.ScrapGained)</span>
+                                                </div>
                                             </div>
                                         </div>
                                     }
@@ -59,43 +73,73 @@
                                 <div class="detail-header">
                                     @if (IsCreatingNew)
                                     {
-                                        <textentry class="input-name" value:bind=@NewFactoryName placeholder=@NewFactoryPlaceholder />
+                                        <TextEntry class="input-name" Value:bind=@NewFactoryName placeholder=@NewFactoryPlaceholder />
+                                        <div class="section-tag">#ui.mainmenu.factory.newmode</div>
                                     }
                                     else
                                     {
-                                        <div class="factory-title">@GetFactoryName(SelectedSave)</div>
-                        
-                                            @if (SelectedSave.IsSandbox)
-                                            {
-                                                <div class="sandbox-warning">
-                                                    <i>warning</i>
-                                                    <span>#ui.mainmenu.factory.sandbox</span>
-                                                </div>
-                                            }
+                                        <div class="title-row">
+                                            <span class="factory-title">@GetFactoryName(SelectedSave)</span>
+                                            <span class="version-tag">v@(SelectedSave.Version)</span>
+                                        </div>
 
-                                            <div class="stats-grid">
-                                                <div class="stat-box">
-                                                    <div class="label">#ui.mainmenu.stats.totalscrap</div>
-                                                    <div class="value">@SelectedSave.TotalScrap</div>
-                                                </div>
-                                                <div class="stat-box">
-                                                    <div class="label">#ui.mainmenu.stats.prestige</div>
-                                                    <div class="value">@SelectedSave.PrestigeLevel</div>
-                                                </div>
+                                        @if (SelectedSave.IsSandbox)
+                                        {
+                                            <div class="sandbox-warning">
+                                                <i>warning</i>
+                                                <span>#ui.mainmenu.factory.sandbox</span>
                                             </div>
                                         }
-                                    </div>
+                                    }
+                                </div>
 
-                                    <div class="lobby-settings">
-                                        <div class="setting-row">
-                                            <label>#ui.mainmenu.settings.visibility</label>
+                                <div class="detail-body">
+                                    @if (!IsCreatingNew)
+                                    {
+                                        <div class="kpi-row">
+                                            <div class="kpi-card gold">
+                                                <span class="kpi-label">#ui.mainmenu.stats.totalscrap</span>
+                                                <span class="kpi-val">@NumberFormatter.FormatWithSuffix(SelectedSave.Stats.ScrapGained)</span>
+                                            </div>
+                                            <div class="kpi-card">
+                                                <span class="kpi-label">#ui.mainmenu.stats.tier</span>
+                                                <span class="kpi-val">@SelectedSave.WorldState.Tier</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="info-section">
+                                            <div class="section-header">
+                                                <i>info</i>
+                                                <span>#ui.mainmenu.stats.factory_info</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="row-label">#ui.mainmenu.stats.lastplayed</span>
+                                                <span class="row-val">@SelectedSave.UpdatedAt.ToString("dd MMM yyyy - HH:mm")</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="row-label">#ui.mainmenu.stats.playtime</span>
+                                                <span class="row-val">@TimeSpan.FromSeconds(SelectedSave.Stats.TimePlayed).ToString(@"hh\:mm\:ss")</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="row-label">#ui.mainmenu.stats.founded</span>
+                                                <span class="row-val">@SelectedSave.CreatedAt.ToString("dd MMM yyyy - HH:mm")</span>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div class="info-section">
+                                        <div class="section-header">
+                                            <i>groups</i>
+                                            <span>#ui.mainmenu.settings.session_title</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <label class="row-label">#ui.mainmenu.settings.visibility</label>
                                             <div class="mock-dropdown" onclick=@CycleVisibility>
                                                 @VisibilityOptions[VisibilityIndex]
                                             </div>
                                         </div>
-
-                                        <div class="setting-row">
-                                            <label>#ui.mainmenu.settings.maxplayers</label>
+                                        <div class="info-row">
+                                            <label class="row-label">#ui.mainmenu.settings.maxplayers</label>
                                             <div class="player-selector">
                                                 <div class="btn-adjust" onclick=@(() => ChangeMaxPlayers(-1))>-</div>
                                                 <div class="val">@MaxPlayers</div>
@@ -103,26 +147,23 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="launch-footer">
-                                        <div class="btn-launch" onclick=@OnClickLaunch>
-                                            @if (IsCreatingNew)
-                                            {
-                                                <span>#ui.mainmenu.button.createlaunch</span>
-                                            }
-                                            else
-                                            {
-                                                <span>#ui.mainmenu.button.launch</span>
-                                            }
-                                        </div>
+                                <div class="detail-footer">
+                                    <div class="btn-launch @(canLaunch ? "" : "disabled")" onclick=@(canLaunch ? OnClickLaunch : null)>
+                                        <span>@(IsCreatingNew ? "#ui.mainmenu.button.createlaunch" : "#ui.mainmenu.button.launch")</span>
                                     </div>
-                                }
-            else
-                                {
-                                    <div class="empty-state">#ui.mainmenu.empty</div>
-                                }
-                            </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="empty-state">
+                                    <i>precision_manufacturing</i>
+                                    <span>#ui.mainmenu.empty</span>
+                                </div>
+                            }
                         </div>
+                    </div>
                     }
                 else if (CurrentTab == MenuTab.Join)
                     {
@@ -164,6 +205,7 @@
     
     public FactoryWorldData SelectedSave { get; set; }
     public bool IsCreatingNew { get; set; } = false;
+    bool canLaunch => IsCreatingNew ? !string.IsNullOrWhiteSpace(NewFactoryName) : SelectedSave != null;
 
     public enum MenuTab { Play, Join, Options }
     public MenuTab CurrentTab { get; set; } = MenuTab.Play;
@@ -229,7 +271,7 @@
     private void JoinLobby(LobbyInformation lobby)
     {
         GameSession.Clear();
-        Log.Info($"Connexion au lobby: {lobby.Name}...");
+        Log.Info($"[Menu] Joining lobby {lobby.Name} ({lobby.LobbyId}) with {lobby.Members}/{lobby.MaxMembers} players");
         Networking.Connect(lobby.LobbyId);
     }
 
@@ -248,6 +290,9 @@
             var myFactories = await SupabaseService.FetchUserFactoriesAsync(mySteamId, myToken);
 
             Saves = myFactories ?? new List<FactoryWorldData>();
+
+            // Sort by most recent
+            Saves = Saves.OrderByDescending(s => s.UpdatedAt).ToList();
         }
         catch (System.Exception ex)
         {
@@ -263,7 +308,7 @@
     {
         SelectedSave = null;
         IsCreatingNew = true;
-        NewFactoryName = "Nouvelle Usine";
+        NewFactoryName = "";
         StateHasChanged();
     }
 
@@ -276,11 +321,16 @@
 
     public void OnClickLaunch()
     {
+        if (IsCreatingNew && string.IsNullOrWhiteSpace(NewFactoryName))
+        {
+            return; 
+        }
+
         GameSession.IsNewGame = IsCreatingNew;
         GameSession.NewSaveName = NewFactoryName;
         GameSession.TargetFactoryId = IsCreatingNew ? System.Guid.NewGuid().ToString() : SelectedSave.FactoryId;
 
-        Log.Info($"Lancement de la factory: {GameSession.TargetFactoryId} (Max: {MaxPlayers})");
+        Log.Info($"[Menu] Launching game with FactoryId: {GameSession.TargetFactoryId}, IsNewGame: {GameSession.IsNewGame}, NewSaveName: {GameSession.NewSaveName}");
 
         var config = new Sandbox.Network.LobbyConfig()
         {
@@ -291,6 +341,9 @@
         };
 
         Networking.CreateLobby(config);
+
+        Panel.Style.PointerEvents = PointerEvents.None;
+        Mouse.Visibility = MouseVisibility.Hidden;
 
         Scene.LoadFromFile("scenes/game.scene");
     }

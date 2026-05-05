@@ -91,7 +91,8 @@ public sealed class ImpactProjectile : BaseProjectile
 
                 // Track damage and attacker for stats
                 var backpack = Shooter?.Components.Get<PlayerBackpack>();
-                var shooterSteamId = backpack?.Network.Owner?.SteamId.ToString() ?? "unknown";
+                // var shooterSteamId = backpack?.Network.Owner?.SteamId.ToString() ?? "unknown";
+                var shooterSteamId = backpack?.Network.Owner?.GetUniqueId() ?? backpack?.Network.Owner?.SteamId.ToString() ?? "unknown";
                 health.OnDamageDealt( shooterSteamId, WeaponId, finalDamage, false );
             }
 

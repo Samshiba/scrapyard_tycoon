@@ -64,6 +64,10 @@ public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
             Consume();
             return true;
         }
+        if ( backpack != null && backpack.CollectedItems.Count >= backpack.MaxItems && GameStats.CanSendToSbox( Scene ) )
+        {
+            Sandbox.Services.Achievements.Unlock( "scrt_hoarder" );
+        }
         return false;
     }
 
