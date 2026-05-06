@@ -141,7 +141,7 @@ public sealed class SellerMachine : Component, Component.IPressable
             ItemData item = ProcessingQueue.Dequeue();
             float finalValue = item.Value * ValueMultiplier;
 
-            FactoryStats.Get( Scene ).AddScrap( finalValue );
+            FactoryDataSyncer.Get( Scene ).AddScrap( finalValue );
 
             // Trigger light pulse on sell
             _isPulsing = true;

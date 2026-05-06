@@ -8,7 +8,7 @@ using static Sandbox.Services.Stats;
 /// <summary>
 /// Provides clean access to player and factory statistics for the Codex UI.
 /// All player stats come from Sbox (lifetime accumulated).
-/// Factory stats come from the synchronized FactoryStats component (Network).
+/// Factory stats come from the synchronized FactoryDataSyncer component (Network).
 /// </summary>
 public static class CodexStatsProvider
 {
@@ -81,34 +81,35 @@ public static class CodexStatsProvider
     // ==========================================
 
     // SPS
-    public static double GetScrapPerSecond() => FactoryStats.Get( Scene )?.CurrentSPS ?? 0;
+    public static double GetScrapPerSecond() => FactoryDataSyncer.Get( Scene )?.CurrentSPS ?? 0;
 
     // Economy
-    public static double GetFactoryScrapGained() => FactoryStats.Get( Scene )?.ScrapGained ?? 0;
-    public static double GetFactoryLargestScrapGain() => FactoryStats.Get( Scene )?.LargestScrapGain ?? 0;
-    public static double GetFactoryMoneySpent() => FactoryStats.Get( Scene )?.TotalMoneySpent ?? 0;
-    public static double GetFactoryLargestPurchase() => FactoryStats.Get( Scene )?.LargestSinglePurchase ?? 0;
-    public static int GetFactoryGibsDropped() => FactoryStats.Get( Scene )?.GibsDropped ?? 0;
+    public static double GetFactoryScrapGained() => FactoryDataSyncer.Get( Scene )?.ScrapGained ?? 0;
+    public static double GetFactoryLargestScrapGain() => FactoryDataSyncer.Get( Scene )?.LargestScrapGain ?? 0;
+    public static double GetFactoryMoneySpent() => FactoryDataSyncer.Get( Scene )?.TotalMoneySpent ?? 0;
+    public static double GetFactoryLargestPurchase() => FactoryDataSyncer.Get( Scene )?.LargestSinglePurchase ?? 0;
+    public static int GetFactoryGibsDropped() => FactoryDataSyncer.Get( Scene )?.GibsDropped ?? 0;
 
     // Combat
-    public static double GetFactoryTotalDamage() => FactoryStats.Get( Scene )?.TotalDamage ?? 0;
-    public static double GetFactoryHighestDamageHit() => FactoryStats.Get( Scene )?.HighestDamageHit ?? 0;
-    public static int GetFactoryTotalAttacks() => FactoryStats.Get( Scene )?.TotalAttacks ?? 0;
-    public static int GetFactoryTotalCriticalHits() => FactoryStats.Get( Scene )?.TotalCriticalHits ?? 0;
-    public static double GetFactoryCriticalDamage() => FactoryStats.Get( Scene )?.CriticalDamage ?? 0;
-    public static long GetFactoryTargetsDestroyed() => FactoryStats.Get( Scene )?.TargetsDestroyed ?? 0;
+    public static double GetFactoryTotalDamage() => FactoryDataSyncer.Get( Scene )?.TotalDamage ?? 0;
+    public static double GetFactoryHighestDamageHit() => FactoryDataSyncer.Get( Scene )?.HighestDamageHit ?? 0;
+    public static int GetFactoryTotalAttacks() => FactoryDataSyncer.Get( Scene )?.TotalAttacks ?? 0;
+    public static int GetFactoryTotalCriticalHits() => FactoryDataSyncer.Get( Scene )?.TotalCriticalHits ?? 0;
+    public static double GetFactoryCriticalDamage() => FactoryDataSyncer.Get( Scene )?.CriticalDamage ?? 0;
+    public static long GetFactoryTargetsDestroyed() => FactoryDataSyncer.Get( Scene )?.TargetsDestroyed ?? 0;
 
     // Buying
-    public static int GetFactoryWeaponsBought() => FactoryStats.Get( Scene )?.WeaponsBought ?? 0;
-    public static int GetFactoryUpgradesBought() => FactoryStats.Get( Scene )?.UpgradesBought ?? 0;
+    public static int GetFactoryWeaponsBought() => FactoryDataSyncer.Get( Scene )?.WeaponsBought ?? 0;
+    public static int GetFactoryUpgradesBought() => FactoryDataSyncer.Get( Scene )?.UpgradesBought ?? 0;
 
     // Time & Meta
-    public static float GetFactoryPlaytime() => FactoryStats.Get( Scene )?.TimePlayed ?? 0f;
-    public static int GetFactoryTimesPrestiged() => FactoryStats.Get( Scene )?.TimesPrestiged ?? 0;
+    public static float GetFactoryPlaytime() => FactoryDataSyncer.Get( Scene )?.TimePlayed ?? 0f;
+    public static int GetFactoryTimesPrestiged() => FactoryDataSyncer.Get( Scene )?.TimesPrestiged ?? 0;
+    public static int GetFactoryPrestigePoints() => FactoryDataSyncer.Get( Scene )?.TotalPrestigePoints ?? 0;
 
     public static int GetFactoryTier()
     {
-        return FactoryStats.Get( Scene )?.Tier ?? 1;
+        return FactoryDataSyncer.Get( Scene )?.Tier ?? 1;
     }
 
 

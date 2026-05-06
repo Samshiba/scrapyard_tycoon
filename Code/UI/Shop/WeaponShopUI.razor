@@ -231,7 +231,7 @@
             .ToList();
     }
 
-    double GetScrap() => FactoryStats.Get(Scene)?.TotalScrap ?? 0;
+    double GetScrap() => FactoryDataSyncer.Get(Scene)?.TotalScrap ?? 0;
 
     int GetCurrentSpawnerTier()
     {
@@ -310,6 +310,9 @@
 
         if (CodexUI.Local != null)
             CodexUI.Local.CloseMenu();
+
+        if (PrestigeShopUI.Local != null)
+            PrestigeShopUI.Local.CloseMenu();
 
         Mouse.Visibility = MouseVisibility.Visible;
         Panel.Style.PointerEvents = PointerEvents.All;

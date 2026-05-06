@@ -36,7 +36,6 @@
     "ui.energybar.exhausted": "Épuisé",
     "ui.tooltip.key": "Touche",
     "ui.tooltip.description": "Description",
-
     "ui.mainmenu.factory.newmode": "MODE : NOUVELLE USINE",
     "ui.mainmenu.stats.totalscrap": "SCRAP TOTAL",
     "ui.mainmenu.stats.tier": "TIER ACTUEL",
@@ -75,7 +74,6 @@
     "ui.mainmenu.servers.empty": "Aucune usine publique trouvée.",
     "ui.mainmenu.servers.players": "joueurs",
     "ui.mainmenu.servers.join": "Rejoindre",
-
     "ui.codex.title": "SCRAP-DEX",
     "ui.codex.button.close": "✖",
     "ui.codex.tab.armory": "ARMURERIE",
@@ -85,7 +83,6 @@
     "ui.codex.locked.weapon": "Cette arme est verrouillée.",
     "ui.codex.locked.target": "Cette cible est verrouillée.",
     "ui.codex.wip": "En Construction",
-    
     "_comment_armory": "ONGLET ARMURERIE - Stats des Armes",
     "ui.codex.armory.section.stats": "STATS DE COMBAT",
     "ui.codex.armory.stat.damage": "Dégâts",
@@ -100,7 +97,6 @@
     "ui.codex.armory.vanity.damagedealt": "Dégâts infligés:",
     "ui.codex.armory.vanity.maxhit": "Dégât Record",
     "ui.codex.armory.vanity.crits": "Coups Critiques",
-    
     "_comment_targets": "ONGLET CIBLES - Stats des Props",
     "ui.codex.targets.section.info": "INFO CIBLE",
     "ui.codex.targets.stat.health": "Santé",
@@ -118,14 +114,13 @@
     "ui.codex.targets.vanity.scrapgained": "Scrap Gagné:",
     "ui.codex.targets.vanity.scrapdropped": "Scrap Total Produit",
     "ui.codex.targets.vanity.gibsdropped": "Total de Gibs",
-    
     "_comment_statistics": "ONGLET STATISTIQUES",
     "ui.codex.stats.section.factory_meta": "Usine Actuelle (Méta)",
     "ui.codex.stats.section.factory_economy": "Usine Actuelle (Économie)",
     "ui.codex.stats.section.factory_combat": "Usine Actuelle (Combat)",
-    
     "ui.codex.stats.factory.tier": "Niveau de l'Usine (Tier)",
-    "ui.codex.stats.factory.prestige": "Prestige Actuel",
+    "ui.codex.stats.factory.prestige_points": "Points de Prestige Totaux",
+    "ui.codex.stats.factory.times_prestiged": "Nombre de Prestiges",
     "ui.codex.stats.factory.playtime": "Temps de Jeu (Session)",
     "ui.codex.stats.factory.scrapsession": "Scrap Gagné",
     "ui.codex.stats.factory.moneyspent": "Argent Dépensé",
@@ -142,11 +137,9 @@
     "ui.codex.stats.factory.weaponsbought": "Armes Achetées",
     "ui.codex.stats.factory.upgradesbought": "Améliorations Achetées",
     "ui.codex.stats.factory.propsunlocked": "Cibles Découvertes",
-
     "ui.codex.stats.section.lifetime_meta": "Carrière Globale (Méta)",
     "ui.codex.stats.section.lifetime_economy": "Carrière Globale (Économie)",
     "ui.codex.stats.section.lifetime_combat": "Carrière Globale (Combat)",
-    
     "ui.codex.stats.lifetime.prestiges": "Prestiges Effectués",
     "ui.codex.stats.lifetime.prestigepoints": "Points de Prestige",
     "ui.codex.stats.lifetime.playtime": "Temps de Jeu Total",
@@ -164,24 +157,25 @@
     "ui.codex.stats.lifetime.weaponsbought": "Total des Armes Achetées",
     "ui.codex.stats.lifetime.upgradesbought": "Total des Améliorations Achetées",
     "ui.codex.stats.lifetime.propsunlocked": "Cibles Découvertes",
-
     "ui.prestige.title": "TERMINAL DE SINGULARITÉ",
-    "ui.prestige.button.close": "FERMER",
-    
+    "ui.prestige.button.close": "✖",
     "ui.prestige.widget.core_power": "ÉNERGIE DU CŒUR",
+    "ui.prestige.widget.rp_unused": "Points de Prestige Inutilisés",
     "ui.prestige.widget.passive_effects": "EFFETS PASSIFS",
     "ui.prestige.stat.damage": "Dégâts Globaux",
-    "ui.prestige.stat.scrap": "Rendement de Scrap",
-    "ui.prestige.stat.attackspeed": "Vitesse d'Attaque",
-    
-    "ui.prestige.widget.projection": "PROJECTION",
-    "ui.prestige.widget.progress": "Progression (Prochain Point)",
-    
-    "ui.prestige.button.respec": "RÉINITIALISER LE CŒUR",
-    "ui.prestige.button.reset": "DÉCLENCHER L'ASCENSION",
-    "ui.prestige.button.warning": "ALERTE CRITIQUE : Détruit l'usine, le scrap et les améliorations standard.",
+    "ui.prestige.stat.scrap": "Bonus Scrap",
+    "ui.prestige.stat.attackspeed": "Bonus Vitesse",
+    "ui.prestige.widget.projection": "PROGRESSION PROCHAIN RANG",
+    "ui.prestige.widget.progress": "Progression vers le Prochain Rang",
+    "ui.prestige.button.respec": "REMBOURSER TOUT",
+    "ui.prestige.button.reset": "RÉINITIALISER & PRESTIGE",
+    "ui.prestige.button.warning": "ATTENTION : Réinitialise l'usine, le scrap et toutes les améliorations. Vous gardez les bonus de prestige.",
     "ui.prestige.button.hostonly": "HÔTE UNIQUEMENT",
-    
+    "ui.prestige.lore.title": "SYSTÈME DE PRESTIGE",
+    "ui.prestige.lore.description": "Réinitialisez votre usine pour gagner des points de prestige et des bonus permanents.",
+    "ui.prestige.lore.keep": "+ Conservez tous vos points et bonus de prestige.",
+    "ui.prestige.lore.lose": "- Perdez l'usine, les armes et toutes les améliorations régulières.",
+    "ui.prestige.button.respec_tax": "Coût du Remboursement :",
     "ui.prestige.tooltip.maxed": "ACQUIS",
     "ui.prestige.tooltip.cost": "COÛT"
 }

@@ -74,14 +74,38 @@
     border-right: 1px solid $border-standard;
     display: flex;
     flex-direction: column;
-    padding: $spacing-2xl;
-    gap: $spacing-2xl;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    overflow: visible;
+    // On a retiré le padding global pour permettre au header et footer de toucher les bords
+    overflow: hidden;
 
-    .terminal-block {
-        background-color: $bg-primary;
+    // EN-TÊTE FIXE
+    .inspect-header {
+        padding: $spacing-xl $spacing-2xl;
+        border-bottom: 1px solid $border-standard;
+        background-color: $bg-secondary;
+        flex-shrink: 0;
+
+        .inspect-name {
+            font-size: $fs-h2;
+            color: $text-primary;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-family: $font-heading;
+        }
+    }
+
+    // ZONE SCROLLABLE
+    .inspect-scroll {
+        flex: 1;
+        overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-2xl;
+        padding: $spacing-2xl;
+    }
+
+    // LES BLOCS CATÉGORIES (Lore, Core, Projection)
+    .inspect-stats-box {
+        background-color: $bg-primary; // Contraste avec le fond secondary
         border: 1px solid $border-standard;
         border-radius: $radius-md;
         padding: $spacing-xl;
@@ -89,81 +113,90 @@
         flex-direction: column;
         gap: $spacing-md;
         flex-shrink: 0;
-        min-width: 0;
-
-        .block-title {
-            display: flex;
-            align-items: center;
-            gap: $spacing-sm;
-            color: $text-secondary;
-            font-size: $fs-badge;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 1px solid $border-standard;
-            padding-bottom: $spacing-sm;
-            font-family: $font-heading;
-
-            i {
-                font-size: $fs-icon-sm;
-                color: $tag-magical;
-                font-family: unset;
-            }
-        }
-    }
-
-    // Dans .col-terminal, remplace la partie .core-power et .projection par ceci :
-
-    // --- ALIGNEMENT DES MONTANTS (Montant + Devise) ---
-    .core-amount, .projected-gain {
-        display: flex;
-        align-items: center;
-        gap: $spacing-sm;
-        margin-bottom: $spacing-md;
-        font-family: $font-mono;
-        white-space: nowrap;
-        flex-shrink: 0;
-        overflow: visible;
-
-        .sign {
-            font-size: $fs-h2;
-            color: $status-success;
-            font-weight: 900;
-        }
-        .val {
-            font-size: $fs-stat-numbers;
-            font-weight: 900;
-            color: $tag-magical;
-            font-family: $font-mono;
-        }
-        .cur {
-            font-size: $fs-ui-label;
-            color: $text-secondary;
-            font-weight: 800;
-            font-family: $font-mono;
-            letter-spacing: 1px;
-        }
-    }
-
-    // --- PANNEAU DE STATS (Style WeaponShop) ---
-    .inspect-stats-box {
-        background: $bg-secondary;
-        border: 1px solid $border-standard;
-        border-radius: $radius-md;
-        padding: $spacing-lg;
-        display: flex;
-        flex-direction: column;
-        gap: $spacing-md;
-        flex-shrink: 0;
         border-left: 4px solid $tag-magical;
 
         .section-header {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
             color: $text-primary;
             font-size: $fs-body-lg;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: $spacing-sm;
+            margin-bottom: $spacing-xs;
             font-family: $font-heading;
+
+            i {
+                color: $tag-magical;
+            }
+        }
+
+        .section-divider {
+            color: $text-muted;
+            font-size: $fs-badge;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: $font-heading;
+            margin-top: $spacing-sm;
+            border-bottom: 1px solid rgba($border-standard, 0.5);
+            padding-bottom: $spacing-xs;
+        }
+
+        .lore-text {
+            color: $text-secondary;
+            font-size: $fs-body;
+            font-family: $font-body;
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-md;
+
+            p {
+                margin: 0;
+                padding: 0;
+                white-space: normal;
+            }
+
+            .text-success {
+                color: $status-success;
+                font-weight: 700;
+            }
+
+            .text-critical {
+                color: $status-critical;
+                font-weight: 700;
+            }
+        }
+
+        // ALIGNEMENT PARFAIT DES GROS CHIFFRES
+        .core-amount {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            margin-bottom: $spacing-sm;
+            font-family: $font-mono;
+            white-space: nowrap;
+            flex-shrink: 0;
+
+            .sign {
+                font-size: $fs-h2;
+                color: $status-success;
+                font-weight: 900;
+            }
+            .val {
+                font-size: $fs-display-xl; // Taille harmonisée
+                font-weight: 900;
+                color: $tag-magical;
+                font-family: $font-mono;
+            }
+            .cur {
+                font-size: $fs-h3;
+                color: $text-secondary;
+                font-weight: 800;
+                font-family: $font-heading;
+                letter-spacing: 1px;
+            }
         }
 
         .stat-row {
@@ -172,8 +205,6 @@
             align-items: center;
             justify-content: space-between;
             gap: $spacing-md;
-            flex-shrink: 0;
-            line-height: 20px;
             padding: $spacing-sm 0;
             font-family: $font-body;
             border-bottom: 1px solid rgba($border-standard, 0.3);
@@ -188,7 +219,6 @@
                 font-weight: 600;
                 flex: 1;
             }
-
             .stat-value {
                 color: $text-primary;
                 font-size: $fs-body-lg;
@@ -197,9 +227,8 @@
                 white-space: nowrap;
             }
         }
-    }
 
-    .projection {
+        // BARRE DOPA
         .dopa-container {
             display: flex;
             flex-direction: column;
@@ -216,7 +245,7 @@
             .dopa-bar-track {
                 position: relative;
                 height: 24px;
-                background-color: $bg-primary;
+                background-color: $bg-secondary;
                 border: 1px solid $border-standard;
                 border-radius: $radius-sm;
                 overflow: hidden;
@@ -247,11 +276,15 @@
         }
     }
 
+    // PIED DE PAGE FIXE (Boutons)
     .action-section {
-        margin-top: auto;
+        flex-shrink: 0;
         display: flex;
         flex-direction: column;
         gap: $spacing-lg;
+        background-color: $bg-primary; // Fond différent pour montrer que ça ne scroll pas
+        padding: $spacing-xl $spacing-2xl;
+        border-top: 1px solid $border-standard;
 
         .btn-respec {
             display: flex;
@@ -267,19 +300,22 @@
             .respec-info {
                 display: flex;
                 flex-direction: column;
-
                 .title {
                     color: $text-secondary;
                     font-weight: 700;
                     font-family: $font-body;
                     font-size: $fs-body;
                 }
+                .respec-cost {
+                    display: flex;
+                    gap: $spacing-xs;
+                    margin-top: 4px;
+                }
                 .cost {
                     color: $orange-copper;
                     font-weight: 800;
                     font-family: $font-mono;
                     font-size: $fs-body-sm;
-                    margin-top: 2px;
                 }
             }
 
@@ -289,7 +325,7 @@
                 transition: transform 200ms ease-out;
             }
 
-            &:hover {
+            &:hover:not(.locked) {
                 background-color: rgba(217, 119, 6, 0.15);
                 border-color: $orange-copper;
                 i {
@@ -320,6 +356,9 @@
             cursor: pointer;
             overflow: hidden;
             transition: all 150ms ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
             .content {
                 position: relative;
@@ -327,6 +366,7 @@
                 display: flex;
                 flex-direction: column;
                 align-items: center;
+                justify-content: center;
                 text-align: center;
 
                 .btn-title {
@@ -492,7 +532,6 @@
     .tt-desc {
         color: $text-secondary;
         font-size: $fs-body-lg;
-        line-height: 24px;
         margin-bottom: $spacing-lg;
         padding-bottom: $spacing-lg;
         border-bottom: 1px solid $bg-secondary;

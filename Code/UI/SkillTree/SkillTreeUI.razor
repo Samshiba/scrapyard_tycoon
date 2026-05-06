@@ -191,6 +191,9 @@
 
         if (CodexUI.Local != null)
             CodexUI.Local.CloseMenu();
+
+        if (PrestigeShopUI.Local != null)
+            PrestigeShopUI.Local.CloseMenu();
         
         Mouse.Visibility = MouseVisibility.Visible;
             Panel.Style.PointerEvents = PointerEvents.All;
@@ -365,7 +368,7 @@
     }
 
     int GetLevel( string id ) => GlobalUpgradesSystem.Instance?.GetUpgradeLevel( id ) ?? 0;
-    double GetScrap() => FactoryStats.Get( Scene )?.TotalScrap ?? 0;
+    double GetScrap() => FactoryDataSyncer.Get( Scene )?.TotalScrap ?? 0;
     void OnNodeClick( string id )
     {
         if ( DragDistance > 5f ) return; 

@@ -13,7 +13,6 @@
     <div class="prst-bg">
         <div class="prst-window">
             
-            <!-- HEADER (Identique au Codex) -->
             <div class="prst-header">
                 <span class="prst-title">#ui.prestige.title</span>
                 <div class="prst-close" onclick=@CloseMenu>#ui.prestige.button.close</div>
@@ -25,20 +24,33 @@
                 <!-- ========================================== -->
                 <div class="col-terminal" candragscroll="false">
                     
-                    <div class="terminal-block core-power">
-                        <div class="block-title">
-                            <span>#ui.prestige.widget.core_power</span>
-                        </div>
+                    <!-- ZONE SCROLLABLE -->
+                    <div class="inspect-scroll" candragscroll="false">
                         
-                        <!-- Les montants (le CSS va corriger l'alignement) -->
-                        <div class="core-amount">
-                            <span class="val">@NumberFormatter.FormatWithSuffix(GetAvailablePrestigePoints())</span>
-                            <span class="cur">PR</span>
+                        <!-- BLOC 1 : EXPLICATION (Même style que le reste) -->
+                        <div class="inspect-stats-box" style="border-left-color: #a855f7;">
+                            <div class="section-header">
+                                <span>#ui.prestige.lore.title</span>
+                            </div>
+                            <div class="lore-text">
+                                <p>#ui.prestige.lore.description</p>
+                                <p><span class="text-success">#ui.prestige.lore.keep</span></p>
+                                <p><span class="text-critical">#ui.prestige.lore.lose</span></p>
+                            </div>
                         </div>
-                        
-                        <!-- NOUVEAU PANNEAU DE STATS HARMONISÉ -->
+
+                        <!-- BLOC 2 : CORE POWER & PASSIFS -->
                         <div class="inspect-stats-box">
-                            <div class="section-header">#ui.prestige.widget.passive_effects</div>
+                            <div class="section-header">
+                                <span>#ui.prestige.widget.core_power</span>
+                            </div>
+                            
+                            <div class="core-amount">
+                                <span class="val">@NumberFormatter.FormatWithSuffix(GetAvailablePrestigePoints())</span>
+                                <span class="cur">#ui.prestige.widget.rp_unused</span>
+                            </div>
+                            
+                            <div class="section-divider">#ui.prestige.widget.passive_effects</div>
                             @{
                                 int pts = GetAvailablePrestigePoints();
                                 float dmgBonus = pts * 1.5f;
@@ -58,41 +70,51 @@
                                 <span class="stat-value text-cyan">+@(Math.Round(atkSpeed, 1))%</span>
                             </div>
                         </div>
+
+                        <!-- BLOC 3 : PROJECTION -->
+                        <div class="inspect-stats-box">
+                            <div class="section-header">
+                                <span>#ui.prestige.widget.projection</span>
+                            </div>
+                            
+                            <div class="core-amount">
+                                <span class="sign">+</span>
+                                <span class="val">@GetProjectedPoints()</span>
+                                <span class="cur">#common.currency.prestige</span>
+                            </div>
+                            
+                            <div class="dopa-container">
+                                <div class="dopa-labels">
+                                    <span>#ui.prestige.widget.progress</span>
+                                    <span class="text-gold">@NumberFormatter.FormatWithSuffix(GetRunScrap(), 1) / @NumberFormatter.FormatWithSuffix(GetScrapNeededForNextPoint(), 1) SC</span>
+                                </div>
+                                <div class="dopa-bar-track">
+                                    <div class="dopa-bar-fill" style="width: @(GetDopamineFillPct().ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%;"></div>
+                                    <div class="dopa-pct-text">@(Math.Round(GetDopamineFillPct(), 1))%</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="terminal-block projection">
-                        <div class="block-title">
-                            <span>#ui.prestige.widget.projection</span>
-                        </div>
-                        <div class="projected-gain">
-                            <span class="sign">+</span>
-                            <span class="val">@GetProjectedPoints()</span>
-                            <span class="cur">PR</span>
-                        </div>
-                        
-                        <div class="dopa-container">
-                            <div class="dopa-labels">
-                                <span>#ui.prestige.widget.progress</span>
-                                <span class="text-gold">@NumberFormatter.FormatWithSuffix(GetRunScrap(), 1) / @NumberFormatter.FormatWithSuffix(GetScrapNeededForNextPoint(), 1) SC</span>
-                            </div>
-                            <div class="dopa-bar-track">
-                                <div class="dopa-bar-fill" style="width: @GetDopamineFillPct()%;"></div>
-                                <div class="dopa-pct-text">@(Math.Round(GetDopamineFillPct(), 1))%</div>
-                            </div>
-                        </div>
-                    </div>
-
+                    <!-- FOOTER FIXE (Couleur de fond différente pour montrer que ça ne scroll pas) -->
                     <div class="action-section">
                         @if (Networking.IsHost)
                         {
                             int spentPoints = GetSpentPrestigePoints();
-                            int respecCost = Math.Max(1, (int)(spentPoints * 0.10f));
+                            int respecCost = Math.Max( 1, (int)Math.Ceiling( spentPoints * 0.1 ) );
                             bool canRespec = spentPoints > 0;
                             
                             <div class="btn-respec @(canRespec ? "" : "locked")" onclick=@(canRespec ? OnRespecClicked : null)>
                                 <div class="respec-info">
                                     <span class="title">#ui.prestige.button.respec</span>
-                                    @if(canRespec) { <span class="cost">Taxe : -@respecCost PR</span> }
+                                    @if(canRespec)
+                                    {
+                                        <div class="respec-cost">
+                                            <span class="cost">#ui.prestige.button.respec_tax</span>
+                                            <span class="cost">-@respecCost</span>
+                                            <span class="cost">#common.currency.prestige</span>
+                                        </div>
+                                    }
                                 </div>
                                 <i>settings_backup_restore</i>
                             </div>
@@ -116,7 +138,7 @@
                 </div>
 
                 <!-- ========================================== -->
-                <!-- COLONNE DROITE (Le Graphe)                 -->
+                <!-- COLONNE DROITE (Le Graphe - INCHANGÉ)      -->
                 <!-- ========================================== -->
                 <div class="col-graph">
                     <zoomgraphpanel @ref="GraphPanel" class="prst-graph"
@@ -178,7 +200,7 @@
                                         {
                                             <div class="tt-price">
                                                 <span class="val">@hNode.BaseCost</span>
-                                                <span class="val">PR</span>
+                                                <span class="val">#common.currency.prestige</span>
                                             </div>
                                         }
                                     </div>
@@ -317,7 +339,7 @@
         FactoryWorldData factory = SaveManager.Get( Scene )?.CurrentFactory;
         if (factory == null || UpgradeManager.Instance?.Database == null) return 0;
 
-        foreach ( var kvp in factory.GlobalUpgrades )
+        foreach ( KeyValuePair<string, int> kvp in factory.GlobalUpgrades )
         {
             if ( UpgradeManager.Instance.Database.TryGetValue( kvp.Key, out UpgradeDefinition def ) && def.Type == UpgradeType.Prestige )
             {
@@ -370,7 +392,6 @@
     {
         if (!Networking.IsHost) return;
         PrestigeSystem.Instance?.Respec();
-        // Optionnel : Gérer la soustraction de la "taxe" côté serveur dans ta méthode Respec() !
     }
 
     protected override int BuildHash()

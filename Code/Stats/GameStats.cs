@@ -24,10 +24,10 @@ public static class GameStats
         if ( largestItemValue > fStats.LargestScrapGain )
             fStats.LargestScrapGain = largestItemValue;
 
-        if ( FactoryStats.Get( scene ) != null )
+        if ( FactoryDataSyncer.Get( scene ) != null )
         {
-            FactoryStats.Get( scene ).ScrapGained = fStats.ScrapGained;
-            FactoryStats.Get( scene ).LargestScrapGain = fStats.LargestScrapGain;
+            FactoryDataSyncer.Get( scene ).ScrapGained = fStats.ScrapGained;
+            FactoryDataSyncer.Get( scene ).LargestScrapGain = fStats.LargestScrapGain;
         }
         SaveEventBus.NotifyChange( SaveEventBus.SaveReason.WorldStatUpdate, "Stats: Scrap" );
 
@@ -61,10 +61,10 @@ public static class GameStats
         if ( amount > fStats.LargestSinglePurchase )
             fStats.LargestSinglePurchase = amount;
 
-        if ( FactoryStats.Get( scene ) != null )
+        if ( FactoryDataSyncer.Get( scene ) != null )
         {
-            FactoryStats.Get( scene ).TotalMoneySpent = fStats.TotalMoneySpent;
-            FactoryStats.Get( scene ).LargestSinglePurchase = fStats.LargestSinglePurchase;
+            FactoryDataSyncer.Get( scene ).TotalMoneySpent = fStats.TotalMoneySpent;
+            FactoryDataSyncer.Get( scene ).LargestSinglePurchase = fStats.LargestSinglePurchase;
         }
 
         // --- 3. API S&BOX (JOUEUR) ---
@@ -100,10 +100,10 @@ public static class GameStats
         if ( gibsDropped > 0 )
             fStats.GibsDropped += gibsDropped;
 
-        if ( FactoryStats.Get( scene ) != null )
+        if ( FactoryDataSyncer.Get( scene ) != null )
         {
-            FactoryStats.Get( scene ).TargetsDestroyed = fStats.TargetsDestroyed;
-            FactoryStats.Get( scene ).GibsDropped = fStats.GibsDropped;
+            FactoryDataSyncer.Get( scene ).TargetsDestroyed = fStats.TargetsDestroyed;
+            FactoryDataSyncer.Get( scene ).GibsDropped = fStats.GibsDropped;
         }
 
         // --- 3. API S&BOX (JOUEUR) ---
@@ -166,13 +166,13 @@ public static class GameStats
             fStats.CriticalDamage += damage;
         }
 
-        if ( FactoryStats.Get( scene ) != null )
+        if ( FactoryDataSyncer.Get( scene ) != null )
         {
-            FactoryStats.Get( scene ).TotalDamage = fStats.TotalDamage;
-            FactoryStats.Get( scene ).TotalAttacks = fStats.TotalAttacks;
-            FactoryStats.Get( scene ).HighestDamageHit = fStats.HighestDamageHit;
-            FactoryStats.Get( scene ).TotalCriticalHits = fStats.TotalCriticalHits;
-            FactoryStats.Get( scene ).CriticalDamage = fStats.CriticalDamage;
+            FactoryDataSyncer.Get( scene ).TotalDamage = fStats.TotalDamage;
+            FactoryDataSyncer.Get( scene ).TotalAttacks = fStats.TotalAttacks;
+            FactoryDataSyncer.Get( scene ).HighestDamageHit = fStats.HighestDamageHit;
+            FactoryDataSyncer.Get( scene ).TotalCriticalHits = fStats.TotalCriticalHits;
+            FactoryDataSyncer.Get( scene ).CriticalDamage = fStats.CriticalDamage;
         }
 
         // --- 3. API S&BOX (JOUEUR) ---
@@ -242,8 +242,8 @@ public static class GameStats
 
         // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
         save.CurrentFactory.Stats.WeaponsBought++;
-        if ( FactoryStats.Get( scene ) != null )
-            FactoryStats.Get( scene ).WeaponsBought = save.CurrentFactory.Stats.WeaponsBought;
+        if ( FactoryDataSyncer.Get( scene ) != null )
+            FactoryDataSyncer.Get( scene ).WeaponsBought = save.CurrentFactory.Stats.WeaponsBought;
 
         // --- 3. API S&BOX (JOUEUR) ---
         if ( CanSendToSbox( scene ) )
@@ -264,8 +264,8 @@ public static class GameStats
 
         // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
         save.CurrentFactory.Stats.UpgradesBought++;
-        if ( FactoryStats.Get( scene ) != null )
-            FactoryStats.Get( scene ).UpgradesBought = save.CurrentFactory.Stats.UpgradesBought;
+        if ( FactoryDataSyncer.Get( scene ) != null )
+            FactoryDataSyncer.Get( scene ).UpgradesBought = save.CurrentFactory.Stats.UpgradesBought;
 
         // --- 3. API S&BOX (JOUEUR) ---
         if ( CanSendToSbox( scene ) )
@@ -292,10 +292,10 @@ public static class GameStats
         save.CurrentFactory.Stats.TimesPrestiged++;
         save.CurrentFactory.Stats.PrestigePoints += newPrestigeLevel;
 
-        if ( FactoryStats.Get( scene ) != null )
+        if ( FactoryDataSyncer.Get( scene ) != null )
         {
-            FactoryStats.Get( scene ).TimesPrestiged = save.CurrentFactory.Stats.TimesPrestiged;
-            FactoryStats.Get( scene ).TotalPrestigePoints = save.CurrentFactory.Stats.PrestigePoints;
+            FactoryDataSyncer.Get( scene ).TimesPrestiged = save.CurrentFactory.Stats.TimesPrestiged;
+            FactoryDataSyncer.Get( scene ).TotalPrestigePoints = save.CurrentFactory.Stats.PrestigePoints;
         }
 
         SaveEventBus.NotifyChange( SaveEventBus.SaveReason.WorldStatUpdate, "Stats: Prestige" );
@@ -324,8 +324,8 @@ public static class GameStats
 
         // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
         save.CurrentFactory.Stats.TimePlayed += deltaSeconds;
-        if ( FactoryStats.Get( scene ) != null )
-            FactoryStats.Get( scene ).TimePlayed = save.CurrentFactory.Stats.TimePlayed;
+        if ( FactoryDataSyncer.Get( scene ) != null )
+            FactoryDataSyncer.Get( scene ).TimePlayed = save.CurrentFactory.Stats.TimePlayed;
 
         // --- 3. API S&BOX (JOUEUR) ---
         if ( CanSendToSbox( scene ) )
@@ -351,8 +351,8 @@ public static class GameStats
         // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
         var fStats = save.CurrentFactory.Stats;
         fStats.EnergyConsumed += energyAmount;
-        if ( FactoryStats.Get( scene ) != null )
-            FactoryStats.Get( scene ).EnergyConsumed = fStats.EnergyConsumed;
+        if ( FactoryDataSyncer.Get( scene ) != null )
+            FactoryDataSyncer.Get( scene ).EnergyConsumed = fStats.EnergyConsumed;
 
         // --- 3. API S&BOX (JOUEUR) ---
         if ( CanSendToSbox( scene ) )
@@ -374,8 +374,8 @@ public static class GameStats
         // --- 1. SAUVEGARDE & 2. RÉSEAU (FACTORY) ---
         var fStats = save.CurrentFactory.Stats;
         fStats.ExhaustionPenalties++;
-        if ( FactoryStats.Get( scene ) != null )
-            FactoryStats.Get( scene ).ExhaustionPenalties = fStats.ExhaustionPenalties;
+        if ( FactoryDataSyncer.Get( scene ) != null )
+            FactoryDataSyncer.Get( scene ).ExhaustionPenalties = fStats.ExhaustionPenalties;
 
         // --- 3. API S&BOX (JOUEUR) ---
         if ( CanSendToSbox( scene ) )

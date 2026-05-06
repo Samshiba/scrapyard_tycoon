@@ -56,7 +56,7 @@
 		}
 	}
 
-	double GetScrap() => FactoryStats.Get(Scene)?.TotalScrap ?? 0;
+	double GetScrap() => FactoryDataSyncer.Get(Scene)?.TotalScrap ?? 0;
 
 	protected override int BuildHash()
 	{

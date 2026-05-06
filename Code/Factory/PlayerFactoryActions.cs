@@ -18,17 +18,17 @@ public sealed class PlayerFactoryActions : Component, Component.INetworkListener
 
         string callerId = Rpc.Caller.GetUniqueId() ?? Rpc.Caller.SteamId.ToString();
 
-        // Use centralized FactoryStats which handles:
+        // Use centralized FactoryDataSyncer which handles:
         // 1. Payment validation + execution (SpendScrap)
         // 2. SaveManager updates
         // 3. [Sync] updates
         // 4. ItemUnlockSystem updates
         // 5. GameStats tracking
         // 6. SaveEventBus notifications
-        var factoryStats = FactoryStats.Get( Scene );
-        if ( factoryStats != null && factoryStats.SpendScrap( weaponDef.UnlockCost ) )
+        var factoryDataSyncer = FactoryDataSyncer.Get( Scene );
+        if ( factoryDataSyncer != null && factoryDataSyncer.SpendScrap( weaponDef.UnlockCost ) )
         {
-            if ( factoryStats.UnlockWeapon( weaponId, callerId ) )
+            if ( factoryDataSyncer.UnlockWeapon( weaponId, callerId ) )
             {
                 Log.Info( $"[PlayerFactoryActions] Weapon purchase successful: {weaponId} for {weaponDef.UnlockCost} scrap" );
             }

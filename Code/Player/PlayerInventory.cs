@@ -284,6 +284,30 @@ public sealed class PlayerInventory : Component
         return dist < WeaponHolder.HideDistance;
     }
 
+    public void ResetEquippedWeaponsForPrestige()
+    {
+        if ( !Networking.IsHost ) return;
+
+        // Clear all equipped weapons
+        for ( int i = 0; i < EquippedWeapons.Length; i++ )
+        {
+            EquippedWeapons[i] = null;
+        }
+
+        // Unequip current weapon
+        UnequipCurrentWeapon();
+
+        // Reset to bat weapon in first slot
+        if ( _weaponCache.TryGetValue( "bat", out var batWeapon ) )
+        {
+            EquippedWeapons[0] = batWeapon;
+            ActiveSlotIndex = 0;
+            EquipSlot( 0 );
+        }
+
+        Log.Info( $"[PlayerInventory] Reset equipped weapons for prestige - {MySteamId}" );
+    }
+
     public BaseWeapon ActiveWeapon =>
         _activeWeaponObject?.Components.Get<BaseWeapon>( FindMode.EverythingInSelfAndDescendants );
 }

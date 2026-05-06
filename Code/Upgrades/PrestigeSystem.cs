@@ -1,4 +1,5 @@
 using Sandbox;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,17 +23,34 @@ public sealed class PrestigeSystem : Component
         int pointsEarned = CalculatePointsFromScrap( factory.WorldState.RunScrapGained );
         if ( pointsEarned <= 0 ) return;
 
-        // Add prestige points via centralized FactoryStats
-        FactoryStats.Get( Scene )?.AddPrestige( pointsEarned, trackStats: true );
+        // Add prestige points via centralized FactoryDataSyncer
+        FactoryDataSyncer.Get( Scene )?.AddPrestige( pointsEarned, trackStats: true );
 
-        // Wipe scrap via centralized FactoryStats
-        FactoryStats.Get( Scene )?.WipeScrapForPrestige();
+        // Wipe scrap via centralized FactoryDataSyncer
+        FactoryDataSyncer.Get( Scene )?.WipeScrapForPrestige();
 
-        // Wipe global upgrades (keep prestige only) via centralized FactoryStats
-        FactoryStats.Get( Scene )?.WipeGlobalUpgradesForPrestige();
+        // Wipe global upgrades (keep prestige only) via centralized FactoryDataSyncer
+        FactoryDataSyncer.Get( Scene )?.WipeGlobalUpgradesForPrestige();
+
+        // Wipe Weapons/Utilities via centralized FactoryDataSyncer
+        FactoryDataSyncer.Get( Scene )?.WipeWeaponsAndUtilitiesForPrestige();
+
+        // Wipe player inventories (weapons, gibs, items) for all players
+        FactoryDataSyncer.Get( Scene )?.WipePlayerInventoriesForPrestige();
+
+        // Force all connected players to reload their inventories
+        foreach ( var backpack in Scene.GetAllComponents<PlayerBackpack>() )
+        {
+            backpack.ResetInventoryForPrestige();
+        }
+
+        foreach ( var inventory in Scene.GetAllComponents<PlayerInventory>() )
+        {
+            inventory.ResetEquippedWeaponsForPrestige();
+        }
 
         // Reset world state
-        factory.WorldState = new WorldStateData();
+        FactoryDataSyncer.Get( Scene )?.ResetWorldStateForPrestige();
 
         // Rebuild upgrade cache
         GlobalUpgradesSystem.Instance?.RebuildCache();
@@ -59,14 +77,16 @@ public sealed class PrestigeSystem : Component
             }
         }
 
+        pointsToRefund -= Math.Max( 1, (int)Math.Ceiling( pointsToRefund * 0.1 ) );
+
         foreach ( var key in keysToRemove )
         {
             factory.GlobalUpgrades.Remove( key );
             GlobalUpgradesSystem.Instance?.SyncedUpgrades.Remove( key );
         }
 
-        // Refund prestige points via centralized FactoryStats (without tracking stats)
-        FactoryStats.Get( Scene )?.AddPrestige( pointsToRefund, trackStats: false );
+        // Refund prestige points via centralized FactoryDataSyncer (without tracking stats)
+        FactoryDataSyncer.Get( Scene )?.AddPrestige( pointsToRefund, trackStats: false );
 
         GlobalUpgradesSystem.Instance?.RebuildCache();
 

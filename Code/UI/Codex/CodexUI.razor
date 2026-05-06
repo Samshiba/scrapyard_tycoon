@@ -333,17 +333,21 @@
                                                                             <div class="section-title">#ui.codex.stats.section.factory_meta</div>
                                                                             <div class="kpi-grid">
                                                                                 <div class="kpi-row">
-                                                                                    <div class="kpi-card kpi-medium buff">
+                                                                                    <div class="kpi-card kpi-small buff">
                                                                                         <div class="kpi-label">#ui.codex.stats.factory.tier</div>
                                                                                         <div class="kpi-val">@CodexStatsProvider.GetFactoryTier()</div>
                                                                                     </div>
-                                                                                    <div class="kpi-card kpi-medium magic">
-                                                                                        <div class="kpi-label">#ui.codex.stats.factory.prestige</div>
+                                                                                    <div class="kpi-card kpi-small magic">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.times_prestiged</div>
                                                                                         <div class="kpi-val">@CodexStatsProvider.GetFactoryTimesPrestiged()</div>
                                                                                     </div>
-                                                                                    <div class="kpi-card kpi-medium info">
+                                                                                    <div class="kpi-card kpi-small info">
                                                                                         <div class="kpi-label">#ui.codex.stats.factory.playtime</div>
                                                                                         <div class="kpi-val">@CodexStatsProvider.FormatPlaytime(CodexStatsProvider.GetFactoryPlaytime())</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small magic">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.prestige_points</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetFactoryPrestigePoints()</div>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -577,6 +581,9 @@
 
         if (WeaponShopUI.Local != null)
             WeaponShopUI.Local.CloseMenu();
+
+        if (PrestigeShopUI.Local != null)
+            PrestigeShopUI.Local.CloseMenu();
 
         if (SelectedWeapon == null && AllWeapons.Any())
             SelectedWeapon = AllWeapons.First();

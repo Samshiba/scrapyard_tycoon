@@ -84,4 +84,14 @@ public sealed class PlayerBackpack : Component, Component.INetworkListener
             SaveEventBus.NotifyChange( SaveEventBus.SaveReason.InventoryChanged, "Inventory updated", MySteamId );
         }
     }
+
+    public void ResetInventoryForPrestige()
+    {
+        if ( !Networking.IsHost ) return;
+
+        CollectedItems.Clear();
+        SaveChanges();
+
+        Log.Info( $"[PlayerBackpack] Reset inventory for prestige - {MySteamId}" );
+    }
 }

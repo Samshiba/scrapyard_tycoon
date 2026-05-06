@@ -1,16 +1,17 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sandbox;
 
-public sealed class FactoryStats : Component, Component.INetworkListener
+public sealed class FactoryDataSyncer : Component, Component.INetworkListener
 {
-    // REAL TIME STATS
+    // REAL TIME DATA
     [Sync][Property] public double TotalScrap { get; private set; } = 0;
     [Sync][Property] public int PrestigePoints { get; private set; } = 0;
     [Sync][Property] public double CurrentSPS { get; private set; } = 0;
     [Sync][Property] public int Tier { get; set; } = 1;
 
-    // STATS TO SAVE
+    // STATS
     [Sync] public double ScrapGained { get; set; } = 0;
     [Sync] public double LargestScrapGain { get; set; } = 0;
     [Sync] public double TotalMoneySpent { get; set; } = 0;
@@ -42,9 +43,9 @@ public sealed class FactoryStats : Component, Component.INetworkListener
     private double _scrapSinceLastTick = 0;
     private const int SPS_WINDOW_SECONDS = 5;
 
-    public static FactoryStats Get( Scene scene )
+    public static FactoryDataSyncer Get( Scene scene )
     {
-        return scene.GetAllComponents<FactoryStats>().FirstOrDefault();
+        return scene.GetAllComponents<FactoryDataSyncer>().FirstOrDefault();
     }
 
     protected override void OnUpdate()
@@ -233,7 +234,7 @@ public sealed class FactoryStats : Component, Component.INetworkListener
         }
 
         SaveEventBus.NotifyChange( SaveEventBus.SaveReason.ItemUnlocked, $"Weapon: {weaponId}" );
-        Log.Info( $"[FactoryStats] Weapon unlocked: {weaponId}" );
+        Log.Info( $"[FactoryDataSyncer] Weapon unlocked: {weaponId}" );
 
         return true;
     }
@@ -264,7 +265,7 @@ public sealed class FactoryStats : Component, Component.INetworkListener
         }
 
         SaveEventBus.NotifyChange( SaveEventBus.SaveReason.ItemUnlocked, $"Utility: {utilityId}" );
-        Log.Info( $"[FactoryStats] Utility unlocked: {utilityId}" );
+        Log.Info( $"[FactoryDataSyncer] Utility unlocked: {utilityId}" );
 
         return true;
     }
@@ -339,7 +340,7 @@ public sealed class FactoryStats : Component, Component.INetworkListener
         }
         else
         {
-            Log.Warning( $"[FactoryStats] Unknown upgrade type for {upgradeId}" );
+            Log.Warning( $"[FactoryDataSyncer] Unknown upgrade type for {upgradeId}" );
             return false;
         }
 
@@ -365,12 +366,12 @@ public sealed class FactoryStats : Component, Component.INetworkListener
             globalUpgrades.RebuildCache();
 
             SaveEventBus.NotifyChange( SaveEventBus.SaveReason.GlobalUpgradeChanged, $"{upgradeId} → Level {currentLevel + 1}" );
-            Log.Info( $"[FactoryStats] Upgrade purchased: {upgradeId} (Level {currentLevel + 1})" );
+            Log.Info( $"[FactoryDataSyncer] Upgrade purchased: {upgradeId} (Level {currentLevel + 1})" );
 
             return true;
         }
 
-        Log.Warning( $"[FactoryStats] Insufficient funds for upgrade: {upgradeId}" );
+        Log.Warning( $"[FactoryDataSyncer] Insufficient funds for upgrade: {upgradeId}" );
         return false;
     }
 
@@ -407,5 +408,60 @@ public sealed class FactoryStats : Component, Component.INetworkListener
         factory.GlobalUpgrades = prestigeUpgradesToKeep;
 
         SaveEventBus.NotifyChange( SaveEventBus.SaveReason.GlobalUpgradeChanged, $"Wiped {nonPrestigeKeys.Count} upgrades (kept prestige only)" );
+    }
+
+    public void WipeWeaponsAndUtilitiesForPrestige()
+    {
+        if ( !Networking.IsHost ) return;
+
+        var factory = SaveManager.Get( Scene )?.CurrentFactory;
+        var itemUnlock = ItemUnlockSystem.Get( Scene );
+
+        if ( factory == null || itemUnlock == null ) return;
+
+        int weaponsWiped = itemUnlock.UnlockedWeapons.Count;
+        int utilitiesWiped = itemUnlock.UnlockedUtilities.Count;
+
+        itemUnlock.UnlockedWeapons.Clear();
+        itemUnlock.UnlockedUtilities.Clear();
+
+        factory.UnlockedWeapons = new List<string>();
+        factory.UnlockedUtilities = new List<string>();
+
+        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.ItemUnlocked, $"Wiped {weaponsWiped} weapons and {utilitiesWiped} utilities for prestige" );
+    }
+
+    public void WipePlayerInventoriesForPrestige()
+    {
+        if ( !Networking.IsHost ) return;
+
+        var saveManager = SaveManager.Get( Scene );
+        if ( saveManager?.ActivePlayers == null ) return;
+
+        int playersWiped = 0;
+
+        foreach ( var playerData in saveManager.ActivePlayers.Values )
+        {
+            if ( playerData?.Inventory == null ) continue;
+
+            playerData.Inventory = new InventoryStateData();
+
+            playersWiped++;
+        }
+
+        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.InventoryChanged, $"Wiped inventories for {playersWiped} players for prestige" );
+    }
+
+    internal void ResetWorldStateForPrestige()
+    {
+        if ( !Networking.IsHost ) return;
+
+        var factory = SaveManager.Get( Scene )?.CurrentFactory;
+        if ( factory == null ) return;
+
+        factory.WorldState = new WorldStateData();
+        Tier = factory.Tier;
+
+        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.DataMigration, "World state reset for prestige" );
     }
 }

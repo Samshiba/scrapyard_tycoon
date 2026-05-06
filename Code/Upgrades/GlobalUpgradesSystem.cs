@@ -145,7 +145,7 @@ public sealed class GlobalUpgradesSystem : Component
     {
         if ( !Networking.IsHost ) return false;
 
-        // Use centralized FactoryStats which handles:
+        // Use centralized FactoryDataSyncer which handles:
         // 1. Validation of upgrade and player requirements
         // 2. Payment handling (SpendScrap or SpendPrestige)
         // 3. SaveManager updates
@@ -154,7 +154,7 @@ public sealed class GlobalUpgradesSystem : Component
         // 6. GameStats tracking (OnMoneySpent, OnUpgradeBought)
         // 7. SaveEventBus notifications
         // 8. Cache rebuild
-        return FactoryStats.Get( Scene )?.PurchaseUpgrade( upgradeId, steamId ) ?? false;
+        return FactoryDataSyncer.Get( Scene )?.PurchaseUpgrade( upgradeId, steamId ) ?? false;
     }
 
     public bool IsUpgraded( string upgradeId, int requiredLevel = 1 )
