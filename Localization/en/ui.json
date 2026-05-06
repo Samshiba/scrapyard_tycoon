@@ -28,6 +28,8 @@
     "ui.skilltree.tooltip.maxed": "Fully Unlocked",
     "ui.skilltree.tooltip.locked": "Missing Prerequisites",
     "ui.seller.title": "Processing",
+    "ui.seller.eta": "Time Remaining",
+    "ui.seller.sps": "Scrap/Sec",
     "ui.backpack.label": "Inventory",
     "ui.backpack.scrap": "Scrap",
     "ui.backpack.items": "Items",

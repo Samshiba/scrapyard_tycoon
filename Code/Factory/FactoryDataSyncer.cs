@@ -41,7 +41,7 @@ public sealed class FactoryDataSyncer : Component, Component.INetworkListener
     private Queue<double> _scrapHistory = new();
     private TimeSince _timeSinceLastTick = 0;
     private double _scrapSinceLastTick = 0;
-    private const int SPS_WINDOW_SECONDS = 5;
+    private const int SPS_WINDOW_SECONDS = 10;
 
     public static FactoryDataSyncer Get( Scene scene )
     {

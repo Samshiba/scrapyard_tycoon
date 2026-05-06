@@ -28,6 +28,8 @@
     "ui.skilltree.tooltip.maxed": "Débloqué au maximum",
     "ui.skilltree.tooltip.locked": "Prérequis manquants",
     "ui.seller.title": "Traitement",
+    "ui.seller.eta": "Temps restant",
+    "ui.seller.sps": "Scrap/Sec",
     "ui.backpack.label": "Inventaire",
     "ui.backpack.scrap": "Scrap",
     "ui.backpack.items": "Objets",

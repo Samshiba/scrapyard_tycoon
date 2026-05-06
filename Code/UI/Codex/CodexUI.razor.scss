@@ -1,6 +1,6 @@
-@import '../_design-system.scss';
-@import '../_mixins.scss';
-@import '../_animations.scss';
+@import "../_design-system.scss";
+@import "../_mixins.scss";
+@import "../_animations.scss";
 
 .codex-bg {
     position: absolute;
@@ -71,7 +71,7 @@
             &.active {
                 color: $orange-copper;
                 border-bottom-color: $orange-copper;
-                background-color: rgba(217, 119, 6, 0.1); 
+                background-color: rgba(217, 119, 6, 0.1);
             }
         }
     }
@@ -175,7 +175,7 @@
         cursor: not-allowed;
         background-color: rgba(20, 25, 34, 0.5);
         opacity: 0.6;
-        
+
         .item-name {
             color: $text-muted;
         }
@@ -226,7 +226,7 @@
         .inspect-tags {
             display: flex;
             gap: $spacing-sm;
-            
+
             .tag {
                 padding: 6px 12px;
                 border-radius: $radius-sm;
@@ -234,11 +234,31 @@
                 font-weight: 800;
                 font-family: $font-body;
             }
-            .tag-cat { background: $border-standard; color: $text-primary; border: 1px solid $blue-slate; }
-            .tag-physical { background: $bg-tertiary; color: $text-secondary; border: 1px solid $blue-slate; }
-            .tag-magical { background: #3b0764; color: #d8b4fe; border: 1px solid $tag-magical; }
-            .tag-electric { background: #422006; color: #fef08a; border: 1px solid $tag-electric; }
-            .tag-poison { background: #052e16; color: #86efac; border: 1px solid $tag-poison; }
+            .tag-cat {
+                background: $border-standard;
+                color: $text-primary;
+                border: 1px solid $blue-slate;
+            }
+            .tag-physical {
+                background: $bg-tertiary;
+                color: $text-secondary;
+                border: 1px solid $blue-slate;
+            }
+            .tag-magical {
+                background: #3b0764;
+                color: #d8b4fe;
+                border: 1px solid $tag-magical;
+            }
+            .tag-electric {
+                background: #422006;
+                color: #fef08a;
+                border: 1px solid $tag-electric;
+            }
+            .tag-poison {
+                background: #052e16;
+                color: #86efac;
+                border: 1px solid $tag-poison;
+            }
         }
     }
 
@@ -285,16 +305,16 @@
                     align-items: center;
                     justify-content: space-between;
 
-                    .stat-label { 
-                        color: $text-secondary; 
-                        font-weight: 700; 
+                    .stat-label {
+                        color: $text-secondary;
+                        font-weight: 700;
                         font-family: $font-body;
                     }
-                    .stat-final { 
-                        color: $text-primary; 
-                        font-weight: 900; 
-                        font-size: $fs-ui-label; 
-                        font-family: $font-mono; 
+                    .stat-final {
+                        color: $text-primary;
+                        font-weight: 900;
+                        font-size: $fs-ui-label;
+                        font-family: $font-mono;
                     }
                 }
 
@@ -307,17 +327,21 @@
                     font-size: $fs-body-sm;
                     font-family: $font-mono;
 
-                    .base-val { color: $text-tertiary; }
-                    .math-op { color: $text-muted; }
-                    .bonus-val { color: $status-success; font-weight: 700; }
-                    
+                    .base-val {
+                        color: $text-tertiary;
+                    }
+                    .math-op {
+                        color: $text-muted;
+                    }
+                    .bonus-val {
+                        color: $status-success;
+                        font-weight: 700;
+                    }
+
                     // New formula display style
                     .formula {
                         color: $text-tertiary;
                         font-weight: 500;
-                        white-space: pre-wrap;
-                        word-break: break-word;
-                        display: inline-block;
                         max-width: 100%;
                     }
                 }
@@ -329,16 +353,16 @@
                 justify-content: space-between;
                 align-items: center;
                 padding: $spacing-md $spacing-lg;
-                background-color: rgba(217, 119, 6, 0.1); 
+                background-color: rgba(217, 119, 6, 0.1);
                 border-left: 4px solid $orange-copper;
-                
+
                 span {
                     color: $orange-copper;
                     font-weight: 900;
                     letter-spacing: 1px;
                     font-family: $font-heading;
                 }
-                
+
                 .dps-val {
                     font-size: $fs-icon-md;
                     font-family: $font-mono;
@@ -415,7 +439,7 @@
 
             .kpi-card {
                 flex: 1; // Magie absolue : s&box partage l'espace équitablement
-                
+
                 background: $bg-secondary;
                 border: 1px solid $border-standard;
                 border-radius: $radius-md;
@@ -444,19 +468,25 @@
                 }
 
                 // Les classes de taille ne gèrent plus que le padding et la police
-                &.kpi-large { 
+                &.kpi-large {
                     padding: $spacing-2xl;
-                    .kpi-val { font-size: $fs-display-xl; }
+                    .kpi-val {
+                        font-size: $fs-display-xl;
+                    }
                 }
-                
-                &.kpi-medium { 
+
+                &.kpi-medium {
                     padding: $spacing-2xl;
                 }
-                
-                &.kpi-small { 
-                    padding: $spacing-xl; 
-                    .kpi-label { font-size: $fs-body-sm; }
-                    .kpi-val { font-size: $fs-display-md; }
+
+                &.kpi-small {
+                    padding: $spacing-xl;
+                    .kpi-label {
+                        font-size: $fs-body-sm;
+                    }
+                    .kpi-val {
+                        font-size: $fs-display-md;
+                    }
                 }
 
                 // ==============================
@@ -464,28 +494,38 @@
                 // ==============================
                 &.gold {
                     border-color: $currency-gibs;
-                    background: rgba(212, 175, 55, 0.05);
-                    .kpi-val { color: $currency-gibs; }
+                    background-color: rgba(212, 175, 55, 0.05);
+                    .kpi-val {
+                        color: $currency-gibs;
+                    }
                 }
 
                 &.buff {
                     border-left: 4px solid $status-success;
-                    .kpi-val { color: $status-success; }
+                    .kpi-val {
+                        color: $status-success;
+                    }
                 }
 
                 &.combat {
                     border-left: 4px solid $status-critical;
-                    .kpi-val { color: $status-critical; }
+                    .kpi-val {
+                        color: $status-critical;
+                    }
                 }
 
                 &.info {
                     border-left: 4px solid $currency-xp;
-                    .kpi-val { color: $currency-xp; }
+                    .kpi-val {
+                        color: $currency-xp;
+                    }
                 }
-                
+
                 &.magic {
                     border-left: 4px solid $tag-magical;
-                    .kpi-val { color: $tag-magical; }
+                    .kpi-val {
+                        color: $tag-magical;
+                    }
                 }
             }
         }

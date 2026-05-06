@@ -8,7 +8,7 @@ public static class PropStatsCalculator
 {
     /// <summary>
     /// Calculate HP for a prop based on tier and rarity
-    /// Formula: (base_hp * (hp_mult^(tier-1))) * rarity_mod
+    /// Formula: (base_hp * (hp_mult^(tier-1))) * ( 1 + (rarity_mod - 1) * 0.75 )
     /// </summary>
     public static float GetHealth( PropDefinition prop )
     {
@@ -35,7 +35,7 @@ public static class PropStatsCalculator
         if ( config == null ) return 0;
 
         float finalJackpotMultiplier = 1.0f;
-        if ( prop.IsJackpot )
+        if ( prop.IsJackpot || prop.RarityMod >= 10 )
         {
             finalJackpotMultiplier = GlobalUpgradesSystem.Instance.ApplyModifiers( "jackpot_bonus", config.JackpotBonus );
         }
