@@ -63,6 +63,7 @@ public sealed class ImpactProjectile : BaseProjectile
 
             var surfaceTrace = Scene.Trace.Ray( WorldPosition, targetCenter )
                 .IgnoreGameObjectHierarchy( Shooter )
+                .WithoutTags( "player" )
                 .UsePhysicsWorld()
                 .Run();
 
@@ -80,20 +81,18 @@ public sealed class ImpactProjectile : BaseProjectile
             var health = hit.GameObject.Components.GetInAncestorsOrSelf<PropHealth>();
             if ( health != null )
             {
-                double finalDamage = this.Damage * falloff;
+                float finalDamage = Damage * falloff;
                 var damageInfo = new DamageInfo
                 {
-                    Damage = (float)finalDamage,
+                    Damage = finalDamage,
                     Position = WorldPosition
                 };
                 damageInfo.Tags.Add( "explosion" );
+                if ( Tags.Has( "critical" ) ) damageInfo.Tags.Add( "critical" );
                 health.OnDamage( damageInfo );
 
-                // Track damage and attacker for stats
-                var backpack = Shooter?.Components.Get<PlayerBackpack>();
-                // var shooterSteamId = backpack?.Network.Owner?.SteamId.ToString() ?? "unknown";
-                var shooterSteamId = backpack?.Network.Owner?.GetUniqueId() ?? backpack?.Network.Owner?.SteamId.ToString() ?? "unknown";
-                health.OnDamageDealt( shooterSteamId, WeaponId, finalDamage, false );
+                // Stats
+                health.OnDamageDealt( ShooterId, WeaponId, finalDamage, Tags.Has( "critical" ) );
             }
 
             // --- 4. Souffle Physique ---

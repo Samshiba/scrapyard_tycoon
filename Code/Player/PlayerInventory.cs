@@ -252,7 +252,7 @@ public sealed class PlayerInventory : Component
                 col.Enabled = false;
 
             var weaponScript = _activeWeaponObject.Components
-                .Get<BaseWeapon>( FindMode.EverythingInSelfAndDescendants );
+                .Get<WeaponComponent>( FindMode.EverythingInSelfAndDescendants );
             if ( weaponScript != null )
             {
                 weaponScript.Data = def;
@@ -308,6 +308,6 @@ public sealed class PlayerInventory : Component
         Log.Info( $"[PlayerInventory] Reset equipped weapons for prestige - {MySteamId}" );
     }
 
-    public BaseWeapon ActiveWeapon =>
-        _activeWeaponObject?.Components.Get<BaseWeapon>( FindMode.EverythingInSelfAndDescendants );
+    public WeaponComponent ActiveWeapon =>
+        _activeWeaponObject?.Components.Get<WeaponComponent>( FindMode.EverythingInSelfAndDescendants );
 }

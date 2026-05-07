@@ -14,6 +14,8 @@ public sealed class PropHealth : Component, Component.IDamageable
 
     [Property] public BalanceConfig config { get; set; }
 
+    private bool _isFlashing = false;
+
     // Track last attacker for stats
     private string _lastAttackerSteamId = "";
     private string _lastWeaponId = "";
@@ -37,7 +39,7 @@ public sealed class PropHealth : Component, Component.IDamageable
 
     public void OnDamage( in DamageInfo damage )
     {
-        if ( !damage.Tags.Has( "player" ) && !damage.Tags.Has( "machine" ) && !damage.Tags.Has( "explosion" ) )
+        if ( !damage.Tags.Has( "player" ) && !damage.Tags.Has( "machine" ) && !damage.Tags.Has( "explosion" ) && !damage.Tags.Has( "piercing" ) )
         {
             return;
         }
@@ -74,8 +76,12 @@ public sealed class PropHealth : Component, Component.IDamageable
 
     public async void FlashDamage()
     {
+        if ( _isFlashing ) return;
+
         var renderer = GameObject.Components.Get<ModelRenderer>( FindMode.EverythingInSelfAndDescendants );
         if ( renderer == null ) return;
+
+        _isFlashing = true;
 
         var originalMat = renderer.MaterialOverride;
         var originalTint = renderer.Tint;
@@ -89,6 +95,7 @@ public sealed class PropHealth : Component, Component.IDamageable
 
         renderer.MaterialOverride = originalMat;
         renderer.Tint = originalTint;
+        _isFlashing = false;
     }
 
     private void OnBreak()
