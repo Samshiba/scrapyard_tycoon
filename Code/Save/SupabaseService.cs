@@ -78,7 +78,6 @@ public static class SupabaseService
             { "X-sbox-Auth-Token", sboxToken },
             { "X-Steam-Id", steamId },
             { "apikey", SUPABASE_ANON_KEY },
-            { "X-Admin-Key", "WWSMTHjX8ji4WtT@cvPZai2fjb#@1c" }
         };
     }
 
@@ -136,6 +135,10 @@ public static class SupabaseService
                 FactoryData = factoryData,
                 PlayersData = playersData
             };
+
+            payload.FactoryData?.UpdatedAt = System.DateTime.UtcNow;
+
+            Log.Info( payload );
 
             var headers = GetSyncHeaders( sboxToken, steamId );
             var jsonString = JsonSerializer.Serialize( payload, JsonOptions );

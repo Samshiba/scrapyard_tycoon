@@ -17,17 +17,17 @@ public class GunRecoilFeedback : IWeaponFeedback
 
     public void PlayAttackFeedback( IWeaponContext ctx )
     {
-        // 1. On applique le coup de recul (Kick)
+        // Kick
         _currentRecoil = ctx.Data.RecoilKick;
 
-        // 2. Jouer le son d'attaque
-        if ( ctx.Data.AttackSound != null )
+        // Sound
+        if ( ctx.Data.AttackSound != null && (GameSettings.Instance?.Audio.EnableWeaponSounds ?? true) )
         {
             Sound.Play( ctx.Data.AttackSound, ctx.AttackTransform.Position );
         }
 
-        // 3. Faire spawner le Muzzle Flash
-        if ( ctx.Data.MuzzleFlashPrefab != null )
+        // Muzzle Flash
+        if ( ctx.Data.MuzzleFlashPrefab != null && (GameSettings.Instance?.Gameplay.EnableWeaponVFX ?? true) )
         {
             var muzzleFlash = ctx.Data.MuzzleFlashPrefab.Clone( ctx.AttackTransform.Position, ctx.AttackTransform.Rotation );
             muzzleFlash.SetParent( ctx.MuzzleObject );
@@ -40,11 +40,11 @@ public class GunRecoilFeedback : IWeaponFeedback
     public void Update( float deltaTime )
     {
         if ( _weaponObject == null ) return;
+        if ( !GameSettings.Instance?.Gameplay.EnableWeaponVFX ?? false )
+            return;
 
-        // Si l'arme a du recul, on la ramène doucement à sa position d'origine (Recovery)
         if ( _currentRecoil > 0 )
         {
-            // On récupère la vitesse de récupération depuis le contexte (on pourrait aussi le stocker)
             var weaponComponent = _weaponObject.Components.Get<WeaponComponent>();
             float recoverySpeed = weaponComponent?.Data.RecoilRecovery ?? 10f;
             float pushbackForce = weaponComponent?.Data.RecoilPushback ?? 3f;
@@ -59,12 +59,12 @@ public class GunRecoilFeedback : IWeaponFeedback
                 return;
             }
 
-            // On applique la rotation (l'arme se lève)
+            // Rotation
             bool invertPitch = weaponComponent?.Data.InvertRecoilPitch ?? false;
             float recoilAmount = invertPitch ? -_currentRecoil : _currentRecoil;
             _weaponObject.LocalRotation = _baseRotation * Rotation.FromPitch( recoilAmount );
 
-            // On applique la translation (l'arme recule vers le joueur)
+            // Translation
             float kickback = _currentRecoil * (-pushbackForce / 10f);
             _weaponObject.LocalPosition = _basePosition + new Vector3( kickback, 0, 0 );
         }

@@ -10,13 +10,15 @@ public class HitscanDelivery : IWeaponDelivery
         float baseDamage = ctx.GetStat( WeaponStatTarget.Damage );
         float damagePerPellet = baseDamage / projectiles;
 
+        bool isCrit = ctx.RollCritical();
+
         for ( int i = 0; i < projectiles; i++ )
         {
-            ShootSingleRay( ctx, damagePerPellet, i == 0 );
+            ShootSingleRay( ctx, isCrit, damagePerPellet, i == 0 );
         }
     }
 
-    private void ShootSingleRay( IWeaponContext ctx, float basePelletDamage, bool isCenterPellet )
+    private void ShootSingleRay( IWeaponContext ctx, bool isCrit, float basePelletDamage, bool isCenterPellet )
     {
         var camera = ctx.Owner.Scene.Camera;
         var ray = camera.ScreenNormalToRay( 0.5f );
@@ -59,7 +61,6 @@ public class HitscanDelivery : IWeaponDelivery
             if ( health != null )
             {
                 // Base Damage
-                bool isCrit = ctx.RollCritical();
 
                 float randomVariance = Game.Random.Float( 0.9f, 1.1f );
                 float damage = basePelletDamage * randomVariance;

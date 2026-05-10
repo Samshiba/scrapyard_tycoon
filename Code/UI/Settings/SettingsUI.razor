@@ -1,0 +1,170 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using Sandbox.Utils;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@inherits Panel
+@namespace Sandbox
+
+<link rel="stylesheet" href="SettingsUI.razor.scss" />
+
+<root>
+    <!-- ========================================== -->
+    <!-- SECTION 1: GAMEPLAY & VISUALS              -->
+    <!-- ========================================== -->
+    <div class="dashboard-section">
+        <div class="section-title">#ui.settings.section.visuals</div>
+        
+        <div class="power-breakdown-box">
+            
+            <SettingToggle Label="#ui.settings.damage_numbers" 
+                           Value=@GameSettings.Instance.Gameplay.ShowFloatingDamageNumbers 
+                           ValueChanged=@( (bool v) => { GameSettings.Instance.Gameplay.ShowFloatingDamageNumbers = v; } ) />
+
+            <SettingToggle Label="#ui.settings.hit_flashes" 
+                           Value=@GameSettings.Instance.Gameplay.EnablePropHitFlashes 
+                           ValueChanged=@( (bool v) => { GameSettings.Instance.Gameplay.EnablePropHitFlashes = v; } ) />
+
+            <SettingToggle Label="#ui.settings.dark_hit_flashes" 
+                           Value=@GameSettings.Instance.Gameplay.EnableDarkPropHitFlashes 
+                           ValueChanged=@( (bool v) => { GameSettings.Instance.Gameplay.EnableDarkPropHitFlashes = v; } ) />
+
+            <SettingToggle Label="#ui.settings.weapon_vfx" 
+                           Value=@GameSettings.Instance.Gameplay.EnableWeaponVFX 
+                           ValueChanged=@( (bool v) => { GameSettings.Instance.Gameplay.EnableWeaponVFX = v; } ) />
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 2: PERFORMANCE ENGINE              -->
+    <!-- ========================================== -->
+    <div class="dashboard-section">
+        <div class="section-title">#ui.settings.section.performance</div>
+        
+        <div class="power-breakdown-box">
+            
+            <SettingSlider Label="#ui.settings.max_gibs" 
+                           MinValue=@(50f) MaxValue=@(2000f) Step=@(50f) 
+                           Value=@( (float)GameSettings.Instance.Performance.MaxGibsCount ) 
+                           ValueChanged=@( (float v) => { GameSettings.Instance.Performance.MaxGibsCount = (int)v; } ) />
+
+            <SettingToggle Label="#ui.settings.auto_despawn" 
+                           Value=@GameSettings.Instance.Performance.EnableGibsAutoDespawn 
+                           ValueChanged=@( (bool v) => { GameSettings.Instance.Performance.EnableGibsAutoDespawn = v; } ) />
+
+            <SettingSlider Label="#ui.settings.despawn_time" 
+                           Hint="#ui.settings.despawn_time_hint"
+                           MinValue=@(10f) MaxValue=@(300f) Step=@(10f) 
+                           Value=@GameSettings.Instance.Performance.GibDespawnTime 
+                           ValueChanged=@( (float v) => { GameSettings.Instance.Performance.GibDespawnTime = v; } ) />
+
+            <SettingToggle Label="#ui.settings.gib_shadows" 
+                           Value=@GameSettings.Instance.Performance.EnableGibShadows 
+                           ValueChanged=@( (bool v) => { GameSettings.Instance.Performance.EnableGibShadows = v; } ) />
+
+            <SettingToggle Label="#ui.settings.prop_shadows" 
+                           Value=@GameSettings.Instance.Performance.EnablePropShadows 
+                           ValueChanged=@( (bool v) => { GameSettings.Instance.Performance.EnablePropShadows = v; } ) />
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3: UI SETTINGS                     -->
+    <!-- ========================================== -->
+    <div class="dashboard-section">
+        <div class="section-title">#ui.settings.section.ui</div>
+        
+        <div class="power-breakdown-box">
+            
+            <SettingSlider Label="#ui.settings.crosshair_size" 
+                           MinValue=@(1f) MaxValue=@(15.0f) Step=@(0.5f) 
+                           Value=@GameSettings.Instance.UI.CrosshairSize 
+                           ValueChanged=@( (float v) => { GameSettings.Instance.UI.CrosshairSize = v; } ) />
+
+            <SettingToggle Label="#ui.settings.energy_bar" 
+                           Value=@GameSettings.Instance.UI.ShowEnergyBar 
+                           ValueChanged=@( (bool v) => { GameSettings.Instance.UI.ShowEnergyBar = v; } ) />
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3: FACTORY OVERRIDE (DEBUG)        -->
+    <!-- ========================================== -->
+    @if (IsInGame)
+    {
+        <div class="dashboard-section debug-section">
+            <div class="section-title">#ui.settings.section.debug</div>
+            
+            <div class="power-breakdown-box border-critical">
+                <!-- Clear Gibs -->
+                <div class="stat-line">
+                    <div class="stat-header">
+                        <span class="stat-label">#ui.settings.debug.clear_gibs</span>
+                        <div class="settings-btn btn-danger" onclick=@OnClearGibsClicked>#ui.settings.btn.purge_gibs</div>
+                    </div>
+                </div>
+
+                <!-- Clear Prop -->
+                <div class="stat-line">
+                    <div class="stat-header">
+                        <span class="stat-label">#ui.settings.debug.clear_prop</span>
+                        <div class="settings-btn btn-danger" onclick=@OnClearTargetClicked>#ui.settings.btn.purge_prop</div>
+                    </div>
+                </div>
+
+                <!-- Respawn -->
+                <div class="stat-line">
+                    <div class="stat-header">
+                        <span class="stat-label">#ui.settings.debug.respawn</span>
+                        <div class="settings-btn btn-warning" onclick=@OnRespawnClicked>#ui.settings.btn.respawn</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</root>
+
+@code {
+    /// <summary>
+    /// Determines if the settings are opened from the Main Menu (false) or In-Game Codex (true).
+    /// </summary>
+    public bool IsInGame { get; set; } = false;
+    public bool IsSandbox { get; set; } = false; // For future use, e.g. enabling god mode toggles in sandbox
+
+    private void SaveSettings()
+    {
+        GameSettings.Save();
+    }
+
+    public override void OnDeleted()
+    {
+        base.OnDeleted();
+        GameSettings.Save();
+    }
+
+    // --- DEBUG / OVERRIDE HANDLERS ---
+    public void OnClearGibsClicked()
+    {
+        Log.Info("[Settings] Purging all gibs...");
+        GibsManager.Instance?.ClearAllGibs();
+    }
+
+    public void OnClearTargetClicked()
+    {
+        Log.Info("[Settings] Purging all targets...");
+        // Loop on all scene elements
+        foreach ( PropHealth entity in Scene.GetAll<PropHealth>() )
+        {
+            entity.GameObject.Destroy();
+        }
+    }
+
+    public void OnRespawnClicked()
+    {
+        Log.Info("[Settings] Respawning player...");
+        // Call player logic: Player.Local?.Respawn();
+        CodexUI.Local?.CloseMenu();
+    }
+}

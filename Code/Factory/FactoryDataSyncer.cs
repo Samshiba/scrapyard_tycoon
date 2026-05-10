@@ -5,13 +5,14 @@ using Sandbox;
 
 public sealed class FactoryDataSyncer : Component, Component.INetworkListener
 {
-    // REAL TIME DATA
+    // FACTORY DATA
     [Sync][Property] public double TotalScrap { get; private set; } = 0;
     [Sync][Property] public int PrestigePoints { get; private set; } = 0;
     [Sync][Property] public double CurrentSPS { get; private set; } = 0;
     [Sync][Property] public int Tier { get; set; } = 1;
+    [Sync][Property] public bool isSandbox { get; set; } = false;
 
-    // STATS
+    // FACTORY STATS
     [Sync] public double ScrapGained { get; set; } = 0;
     [Sync] public double LargestScrapGain { get; set; } = 0;
     [Sync] public double TotalMoneySpent { get; set; } = 0;
@@ -59,6 +60,7 @@ public sealed class FactoryDataSyncer : Component, Component.INetworkListener
             TotalScrap = SaveManager.Get( Scene ).CurrentFactory.TotalScrap;
             PrestigePoints = SaveManager.Get( Scene ).CurrentFactory.PrestigePoints;
             Tier = SaveManager.Get( Scene ).CurrentFactory.Tier;
+            isSandbox = SaveManager.Get( Scene ).CurrentFactory.IsSandbox;
 
             ScrapGained = fStats.ScrapGained;
             LargestScrapGain = fStats.LargestScrapGain;

@@ -1,0 +1,322 @@
+@import "../_design-system.scss";
+
+// 1. ROOT & ENCAPSULATION
+settingsui, settingsui, root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex-shrink: 0;
+    gap: $spacing-3xl;
+}
+
+settingtoggle, settingslider {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+// 2. RECONSTRUCTION DU DASHBOARD
+.dashboard-section {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+
+    .section-title {
+        font-size: $fs-h3;
+        color: $text-tertiary;
+        font-weight: 800;
+        letter-spacing: 2px;
+        font-family: $font-heading;
+        text-transform: uppercase;
+
+        // FIX BORDURE : Séparé pour s&box
+        border-bottom-width: 1px;
+        border-bottom-color: $border-standard;
+        padding-bottom: $spacing-md;
+    }
+
+    &.debug-section .section-title {
+        color: $status-critical;
+        border-bottom-color: rgba(239, 68, 68, 0.3);
+    }
+}
+
+.power-breakdown-box {
+    background-color: $bg-primary;
+    // FIX BORDURE
+    border-width: 1px;
+    border-color: $border-standard;
+    border-radius: $radius-md;
+    display: flex;
+    flex-direction: column;
+
+    &.border-critical {
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .stat-line {
+        display: flex;
+        flex-direction: column;
+        padding: $spacing-lg $spacing-xl;
+
+        // FIX BORDURE
+        border-bottom-width: 1px;
+        border-bottom-color: $border-standard;
+
+        &:last-child {
+            border-bottom-width: 0px;
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            .stat-info {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .stat-label {
+                color: $text-secondary;
+                font-weight: 700;
+                font-family: $font-body;
+                font-size: $fs-body;
+            }
+
+            .stat-final {
+                color: $text-primary;
+                font-weight: 900;
+                font-size: $fs-ui-label;
+                font-family: $font-mono;
+            }
+        }
+
+        .slider-wrapper {
+            width: 100%;
+            min-height: 50px;
+            margin-top: $spacing-md;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    }
+}
+
+// 3. UI CONTROLS : TOGGLE, SLIDER & BUTTONS
+// ------------------------------------------
+
+// Toggle industriel avec effet néon
+.toggle-switch {
+    width: 56px;
+    height: 28px;
+    background-color: $bg-tertiary;
+
+    // FIX BORDURE
+    border-width: 2px;
+    border-color: $border-heavy;
+    border-radius: 14px;
+
+    position: relative;
+    cursor: pointer;
+    transition: all 200ms ease;
+
+    .toggle-knob {
+        width: 20px;
+        height: 20px;
+        background-color: $text-muted;
+        border-radius: 50%;
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    &.active {
+        background-color: rgba(217, 119, 6, 0.15);
+        border-color: $orange-copper;
+
+        .toggle-knob {
+            background-color: $orange-copper;
+            transform: translateX(28px);
+            box-shadow: 0 0 10px rgba(217, 119, 6, 0.6);
+        }
+    }
+
+    &:hover {
+        border-color: $text-secondary;
+        &.active {
+            border-color: $orange-copper-hover;
+            .toggle-knob {
+                background-color: $orange-copper-hover;
+            }
+        }
+    }
+}
+
+// Boutons d'Action (Debug)
+.settings-btn {
+    padding: $spacing-md $spacing-xl;
+    background-color: $bg-secondary;
+
+    // FIX BORDURE
+    border-width: 1px;
+    border-color: $border-standard;
+
+    color: $text-secondary;
+    font-family: $font-heading;
+    font-size: $fs-body-sm;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    transition: all 150ms ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        background-color: $bg-tertiary;
+        color: $text-primary;
+        border-color: $text-muted;
+    }
+
+    &.btn-danger {
+        color: $status-critical;
+        border-color: rgba(239, 68, 68, 0.3);
+        background-color: rgba(239, 68, 68, 0.05);
+
+        &:hover {
+            background-color: rgba(239, 68, 68, 0.15);
+            border-color: $status-critical;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+    }
+
+    &.btn-warning {
+        color: $status-warning;
+        border-color: rgba(245, 158, 11, 0.3);
+        background-color: rgba(245, 158, 11, 0.05);
+
+        &:hover {
+            background-color: rgba(245, 158, 11, 0.15);
+            border-color: $status-warning;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+            transform: translateY(-2px);
+        }
+    }
+}
+
+/* ==========================================
+   INDUSTRIAL SLIDER CUSTOM COMPONENT
+   ========================================== */
+
+industrialslider {
+    width: 100%;
+    height: 24px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    /* user-select retiré car non supporté */
+
+    // 1. LE RAIL VIDE
+    .track-bg {
+        background-color: #1a1e24;
+        height: 6px;
+        width: 100%;
+        border-radius: 3px;
+        position: absolute;
+        top: 9px;
+        border-top: 1px solid rgba(0, 0, 0, 0.8); /* Remplace l'inset shadow */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        pointer-events: none;
+    }
+
+    // 2. LA BARRE DE REMPLISSAGE
+    .track-fill {
+        background: linear-gradient(90deg, #b45309 0%, #d97706 100%);
+        height: 6px;
+        border-radius: 3px;
+        position: absolute;
+        top: 9px;
+        left: 0;
+        pointer-events: none;
+        box-shadow: 0 0 8px rgba(217, 119, 6, 0.3); /* Ombre unique supportée */
+    }
+
+    // 3. LE BOUTON (Fader)
+    .thumb {
+        width: 14px;
+        height: 24px;
+        background: linear-gradient(180deg, #6b7280 0%, #4b5563 100%);
+        border: 1px solid #374151;
+        border-radius: 3px;
+
+        position: absolute;
+        top: 0px;
+        margin-left: -7px;
+
+        box-shadow: 0 3px 6px
+            rgba(0, 0, 0, 0.6); /* Ombre unique, pas de virgule */
+
+        transition:
+            background 150ms ease,
+            transform 100ms ease; /* Transition simplifiée */
+        pointer-events: none;
+
+        // Ligne de grip au centre
+        &:after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 2px;
+            background-color: #1f2937;
+        }
+    }
+
+    // --- ANIMATIONS ---
+    &:hover {
+        .track-fill {
+            box-shadow: 0 0 12px rgba(217, 119, 6, 0.6);
+        }
+        .thumb {
+            background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+        }
+    }
+
+    &:active {
+        .thumb {
+            background: #d97706;
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+
+            &:after {
+                background-color: #78350f;
+            }
+        }
+    }
+}
+
+// Utilitaires
+.stat-hint {
+    font-size: $fs-body-sm;
+    color: $text-muted;
+    font-family: $font-mono;
+    margin-top: $spacing-xs;
+}
+
+.text-critical {
+    color: $status-critical !important;
+}
+.text-warning {
+    color: $status-warning !important;
+}

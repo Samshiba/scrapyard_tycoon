@@ -17,14 +17,17 @@
                     <span class="codex-title">#ui.codex.title</span>
                     
                     <div class="codex-tabs">
-                        <div class="tab-btn @(ActiveTab == CodexTab.Armory ? "active" : "")" onclick=@(() => ActiveTab =
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             CodexTab.Armory)>#ui.codex.tab.armory</div>
-                        <div class="tab-btn @(ActiveTab == CodexTab.Targets ? "active" : "")" onclick=@(() => ActiveTab =
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              CodexTab.Targets)>#ui.codex.tab.targets</div>
-                        <div class="tab-btn @(ActiveTab == CodexTab.Effects ? "active" : "")" onclick=@(() => ActiveTab =
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              CodexTab.Effects)>#ui.codex.tab.effects</div>
-                        <div class="tab-btn @(ActiveTab == CodexTab.Stats ? "active" : "")" onclick=@(() => ActiveTab =
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            CodexTab.Stats)>#ui.codex.tab.stats</div>
+                        <div class="nav-hint left-hint" onclick=@(() => NavigateTabs(-1))>
+                            <Image Texture="@Input.GetGlyph( "TabLeft", InputGlyphSize.Large, true )" class="ui-glyph" />
+                        </div>
+                        <div class="tab-btn @(ActiveTab == CodexTab.Armory ? "active" : "")" onclick=@(() => ActiveTab = CodexTab.Armory)>#ui.codex.tab.armory</div>
+                        <div class="tab-btn @(ActiveTab == CodexTab.Targets ? "active" : "")" onclick=@(() => ActiveTab = CodexTab.Targets)>#ui.codex.tab.targets</div>
+                        <div class="tab-btn @(ActiveTab == CodexTab.Effects ? "active" : "")" onclick=@(() => ActiveTab = CodexTab.Effects)>#ui.codex.tab.effects</div>
+                        <div class="tab-btn @(ActiveTab == CodexTab.Stats ? "active" : "")" onclick=@(() => ActiveTab = CodexTab.Stats)>#ui.codex.tab.stats</div>
+                        <div class="tab-btn @(ActiveTab == CodexTab.Settings ? "active" : "")" onclick=@(() => ActiveTab = CodexTab.Settings)>#ui.codex.tab.settings</div>
+                        <div class="nav-hint right-hint" onclick=@(() => NavigateTabs(1))>
+                            <Image Texture="@Input.GetGlyph( "TabRight", InputGlyphSize.Large, true )" class="ui-glyph" />
+                        </div>
                     </div>
 
                     <div class="codex-close" onclick=@CloseMenu>#ui.codex.button.close</div>
@@ -528,6 +531,13 @@
 
                                                                     </div>
                                                                 }
+
+                                                                @if (ActiveTab == CodexTab.Settings)
+                                                                {
+                                                                    <div class="empire-dashboard" candragscroll="false">
+                                                                        <SettingsUI IsInGame="@true" IsSandbox="@(FactoryDataSyncer.Get(Scene)?.isSandbox ?? false)" />
+                                                                    </div>
+                                                                }
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -542,7 +552,7 @@
     TimeSince TimeSinceOpened;
     TimeSince TimeSinceClosed = 10f;
     
-    public enum CodexTab { Armory, Targets, Effects, Stats }
+    public enum CodexTab { Armory, Targets, Effects, Stats, Settings }
     public CodexTab ActiveTab { get; set; } = CodexTab.Armory;
 
     // Data lists
@@ -638,7 +648,28 @@
                 Input.EscapePressed = false;
                 CloseMenu();
             }
+
+            // Handle Tabs Navigation 
+            if (Input.Pressed("SlotPrev") || Input.Pressed("TabLeft")) 
+            {
+                NavigateTabs(-1);
+            }
+            if (Input.Pressed("SlotNext") || Input.Pressed("TabRight")) 
+            {
+                NavigateTabs(1);
+            }
         }
+    }
+
+    private void NavigateTabs(int direction)
+    {
+        int tabCount = Enum.GetNames(typeof(CodexTab)).Length;
+        int current = (int)ActiveTab;
+        
+        int nextTab = (current + direction + tabCount) % tabCount;
+        ActiveTab = (CodexTab)nextTab;
+        
+        StateHasChanged();
     }
 
     protected override int BuildHash()

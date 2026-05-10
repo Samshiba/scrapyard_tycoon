@@ -36,7 +36,39 @@ public sealed class PropSpawner : Component
         _allProps = ResourceLibrary.GetAll<PropDefinition>().ToList();
         Log.Info( $"[PropSpawner] Loaded {_allProps.Count} prop definition(s)" );
 
+        if ( GameSettings.Instance != null )
+        {
+            GameSettings.Instance.OnSettingsChanged += OnSettingsChanged;
+        }
+
         SpawnProp();
+    }
+
+    protected override void OnDestroy()
+    {
+        if ( GameSettings.Instance != null )
+        {
+            GameSettings.Instance.OnSettingsChanged -= OnSettingsChanged;
+        }
+    }
+
+    private void OnSettingsChanged()
+    {
+        // Prop shadows settings changed
+        // Update shadows on all currently active props
+        foreach ( var prop in GetActiveProps() )
+        {
+            var renderer = prop.Components.Get<ModelRenderer>( FindMode.EverythingInSelfAndDescendants );
+            if ( renderer != null )
+            {
+                renderer.RenderType = GameSettings.Instance?.Performance.EnablePropShadows ?? true ? ModelRenderer.ShadowRenderType.On : ModelRenderer.ShadowRenderType.Off;
+            }
+        }
+    }
+
+    private List<GameObject> GetActiveProps()
+    {
+        return Scene.GetAllComponents<PropHealth>().Select( x => x.GameObject ).ToList();
     }
 
     protected override void OnUpdate()
@@ -103,6 +135,12 @@ public sealed class PropSpawner : Component
         // PropHealth
         var health = go.AddComponent<PropHealth>();
         health.Initialize( data );
+
+        // Apply shadows setting
+        if ( renderer != null )
+        {
+            renderer.RenderType = GameSettings.Instance?.Performance.EnablePropShadows ?? true ? ModelRenderer.ShadowRenderType.On : ModelRenderer.ShadowRenderType.Off;
+        }
     }
 
     /// <summary>

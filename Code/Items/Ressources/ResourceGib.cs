@@ -7,6 +7,27 @@ public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
     [Property] public Vector3 LaunchAngularVelocity { get; set; }
 
     private bool _launched = false;
+    private TemporaryEffect _despawnEffect;
+
+    protected override void OnAwake()
+    {
+        GibsManager.Instance?.RegisterGib( this );
+
+        if ( GameSettings.Instance != null )
+        {
+            GameSettings.Instance.OnSettingsChanged += OnSettingsChanged;
+        }
+    }
+
+    protected override void OnDestroy()
+    {
+        GibsManager.Instance?.UnregisterGib( this );
+
+        if ( GameSettings.Instance != null )
+        {
+            GameSettings.Instance.OnSettingsChanged -= OnSettingsChanged;
+        }
+    }
 
     public ItemData GetItemData()
     {
@@ -26,6 +47,43 @@ public sealed class ResourceGib : Component, Component.IPressable, IWorldItem
             Type = type,
             Value = value
         };
+
+        ApplyGibSettings();
+    }
+
+    private void ApplyGibSettings()
+    {
+        // Apply auto-despawn if enabled in settings
+        if ( GameSettings.Instance?.Performance.EnableGibsAutoDespawn ?? false )
+        {
+            // Remove old effect if any
+            if ( _despawnEffect != null )
+                _despawnEffect.Destroy();
+
+            _despawnEffect = GameObject.AddComponent<TemporaryEffect>();
+            _despawnEffect.DestroyAfterSeconds = GameSettings.Instance.Performance.GibDespawnTime;
+        }
+        else
+        {
+            // Remove despawn effect if disabled
+            if ( _despawnEffect != null )
+            {
+                _despawnEffect.Destroy();
+                _despawnEffect = null;
+            }
+        }
+
+        // Apply shadows setting
+        var modelRenderer = Components.Get<ModelRenderer>();
+        if ( modelRenderer != null )
+        {
+            modelRenderer.RenderType = GameSettings.Instance?.Performance.EnableGibShadows ?? true ? ModelRenderer.ShadowRenderType.On : ModelRenderer.ShadowRenderType.Off;
+        }
+    }
+
+    private void OnSettingsChanged()
+    {
+        ApplyGibSettings();
     }
 
     private void RandomizeLaunch( Vector3 randomDir )

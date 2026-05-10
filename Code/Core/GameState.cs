@@ -11,6 +11,11 @@ public sealed class GameState : Component, Component.INetworkListener
 
     protected override void OnStart()
     {
+        if ( GameSettings.Instance == null )
+        {
+            GameSettings.Load();
+        }
+
         if ( AllBays.Count == 0 )
         {
             AllBays = Scene.GetAllComponents<BayComponent>().ToList();

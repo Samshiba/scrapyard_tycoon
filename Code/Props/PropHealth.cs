@@ -20,6 +20,22 @@ public sealed class PropHealth : Component, Component.IDamageable
     private string _lastAttackerSteamId = "";
     private string _lastWeaponId = "";
 
+    protected override void OnAwake()
+    {
+        if ( GameSettings.Instance != null )
+        {
+            GameSettings.Instance.OnSettingsChanged += OnSettingsChanged;
+        }
+    }
+
+    protected override void OnDestroy()
+    {
+        if ( GameSettings.Instance != null )
+        {
+            GameSettings.Instance.OnSettingsChanged -= OnSettingsChanged;
+        }
+    }
+
     public void Initialize( PropDefinition data )
     {
         config = BalanceConfig.Instance;
@@ -65,6 +81,7 @@ public sealed class PropHealth : Component, Component.IDamageable
 
     private Color GetFlashColor()
     {
+
         if ( Data.IsJackpot || Data.RarityMod >= 10 ) return (Color)Color.Parse( "#ffde23" );
 
         if ( Data.RarityMod > 6 ) return (Color)Color.Parse( "#ff0000" );
@@ -72,10 +89,23 @@ public sealed class PropHealth : Component, Component.IDamageable
         if ( Data.RarityMod > 3 ) return (Color)Color.Parse( "#002fff" );
 
         return (Color)Color.Parse( "#FFFFFF" );
+
+    }
+
+    private Color GetDarkFlashColor()
+    {
+        if ( Data.IsJackpot || Data.RarityMod >= 10 ) return (Color)Color.Parse( "#78680c" );
+
+        if ( Data.RarityMod > 6 ) return (Color)Color.Parse( "#5c0000" );
+
+        if ( Data.RarityMod > 3 ) return (Color)Color.Parse( "#0b1a5e" );
+
+        return (Color)Color.Parse( "#000000" );
     }
 
     public async void FlashDamage()
     {
+        if ( !GameSettings.Instance?.Gameplay.EnablePropHitFlashes ?? true ) return;
         if ( _isFlashing ) return;
 
         var renderer = GameObject.Components.Get<ModelRenderer>( FindMode.EverythingInSelfAndDescendants );
@@ -87,7 +117,14 @@ public sealed class PropHealth : Component, Component.IDamageable
         var originalTint = renderer.Tint;
 
         renderer.MaterialOverride = Material.Load( "materials/dev/primary_white.vmat" );
-        renderer.Tint = GetFlashColor();
+        if ( GameSettings.Instance?.Gameplay.EnableDarkPropHitFlashes ?? false )
+        {
+            renderer.Tint = GetDarkFlashColor();
+        }
+        else
+        {
+            renderer.Tint = GetFlashColor();
+        }
 
         await Task.DelayRealtime( 50 );
 
@@ -96,6 +133,12 @@ public sealed class PropHealth : Component, Component.IDamageable
         renderer.MaterialOverride = originalMat;
         renderer.Tint = originalTint;
         _isFlashing = false;
+    }
+
+    private void OnSettingsChanged()
+    {
+        // Settings changed - no immediate action needed for PropHealth
+        // Flash behavior will use updated settings on next damage
     }
 
     private void OnBreak()
@@ -169,6 +212,13 @@ public sealed class PropHealth : Component, Component.IDamageable
 
         for ( int i = 0; i < FinalGibCount; i++ )
         {
+            // Check if we've reached max gibs limit
+            if ( !( GibsManager.Instance?.CanSpawnGib() ?? true ) )
+            {
+                Log.Warning( $"[PropHealth] Max gibs count reached ({GibsManager.Instance?.CurrentGibCount}/{GibsManager.Instance?.MaxGibsCount}). Stopping gib spawns." );
+                break;
+            }
+
             var randomDir = new Vector3(
                 Game.Random.Float( -1f, 1f ),
                 Game.Random.Float( -1f, 1f ),

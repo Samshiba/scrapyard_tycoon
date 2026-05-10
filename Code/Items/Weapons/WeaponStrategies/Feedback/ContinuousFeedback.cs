@@ -18,8 +18,10 @@ public class ContinuousFeedback : IWeaponFeedback
     public void Update( float deltaTime )
     {
         if ( _weaponObject == null ) return;
+        if ( !GameSettings.Instance?.Gameplay.EnableWeaponVFX ?? false )
+            return;
 
-        var ctx = _weaponObject.Components.Get<WeaponComponent>();
+        IWeaponContext ctx = _weaponObject.Components.Get<WeaponComponent>();
         if ( ctx == null ) return;
 
         bool isFiring = Input.Down( "attack1" ) && !ctx.IsExhausted();
@@ -28,7 +30,6 @@ public class ContinuousFeedback : IWeaponFeedback
         {
             if ( _activeStreamParticle == null && ctx.Data.StreamEffectPrefab != null )
             {
-                Log.Info( "Spawning continuous stream particle effect." );
                 _activeStreamParticle = ctx.Data.StreamEffectPrefab.Clone( ctx.AttackTransform.Position, ctx.AttackTransform.Rotation );
                 _activeStreamParticle.SetParent( ctx.MuzzleObject );
 

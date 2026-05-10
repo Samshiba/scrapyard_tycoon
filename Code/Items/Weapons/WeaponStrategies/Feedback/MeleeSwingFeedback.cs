@@ -20,7 +20,7 @@ public class MeleeSwingFeedback : IWeaponFeedback
         // On déclenche le balayage (100% de la force d'un coup)
         _currentSwing = 1f;
 
-        if ( ctx.Data.AttackSound != null )
+        if ( ctx.Data.AttackSound != null && (GameSettings.Instance?.Audio.EnableWeaponSounds ?? true) )
         {
             Sound.Play( ctx.Data.AttackSound, ctx.AttackTransform.Position );
         }
@@ -28,7 +28,10 @@ public class MeleeSwingFeedback : IWeaponFeedback
 
     public void Update( float deltaTime )
     {
+
         if ( _weaponObject == null || _currentSwing <= 0 ) return;
+        if ( !GameSettings.Instance?.Gameplay.EnableWeaponVFX ?? false )
+            return;
 
         var weaponComponent = _weaponObject.Components.Get<WeaponComponent>();
         if ( weaponComponent == null ) return;

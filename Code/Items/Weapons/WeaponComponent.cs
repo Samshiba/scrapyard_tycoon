@@ -50,15 +50,15 @@ public sealed class WeaponComponent : Component, IWeaponContext, ITooltipProvide
 
         _energySource = Components.GetInAncestors<IEnergySource>();
 
-        // 1. Instancier les stratégies via la Factory (on l'écrit juste en dessous)
+        // 1. Init Strategies
         _triggerBehavior = WeaponStrategyFactory.CreateTrigger( Data.TriggerType );
         _deliveryBehavior = WeaponStrategyFactory.CreateDelivery( Data.DeliveryType );
         _feedbackBehavior = WeaponStrategyFactory.CreateFeedback( Data.FeedbackType );
 
-        // 2. Initialiser le visuel (sauvegarde la position de base pour le recul/swing)
+        // 2. Init visual
         _feedbackBehavior?.Initialize( GameObject );
 
-        // 3. Lier l'action de tir au Trigger
+        // 3. Bind trigger actions
         _triggerBehavior?.BindActions( () => ExecuteAttack() );
     }
 
@@ -68,16 +68,14 @@ public sealed class WeaponComponent : Component, IWeaponContext, ITooltipProvide
 
         if ( _triggerBehavior == null ) return;
 
-        // On récupère les inputs
         bool pressed = Input.Pressed( "attack1" );
         bool down = Input.Down( "attack1" );
         bool released = Input.Released( "attack1" );
 
-        // On laisse le Trigger décider s'il doit appeler notre action liée (ExecuteAttack)
         _triggerBehavior.Update( this, pressed, down, released );
 
-        // On met à jour l'esthétique (recul qui redescend, animation d'épée qui se finit)
         _feedbackBehavior?.Update( Time.Delta );
+
     }
 
     // =========================================================================

@@ -96,6 +96,33 @@
     overflow: hidden;
 }
 
+.nav-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 $spacing-md;
+    // On l'aligne un peu au-dessus de la bordure du bas pour matcher le texte des tabs
+    margin-bottom: 12px;
+    cursor: pointer;
+    opacity: 0.5; // Un peu grisé par défaut
+    transition: all 150ms ease;
+
+    &:hover {
+        opacity: 1;
+        transform: scale(1.1); // Petit pop au survol
+    }
+
+    // Le fix pour le composant <Image>
+    .ui-glyph {
+        width: 32px;
+        height: 32px;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        image-rendering: trilinear; // Rend l'image bien nette
+    }
+}
+
 // ============================================================================
 // GRID MASTER (Gauches)
 // ============================================================================
