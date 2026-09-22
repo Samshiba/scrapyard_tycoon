@@ -1,0 +1,9 @@
+{
+    "tooltip.skilltree.description": "Ouvrir l'arbre de compétences",
+    "tooltip.shop.description": "Ouvrir la boutique",
+    "tooltip.spawn.description": "Spawner un objet",
+    "tooltip.gib.description": "Collecter du scrap",
+    "tooltip.weapon.attack": "Attaque",
+    "tooltip.weapon.fire": "Tirer",
+    "tooltip.weapon.hit": "Frapper"
+}

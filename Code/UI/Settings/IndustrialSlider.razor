@@ -1,0 +1,90 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using Sandbox.Utils;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@inherits Panel
+@namespace Sandbox
+
+<link rel="stylesheet" href="SettingsUI.razor.scss" />
+
+<root class="industrial-slider-root">
+    <div class="track-bg"></div>
+    <div class="track-fill" style="width: @(GetPercentage())%;"></div>
+    <div class="thumb" style="left: @(GetPercentage())%;"></div>
+</root>
+
+@code {
+    public float MinValue { get; set; } = 0f;
+    public float MaxValue { get; set; } = 1f;
+    public float Step { get; set; } = 0.1f;
+
+    public float Value { get; set; }
+    public Action<float> ValueChanged { get; set; }
+
+    float GetPercentage()
+    {
+        var range = MaxValue - MinValue;
+        if (range <= 0) return 0;
+        return ((Value - MinValue) / range) * 100f;
+    }
+
+    void UpdateValue()
+    {
+        if (Box.Rect.Width == 0) return;
+        
+        var fraction = MousePosition.x / Box.Rect.Width;
+        fraction = Math.Clamp(fraction, 0f, 1f);
+        
+        var rawValue = MinValue + (fraction * (MaxValue - MinValue));
+        
+        if (Step > 0)
+        {
+            rawValue = MathF.Round(rawValue / Step) * Step;
+        }
+
+        var newValue = Math.Clamp(rawValue, MinValue, MaxValue);
+        
+        if (Value != newValue)
+        {
+            Value = newValue;
+            ValueChanged?.Invoke(Value);
+            StateHasChanged();
+        }
+    }
+
+    // 1. GESTION DU DRAG EN CONTINU SANS CACHER LA SOURIS
+    public override void Tick()
+    {
+        base.Tick();
+
+        // HasActive est une propriété native de s&box.
+        // Elle est vraie tant que le clic gauche est maintenu sur ce panel,
+        // même si la souris sort du cadre !
+        if (HasActive)
+        {
+            UpdateValue();
+        }
+    }
+
+    // 2. GESTION DU CLIC INITIAL
+    public override void OnButtonEvent(ButtonEvent e)
+    {
+        // On laisse le moteur UI de base faire son travail (activer le HasActive)
+        base.OnButtonEvent(e);
+
+        if (e.Button == "mouseleft")
+        {
+            if (e.Pressed)
+            {
+                // Met à jour la valeur immédiatement dès qu'on clique
+                UpdateValue();
+            }
+            
+            // Empêche le clic de passer à travers l'interface
+            // (évite de faire tourner la caméra du jeu ou de tirer par erreur)
+            e.StopPropagation = true;
+        }
+    }
+}

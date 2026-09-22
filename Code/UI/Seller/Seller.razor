@@ -1,0 +1,127 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using Sandbox.Utils;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+	<div class="seller-panel">
+
+		<div class="seller-header">
+			<label class="seller-title">#ui.seller.title</label>
+			<div class="seller-counter-group">
+				<label class="seller-count" style="color: @FillColor;">@(Machine?.ProcessingQueue.Count ?? 0)</label>
+				<label class="seller-separator-slash">/</label>
+				<label class="seller-max">@(Machine?.MaxQueueSize ?? 50)</label>
+			</div>
+		</div>
+
+		<div class="seller-separator"></div>
+
+		<div class="seller-bar-track">
+			<div class="seller-bar-fill" style="width: @FillPercentage%; background-color: @FillColor;"></div>
+		</div>
+
+		<div class="seller-stats-row">
+			<div class="seller-stat-item">
+				<label class="seller-stat-label">#ui.seller.eta</label>
+				<label class="seller-stat-value">@EstimatedTimeRemaining</label>
+			</div>
+			<div class="seller-stat-item">
+				<label class="seller-stat-label">#ui.seller.sps</label>
+				<label class="seller-stat-value">@FormattedSPS</label>
+			</div>
+		</div>
+
+	</div>
+</root>
+@code {
+	[Property] public SellerMachine Machine { get; set; }
+
+	private float _smoothedTimeRemaining = 0f;
+	private int _lastQueueCount = -1;
+	private TimeSince _timeSinceQueueChanged = 0;
+	private const float SMOOTH_TIME = 0.5f;
+
+	public float FillPercentage => Machine != null && Machine.MaxQueueSize > 0
+		? ((float)Machine.ProcessingQueue.Count / Machine.MaxQueueSize) * 100f
+		: 0f;
+
+	string FillColor
+	{
+		get
+		{
+			var pct = FillPercentage;
+			if (pct < 50f) return "#6ecf81";
+			if (pct < 80f) return "#f0c040";
+			return "#e8503a";
+		}
+	}
+
+	float CalculateSmoothedETA()
+	{
+		if (Machine == null || Machine.ProcessingQueue.Count == 0)
+			return 0f;
+		
+		int currentCount = Machine.ProcessingQueue.Count;
+		float timePerItem = 1f / Machine.ProcessRate;
+		
+		if (currentCount != _lastQueueCount)
+		{
+			_lastQueueCount = currentCount;
+			_timeSinceQueueChanged = 0;
+		}
+		
+		// Calculer: (count * temps par item) - temps écoulé depuis le dernier changement
+		float eta = (currentCount * timePerItem) - _timeSinceQueueChanged;
+		return Math.Max(0, eta);
+	}
+
+	string EstimatedTimeRemaining
+	{
+		get
+		{
+			if (Machine == null || Machine.ProcessingQueue.Count == 0)
+				return "—";
+			
+			// Use smoothed value for display
+			int minutes = (int)(_smoothedTimeRemaining / 60);
+			int seconds = (int)(_smoothedTimeRemaining % 60);
+			
+			if (minutes > 0)
+				return $"{minutes}m {seconds}s";
+			else
+				return $"{seconds}s";
+		}
+	}
+
+	string FormattedSPS
+	{
+		get
+		{
+			var dataSyncer = FactoryDataSyncer.Get(Scene);
+			if (dataSyncer == null)
+				return "—";
+			
+			// Use NumberFormatter to display SPS with abbreviations (K, M, B, etc)
+			return NumberFormatter.FormatWithSuffix(dataSyncer.CurrentSPS, 1);
+		}
+	}
+
+	protected override void OnUpdate()
+	{
+		base.OnUpdate();
+
+		// Calculer l'ETA avec décrémentation continue
+		float targetETA = CalculateSmoothedETA();
+		_smoothedTimeRemaining = MathX.Lerp(_smoothedTimeRemaining, targetETA, SMOOTH_TIME);
+	}
+
+	protected override int BuildHash() =>
+		Machine != null
+			? System.HashCode.Combine(Machine.ProcessingQueue.Count, Machine.MaxQueueSize, FormattedSPS, EstimatedTimeRemaining)
+			: 0;
+}

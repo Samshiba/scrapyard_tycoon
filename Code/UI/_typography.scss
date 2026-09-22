@@ -1,0 +1,386 @@
+// ============================================================================
+// TYPOGRAPHY SCALE — Scrapyard Tycoon Industrial/Tycoon UI
+// ============================================================================
+// Semantic typography classes for consistent text styling
+// Import this file after _design-system.scss
+// ============================================================================
+
+// ============================================================================
+// GLOBAL TYPOGRAPHY RESET
+// ============================================================================
+html, body {
+  font-family: $font-body;
+  font-size: $fs-body;
+  font-weight: 400;
+  line-height: $lh-body;
+  color: $text-primary;
+  background: $bg-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ============================================================================
+// HEADING STYLES (h1-h4)
+// ============================================================================
+h1, .h1, .display {
+  font-family: $font-heading;
+  font-size: $fs-h1;
+  font-weight: $fw-h1;
+  line-height: $lh-h1;
+  letter-spacing: 1px;
+  color: $text-primary;
+  margin: 0;
+  padding: 0;
+}
+
+h2, .h2, .heading {
+  font-family: $font-heading;
+  font-size: $fs-h2;
+  font-weight: $fw-h2;
+  line-height: $lh-h2;
+  letter-spacing: 0.5px;
+  color: $text-primary;
+  margin: 0;
+  padding: 0;
+}
+
+h3, .h3, .subheading {
+  font-family: $font-heading;
+  font-size: $fs-h3;
+  font-weight: $fw-h3;
+  line-height: $lh-h3;
+  letter-spacing: 0.5px;
+  color: $text-primary;
+  margin: 0;
+  padding: 0;
+}
+
+h4, .h4, .label {
+  font-family: $font-heading;
+  font-size: $fs-h4;
+  font-weight: $fw-h4;
+  line-height: $lh-h4;
+  letter-spacing: 0px;
+  color: $text-primary;
+  margin: 0;
+  padding: 0;
+}
+
+// ============================================================================
+// BODY TEXT STYLES
+// ============================================================================
+p, .body-text {
+  font-family: $font-body;
+  font-size: $fs-body;
+  font-weight: 400;
+  line-height: $lh-body;
+  color: $text-primary;
+  margin: 0;
+  padding: 0;
+  
+  & + p {
+    margin-top: $spacing-md;
+  }
+}
+
+.body-large {
+  font-size: $fs-body-lg;
+  line-height: $lh-body-lg;
+}
+
+.body-small {
+  font-size: $fs-body-sm;
+  line-height: $lh-body;
+  color: $text-secondary;
+}
+
+// ============================================================================
+// TEXT COLOR UTILITIES
+// ============================================================================
+.text-xs {
+  font-size: $fs-minimal;
+}
+
+.text-primary {
+  color: $text-primary;
+}
+
+.text-secondary {
+  color: $text-secondary;
+}
+
+.text-tertiary {
+  color: $text-tertiary;
+}
+
+.text-muted {
+  color: $text-muted;
+}
+
+.text-success {
+  color: $status-success;
+}
+
+.text-warning {
+  color: $status-warning;
+}
+
+.text-critical {
+  color: $status-critical;
+}
+
+.text-gold {
+  color: $currency-gibs;
+  font-family: $font-mono;
+}
+
+.text-cyan {
+  color: $currency-xp;
+}
+
+// ============================================================================
+// TEXT ALIGNMENT UTILITIES
+// ============================================================================
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+// ============================================================================
+// TEXT TRANSFORM UTILITIES
+// ============================================================================
+.text-uppercase {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.text-lowercase {
+  text-transform: lowercase;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+// ============================================================================
+// TEXT WEIGHT UTILITIES
+// ============================================================================
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-black {
+  font-weight: 900;
+}
+
+// ============================================================================
+// FONT FAMILY UTILITIES
+// ============================================================================
+.font-heading {
+  font-family: $font-heading;
+}
+
+.font-body {
+  font-family: $font-body;
+}
+
+.font-mono {
+  font-family: $font-mono;
+}
+
+// ============================================================================
+// UI-SPECIFIC TEXT STYLES
+// ============================================================================
+
+// Large stat numbers (currency, score)
+.stat-number {
+  font-family: $font-mono;
+  font-size: $fs-stat-numbers;
+  font-weight: $fw-stat-numbers;
+  color: $currency-gibs;
+  line-height: 1;
+}
+
+// UI labels (inventory, counters)
+.ui-label {
+  font-family: $font-body;
+  font-size: $fs-ui-label;
+  font-weight: $fw-ui-label;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+// Badge/tag text
+.badge-text {
+  font-family: $font-body;
+  font-size: $fs-badge;
+  font-weight: $fw-badge;
+  color: $text-secondary;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+// ============================================================================
+// EMPHASIS & HIGHLIGHTS
+// ============================================================================
+strong, .strong {
+  font-weight: 600;
+  color: $text-primary;
+}
+
+em, .emphasis {
+  font-style: italic;
+  color: $text-secondary;
+}
+
+mark, .highlight {
+  background-color: rgba($orange-copper, 0.15);
+  color: $orange-copper;
+  padding: 0 $spacing-xs;
+  border-radius: $radius-sm;
+}
+
+// ============================================================================
+// LINKS
+// ============================================================================
+a, .link {
+  color: $orange-copper;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 100ms ease-out;
+  
+  &:hover {
+    color: $orange-copper-hover;
+    text-decoration: underline;
+  }
+  
+  &:active {
+    color: $orange-copper-dark;
+  }
+}
+
+// ============================================================================
+// CODE / MONOSPACE
+// ============================================================================
+code, pre {
+  font-family: $font-mono;
+  font-size: $fs-body-sm;
+  background: $bg-secondary;
+  color: $currency-gibs;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  line-height: 1.5;
+}
+
+// ============================================================================
+// BLOCKQUOTES
+// ============================================================================
+blockquote {
+  border-left: 4px solid $border-accent;
+  padding-left: $spacing-lg;
+  margin: $spacing-lg 0;
+  color: $text-secondary;
+  font-style: italic;
+  
+  & > p {
+    margin: 0;
+  }
+}
+
+// ============================================================================
+// LISTS
+// ============================================================================
+ul, ol {
+  margin: $spacing-md 0;
+  padding-left: $spacing-xl;
+  
+  li {
+    margin-bottom: $spacing-sm;
+    line-height: $lh-body;
+  }
+}
+
+ul li::marker {
+  color: $orange-copper;
+}
+
+ol li::marker {
+  color: $orange-copper;
+}
+
+// ============================================================================
+// ABBREVIATIONS & SMALL TEXT
+// ============================================================================
+abbr {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+small, .small {
+  font-size: $fs-body-sm;
+  color: $text-tertiary;
+}
+
+// ============================================================================
+// ACCESSIBILITY — Font Size Utilities
+// ============================================================================
+.text-xs {
+  font-size: $fs-minimal;
+  line-height: 14px;
+}
+
+.text-sm {
+  font-size: $fs-body-sm;
+  line-height: $lh-body;
+}
+
+.text-base {
+  font-size: $fs-body;
+  line-height: $lh-body;
+}
+
+.text-lg {
+  font-size: $fs-body-lg;
+  line-height: $lh-body-lg;
+}
+
+.text-xl {
+  font-size: $fs-h4;
+  line-height: $lh-h4;
+}
+
+.text-2xl {
+  font-size: $fs-h3;
+  line-height: $lh-h3;
+}
+
+.text-3xl {
+  font-size: $fs-h2;
+  line-height: $lh-h2;
+}
+
+.text-4xl {
+  font-size: $fs-h1;
+  line-height: $lh-h1;
+}

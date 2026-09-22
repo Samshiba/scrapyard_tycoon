@@ -1,0 +1,425 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using Sandbox.Utils;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+    @if (IsOpen)
+    {
+        <div class="shop-bg">
+            <div class="shop-window">
+
+                <div class="shop-header">
+                    <span class="shop-title">#ui.shop.title</span>
+                    <div class="shop-wallet">
+                        <label class="wallet-amount">@NumberFormatter.FormatWithSuffix(GetScrap())</label>
+                        <label class="wallet-currency">#common.currency.scrap</label>
+                    </div>
+                    <div class="shop-close" onclick=@CloseMenu>#ui.shop.button.close</div>
+                </div>
+
+                <div class="shop-body">
+                
+                    <div class="col-filters">
+                        <div class="filter-section">#ui.shop.filter.tier</div>
+                        <div class="filter-tier-controls">
+                            <div class="btn-tier-minus" onclick=@(() => CycleTierDown())>−</div>
+                            <div class="tier-display">@(ActiveTier?.ToString() ?? "ALL")</div>
+                            <div class="btn-tier-plus" onclick=@(() => CycleTierUp())>+</div>
+                        </div>
+
+                        <div class="filter-section" style="margin-top: 24px;">#ui.shop.filter.category</div>
+                        <div class="filter-btn @(ActiveCategory == null ? "active" : "")" onclick=@(() => ActiveCategory =
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    null)>#ui.shop.filter.allweapons</div>
+                        @foreach (WeaponCategory cat in Enum.GetValues(typeof(WeaponCategory)))
+                        {
+                            <div class="filter-btn @(ActiveCategory == cat ? "active" : "")" onclick=@(() => ActiveCategory =
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            cat)>
+                                @WeaponHelper.CategoryToLocalizedString(cat)
+                            </div>
+                        }
+
+                        <div class="filter-section" style="margin-top: 24px;">#ui.shop.filter.element</div>
+                        <div class="filter-btn @(ActiveElement == null ? "active" : "")" onclick=@(() => ActiveElement =
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            null)>#ui.shop.filter.all</div>
+                        @foreach (DamageType dmg in Enum.GetValues(typeof(DamageType)))
+                        {
+                            <div class="filter-btn elem-@dmg.ToString().ToLower() @(ActiveElement == dmg ? "active" : "")"
+                                 onclick=@(() => ActiveElement = dmg)>
+                                @WeaponHelper.DamageTypeToLocalizedString(dmg)
+                            </div>
+                        }
+                    </div>
+
+                    <div class="col-grid">
+                        <div class="grid-container">
+                            @foreach (var weapon in FilteredWeapons)
+                            {
+                                int currentTier = GetCurrentSpawnerTier();
+
+                                if (weapon.RequiredSpawnerTier > currentTier + 1) continue;
+
+                                if (weapon.RequiredSpawnerTier == currentTier + 1)
+                                {
+                                    <div class="grid-item item-teaser">
+                                        <div class="item-img-box">
+                                            @if (!string.IsNullOrEmpty(weapon.IconPath))
+                                            {
+                                                <img src="@weapon.IconPath" alt="icon" />
+                                            }
+                                        </div>
+                                        <div class="item-name"><span>@weapon.LocalizationKeyName</span></div>
+                                        <div class="item-teaser-lock"><label>#ui.shop.weapon.tier</label>
+                                            @weapon.RequiredSpawnerTier</div>
+                                        </div>
+                                        continue;
+                                    }
+
+                                    bool isUnlocked = ItemUnlockSystem.Get( Scene )?.IsWeaponUnlocked(weapon.Id) ?? false;
+                                    bool isSelected = SelectedWeapon == weapon;
+                            
+                                    string itemClass = "grid-item item-accessible";
+                                    if (isUnlocked) itemClass += " item-owned";
+                                    if (isSelected) itemClass += " item-selected";
+
+                                    <div class="@itemClass" onclick=@(() => SelectWeapon(weapon))>
+                                        <div class="item-img-box">
+                                            @if (!string.IsNullOrEmpty(weapon.IconPath))
+                                            {
+                                                <img src="@weapon.IconPath" alt="icon" />
+                                            }
+                                        </div>
+                                        <div class="item-name"><span>@weapon.LocalizationKeyName</span></div>
+                                        @if (!isUnlocked)
+                                        {
+                                            <div class="item-price">
+                                                <label>@NumberFormatter.FormatWithSuffix(weapon.UnlockCost)</label>
+                                                <label style="margin-left: 8px;">#common.currency.scrap</label>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-inspect">
+                            @if (SelectedWeapon != null)
+                            {
+                                bool isUnlocked = ItemUnlockSystem.Get( Scene )?.IsWeaponUnlocked(SelectedWeapon.Id) ?? false;
+                                bool canAfford = GetScrap() >= SelectedWeapon.UnlockCost;
+
+                                <div class="inspect-header">
+                                    <div class="inspect-name"><span>@SelectedWeapon.LocalizationKeyName</span></div>
+                                    <div class="inspect-tags">
+                                        <span
+                                        class="tag tag-cat">@WeaponHelper.CategoryToLocalizedString(SelectedWeapon.Category)</span>
+                                        <span
+                                        class="tag tag-dmg tag-@SelectedWeapon.DamageType.ToString().ToLower()">@WeaponHelper.DamageTypeToLocalizedString(SelectedWeapon.DamageType)</span>
+                                    </div>
+                                </div>
+
+                                <div class="inspect-scroll">
+                                    <div class="inspect-desc"><span>@SelectedWeapon.LocalizationKeyDescription</span></div>
+
+                                    <div class="inspect-stats-box">
+                                        <div class="section-header">#ui.shop.weapon.stats</div>
+                                        <div class="stat-row">
+                                            <span class="stat-label">#ui.shop.weapon.stats.damage</span>
+                                            <span class="stat-value">@SelectedWeapon.DamageBase</span>
+                                        </div>
+                                        <div class="stat-row">
+                                            <span class="stat-label">#ui.shop.weapon.stats.attackrate</span>
+                                            <span class="stat-value">@SelectedWeapon.AttackRateBase</span>
+                                        </div>
+                                        <div class="stat-row">
+                                            <span class="stat-label">#ui.shop.weapon.stats.criticalchance</span>
+                                            <span class="stat-value">@SelectedWeapon.CriticalChanceBase%</span>
+                                        </div>
+                                        <div class="stat-row">
+                                            <span class="stat-label">#ui.shop.weapon.stats.criticaldamage</span>
+                                            <span class="stat-value">@SelectedWeapon.CriticalDamageBase<b>X</b></span>
+                                        </div>
+                                        <div class="stat-row">
+                                            <span class="stat-label">#ui.shop.weapon.stats.range</span>
+                                            <span class="stat-value">@SelectedWeapon.RangeBase</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="inspect-effects-box">
+                                        <div class="section-header">#ui.shop.weapon.effects</div>
+                                        <div class="effects-empty">#ui.shop.weapon.effects.empty</div>
+                                    </div>
+                                </div>
+
+                                <div class="inspect-action">
+                                    @if (!isUnlocked)
+                                    {
+                                        <div class="btn-buy @(canAfford ? "active" : "disabled")" onclick=@(() =>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     BuyWeapon(SelectedWeapon))>
+                                            <label>@NumberFormatter.FormatWithSuffix(SelectedWeapon.UnlockCost)</label>
+                                            <label style="margin-left: 8px;">#common.currency.scrap</label>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="equip-label">#ui.shop.button.equip</div>
+                                        <div class="slot-row">
+                                            @for (int i = 0; i < 4; i++)
+                                            {
+                                                int slotIndex = i;
+                                                bool isEquippedHere = GetLocalInventory()?.EquippedWeapons[slotIndex]?.Id ==
+                                    SelectedWeapon.Id;
+                                        
+                                                <div class="btn-slot @(isEquippedHere ? "equipped" : "")" onclick=@(() =>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                EquipToSlot(SelectedWeapon.Id, slotIndex))>
+                                            @(slotIndex + 1)
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="inspect-empty">
+                            #ui.shop.empty.select<br />#ui.shop.empty.details
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+</root>
+
+@code {
+    public static WeaponShopUI Local { get; private set; }
+
+    PlayerInventory GetLocalInventory()
+    {
+        return Scene.GetAllComponents<PlayerInventory>().FirstOrDefault(x => !x.IsProxy);
+    }
+    
+    public List<WeaponDefinition> AllWeapons { get; set; } = new();
+
+    // --- États de l'UI ---
+    public bool IsOpen { get; set; } = false;
+    TimeSince TimeSinceOpened;
+    TimeSince TimeSinceClosed = 10f;
+    
+    WeaponDefinition SelectedWeapon;
+    WeaponCategory? ActiveCategory = null;
+    DamageType? ActiveElement = null;
+    int? ActiveTier = null;
+
+    protected override void OnAwake()
+    {
+        Local = this;
+        LoadWeapons();
+    }
+
+    private void LoadWeapons()
+    {
+        AllWeapons = ResourceLibrary.GetAll<WeaponDefinition>()
+            .OrderBy(w => w.RequiredSpawnerTier)
+            .ThenBy(w => w.UnlockCost)
+            .ToList();
+    }
+
+    double GetScrap() => FactoryDataSyncer.Get(Scene)?.TotalScrap ?? 0;
+
+    int GetCurrentSpawnerTier()
+    {
+        return SaveManager.Get(Scene)?.CurrentFactory?.Tier ?? 0;
+    }
+
+    // --- Logique de filtrage ---
+    IEnumerable<WeaponDefinition> FilteredWeapons => AllWeapons.Where(w =>
+        (ActiveCategory == null || w.Category == ActiveCategory) &&
+        (ActiveElement == null || w.DamageType == ActiveElement) &&
+        (ActiveTier == null || w.RequiredSpawnerTier == ActiveTier)
+    );
+
+    void SetTierFilter(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            ActiveTier = null;
+        }
+        else if (int.TryParse(value, out int tier))
+        {
+            ActiveTier = tier;
+        }
+        StateHasChanged();
+    }
+
+    void CycleTierUp()
+    {
+        int currentTier = GetCurrentSpawnerTier();
+        int maxTier = BalanceConfig.Instance?.MaxSpawnerTier ?? 10;
+        int visibleMaxTier = Math.Min(currentTier + 1, maxTier);
+
+        if (ActiveTier == null)
+        {
+            ActiveTier = 1;
+        }
+        else if (ActiveTier < visibleMaxTier)
+        {
+            ActiveTier++;
+        }
+        else
+        {
+            ActiveTier = null;
+        }
+        StateHasChanged();
+    }
+
+    void CycleTierDown()
+    {
+        int currentTier = GetCurrentSpawnerTier();
+        int maxTier = BalanceConfig.Instance?.MaxSpawnerTier ?? 10;
+        int visibleMaxTier = Math.Min(currentTier + 1, maxTier);
+
+        if (ActiveTier == null)
+        {
+            ActiveTier = visibleMaxTier;
+        }
+        else if (ActiveTier > 1)
+        {
+            ActiveTier--;
+        }
+        else
+        {
+            ActiveTier = null;
+        }
+        StateHasChanged();
+    }
+
+    // --- Actions ---
+    public void OpenMenu()
+    {
+        if (IsOpen || TimeSinceClosed < 0.2f) return;
+        
+        if (SkillTreeUI.Local != null)
+            SkillTreeUI.Local.CloseMenu();
+
+        if (CodexUI.Local != null)
+            CodexUI.Local.CloseMenu();
+
+        if (PrestigeShopUI.Local != null)
+            PrestigeShopUI.Local.CloseMenu();
+
+        Mouse.Visibility = MouseVisibility.Visible;
+        Panel.Style.PointerEvents = PointerEvents.All;
+        
+        IsOpen = true;
+        Mouse.Position = new Vector2(Screen.Width / 2f, Screen.Height / 2f);
+        TimeSinceOpened = 0;
+        if (SelectedWeapon == null && FilteredWeapons.Any())
+        {
+            SelectedWeapon = FilteredWeapons.FirstOrDefault(w => w.RequiredSpawnerTier <= GetCurrentSpawnerTier());
+        }
+        StateHasChanged();
+    }
+
+    public void CloseMenu()
+    {
+        Panel.Style.PointerEvents = PointerEvents.None;
+    
+        if (SkillTreeUI.Local == null || !SkillTreeUI.Local.IsOpen)
+        {
+            Mouse.Visibility = MouseVisibility.Hidden;
+        }
+
+        if (CodexUI.Local == null || !CodexUI.Local.IsOpen)
+        {
+            Mouse.Visibility = MouseVisibility.Hidden;
+        }
+        
+        IsOpen = false;
+        TimeSinceClosed = 0;
+        StateHasChanged();
+    }
+
+    void SelectWeapon(WeaponDefinition w)
+    {
+        SelectedWeapon = w;
+        StateHasChanged();
+    }
+
+    private void BuyWeapon(WeaponDefinition weapon)
+    {
+        if (weapon == null) return;
+        
+        PlayerFactoryActions.Get(Scene)?.RpcRequestBuyWeapon(weapon.Id);
+    }
+
+    private void EquipToSlot(string weaponId, int slotIndex)
+    {
+        var weaponDef = AllWeapons.FirstOrDefault(w => w.Id == weaponId);
+        if (weaponDef == null) return;
+
+        GetLocalInventory()?.EquipWeapon(weaponDef, slotIndex);
+        StateHasChanged();
+    }
+
+    protected override void OnUpdate()
+    {
+        base.OnUpdate();
+        
+        if (IsOpen && TimeSinceOpened > 0.1f)
+        {
+            // Handle Close
+            if (Input.Pressed("use") || Input.EscapePressed)
+            {
+                Input.EscapePressed = false;
+                CloseMenu();
+            }
+
+            // Handle hotbar equip
+            if (SelectedWeapon != null)
+            {
+                bool isUnlocked = ItemUnlockSystem.Get( Scene )?.IsWeaponUnlocked(SelectedWeapon.Id) ?? false;
+
+                if (isUnlocked)
+                {
+
+                    if (Input.Pressed("Slot1") || Input.Pressed("slot1")) EquipToSlot(SelectedWeapon.Id, 0);
+                    if (Input.Pressed("Slot2") || Input.Pressed("slot2")) EquipToSlot(SelectedWeapon.Id, 1);
+                    if (Input.Pressed("Slot3") || Input.Pressed("slot3")) EquipToSlot(SelectedWeapon.Id, 2);
+                    if (Input.Pressed("Slot4") || Input.Pressed("slot4")) EquipToSlot(SelectedWeapon.Id, 3);
+                }
+            }
+        }
+    }
+
+    protected override int BuildHash()
+    {
+        var h = new System.HashCode();
+        h.Add(IsOpen);
+        h.Add(GetScrap());
+        h.Add(SelectedWeapon);
+        h.Add(ActiveCategory);
+        h.Add(ActiveElement);
+        h.Add(ActiveTier);
+        h.Add(GetCurrentSpawnerTier());
+
+        if (ItemUnlockSystem.Get( Scene ) != null)
+        {
+            h.Add(ItemUnlockSystem.Get( Scene ).UnlockedWeapons.Count);
+        }
+
+        if (GetLocalInventory() != null)
+        {
+            foreach (var w in GetLocalInventory().EquippedWeapons)
+                h.Add(w?.Id);
+        }
+        return h.ToHashCode();
+    }
+}
+

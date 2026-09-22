@@ -1,0 +1,70 @@
+// ============================================================================
+// EnergyBar Component Styles
+// ============================================================================
+@import '../_design-system.scss';
+@import '../_mixins.scss';
+@import '../_animations.scss';
+
+root {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+}
+
+.energy-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 60px);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    opacity: 1;
+    transition: opacity 100ms ease-in;
+
+    &.hidden {
+        opacity: 0;
+        transition: opacity 300ms ease-out;
+    }
+
+    /* ---- ÉTAT ÉPUISÉ (ROUGE CRITIQUE) ---- */
+    &.exhausted {
+        .energy-track {
+            background-color: rgba($status-critical, 0.15);
+            border-color: rgba($status-critical, 0.85);
+            animation: pulse-warning 300ms infinite;
+        }
+
+        .energy-fill {
+            background-color: transparent;
+        }
+    }
+}
+
+/* ---- LE FOND DE LA BARRE ---- */
+.energy-track {
+    width: 280px;
+    height: 4px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid $border-subtle;
+    border-radius: $radius-sm;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    transition: background-color 200ms ease-out, border-color 200ms ease-out;
+}
+
+/* ---- LA JAUGE D'ÉNERGIE ---- */
+.energy-fill {
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.35);
+    border-radius: $radius-sm;
+    transition: width 100ms ease-out;
+}

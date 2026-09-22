@@ -2,29 +2,96 @@ using Sandbox;
 using System.Collections.Generic;
 using System.Linq;
 
-public sealed class PlayerBackpack : Component
+public sealed class PlayerBackpack : Component, Component.INetworkListener
 {
-    [Property, Group("Stats")] public int MaxItems { get; set; } = 10;
+    [Property, Group( "Stats" )] public int BaseMaxItems { get; set; } = 10;
 
-    [Property, Group("Items")] public List<ItemData> CollectedItems { get; set; } = new();
+    [Sync]
+    [Property, Group( "Items" )]
+    public NetList<ItemData> CollectedItems { get; set; } = new();
+
+    // private string MySteamId => Network.Owner.SteamId.ToString();
+    private string MySteamId => Network.Owner.GetUniqueId() ?? Network.Owner.SteamId.ToString();
+
+    public int MaxItems
+    {
+        get
+        {
+            return (int)GlobalUpgradesSystem.Instance.ApplyModifiers( "backpack_capacity", BaseMaxItems );
+        }
+    }
+
+    protected override void OnStart()
+    {
+        if ( !Networking.IsHost ) return;
+
+        if ( SaveManager.Get( Scene )?.ActivePlayers.TryGetValue( MySteamId, out var playerData ) == true )
+        {
+            CollectedItems.Clear();
+
+            foreach ( var stack in playerData.CollectedItems )
+            {
+                for ( int i = 0; i < stack.Count; i++ )
+                {
+                    CollectedItems.Add( new ItemData { Type = stack.Type, Value = stack.Value } );
+                }
+            }
+            Log.Info( $"[PlayerBackpack] Backpack loaded with {CollectedItems.Count} items" );
+        }
+    }
+
+    [Rpc.Broadcast]
+    public void RpcTryAddItem( ResourceType type, float value )
+    {
+        if ( !Networking.IsHost ) return;
+
+        if ( CollectedItems.Count >= MaxItems ) return;
+
+        CollectedItems.Add( new ItemData { Type = type, Value = value } );
+        Log.Info( $"[PlayerBackpack] Item collected: {type} (+{value}). Inventory: {CollectedItems.Count}/{MaxItems}" );
+        SaveChanges();
+    }
 
     public int CurrentItemCount => CollectedItems.Count;
-    public float TotalValue => CollectedItems.Sum(x => x.Value);
+    public float TotalValue => CollectedItems.Sum( x => x.Value );
     public bool IsFull => CurrentItemCount >= MaxItems;
 
-    public bool TryAddItem(ItemData item)
+    public bool TryAddItem( ItemData item )
     {
-        if (CollectedItems.Count >= MaxItems) return false;
+        if ( CollectedItems.Count >= MaxItems ) return false;
 
-        CollectedItems.Add(item);
-        Log.Info($"Ramassé : {item.Type} (+{item.Value}). Place : {CollectedItems.Count}/{MaxItems}");
+        CollectedItems.Add( item );
+        Log.Info( $"[PlayerBackpack] Item collected: {item.Type} (+{item.Value}). Inventory: {CollectedItems.Count}/{MaxItems}" );
+        SaveChanges();
         return true;
     }
 
-    public float EmptyBackpack()
+    public void SaveChanges()
     {
-        float amount = TotalValue;
+        if ( !Networking.IsHost || SaveManager.Get( Scene ) == null ) return;
+
+        if ( SaveManager.Get( Scene ).ActivePlayers.TryGetValue( MySteamId, out var playerData ) )
+        {
+            playerData.CollectedItems = CollectedItems
+            .GroupBy( item => new { item.Type, item.Value } )
+            .Select( group => new ItemStack
+            {
+                Type = group.Key.Type,
+                Value = group.Key.Value,
+                Count = group.Count()
+            } ).ToList();
+
+            SaveEventBus.NotifyChange( SaveEventBus.SaveReason.InventoryChanged, "Inventory updated", MySteamId );
+        }
+    }
+
+    public void ResetInventoryForPrestige()
+    {
+        if ( !Networking.IsHost ) return;
+
         CollectedItems.Clear();
-        return amount;
+        SaveChanges();
+
+        Log.Info( $"[PlayerBackpack] Reset inventory for prestige - {MySteamId}" );
     }
 }

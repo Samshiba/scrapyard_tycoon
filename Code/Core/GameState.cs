@@ -1,32 +1,35 @@
 using Sandbox;
 using System.Linq;
 using System.Collections.Generic;
+using Sandbox.Network;
+using System.Threading.Tasks;
 
 public sealed class GameState : Component, Component.INetworkListener
 {
-    public static GameState Instance { get; private set; }
-
-    // Gardé pour assignation manuelle optionnelle, mais auto-rempli au démarrage
     [Property] public List<BayComponent> AllBays { get; set; } = new();
     [Property] public GameObject PlayerPrefab { get; set; }
 
-    protected override void OnAwake()
-    {
-        Instance = this;
-    }
-
     protected override void OnStart()
     {
+        if ( GameSettings.Instance == null )
+        {
+            GameSettings.Load();
+        }
+
         if ( AllBays.Count == 0 )
         {
             AllBays = Scene.GetAllComponents<BayComponent>().ToList();
-            Log.Info( $"GameState: {AllBays.Count} baie(s) trouvée(s) automatiquement." );
+            Log.Info( $"[GameState] Auto-discovered {AllBays.Count} bay(s) in scene" );
         }
 
         if ( !Networking.IsActive )
         {
-            Log.Info( "GameState: Mode offline détecté, spawn local." );
-            SpawnPlayerForConnection( Connection.Local );
+            Log.Info( "[GameState] Offline mode detected. Host starting for dev." );
+            Networking.CreateLobby( new LobbyConfig()
+            {
+                MaxPlayers = 4,
+                Privacy = LobbyPrivacy.Private
+            } );
         }
     }
 
@@ -35,52 +38,81 @@ public sealed class GameState : Component, Component.INetworkListener
     {
         if ( !Networking.IsHost ) return;
 
-        Log.Info( $"GameState.OnActive: {channel.DisplayName}" );
-        SpawnPlayerForConnection( channel );
+        Log.Info( $"[GameState] Player connected: {channel.DisplayName}" );
+
+        _ = SpawnPlayerForConnectionAsync( channel );
     }
 
-    private void SpawnPlayerForConnection( Connection channel )
+    private async Task SpawnPlayerForConnectionAsync( Connection channel )
     {
         if ( PlayerPrefab == null )
         {
-            Log.Error( "GameState: PlayerPrefab non assigné !" );
+            Log.Error( "[GameState] PlayerPrefab is not assigned in inspector. Player cannot be spawned." );
             return;
         }
 
-        var freeBay = AllBays.FirstOrDefault( b => !b.IsOccupied );
-        if ( freeBay == null )
+        var bayForPlayer = AllBays.FirstOrDefault();
+        if ( bayForPlayer == null )
         {
-            Log.Warning( $"Plus de baies libres pour {channel.DisplayName}" );
+            Log.Error( $"[GameState] No bays configured in scene for player {channel.DisplayName}." );
             return;
         }
 
-        freeBay.AssignOwner( channel );
+        bayForPlayer.AssignOwner( channel );
 
-        if ( freeBay.PlayerStart == null )
+        if ( bayForPlayer.PlayerStart == null )
         {
-            Log.Error( $"Baie {freeBay.BayId}: PlayerStart non assigné !" );
+            Log.Error( $"[GameState] Bay {bayForPlayer.BayId} has no PlayerStart GameObject assigned. Check inspector configuration." );
             return;
+        }
+
+        // Wait for SaveManager to load all player data before spawning visually
+        // string steamId = channel.SteamId.ToString();
+        string steamId = channel.GetUniqueId();
+        var loadTimeout = System.Diagnostics.Stopwatch.StartNew();
+        while ( !SaveManager.Get( Scene )?.ActivePlayers.ContainsKey( steamId ) ?? true )
+        {
+            if ( loadTimeout.ElapsedMilliseconds > 10000 )
+            {
+                Log.Warning( $"[GameState] Timeout waiting for {channel.DisplayName} data. Spawning anyway." );
+                break;
+            }
+            await Task.Delay( 100 );
         }
 
         var sceneCam = Scene.GetAllComponents<CameraComponent>().FirstOrDefault();
         if ( sceneCam != null )
         {
             sceneCam.Enabled = false;
-            Log.Info( "GameState: Caméra de scène désactivée." );
+            Log.Info( "[GameState] Scene camera disabled. Using player camera." );
         }
 
-        var spawnPos = freeBay.PlayerStart.WorldPosition;
-        var spawnRot = freeBay.PlayerStart.WorldRotation;
+        var spawnPos = bayForPlayer.PlayerStart.WorldPosition;
+        var spawnRot = bayForPlayer.PlayerStart.WorldRotation;
 
         var player = PlayerPrefab.Clone( spawnPos, spawnRot );
         player.NetworkSpawn( channel );
 
-        Log.Info( $"Player spawné pour {channel.DisplayName} à {spawnPos}" );
+        Log.Info( $"[GameState] Player {channel.DisplayName} spawned at position {spawnPos} in Bay {bayForPlayer.BayId} (all data loaded)" );
     }
 
     public void OnDisconnected( Connection channel )
     {
-        var playerBay = AllBays.FirstOrDefault( b => b.Owner == channel );
-        playerBay?.ClearOwner();
+        if ( !Networking.IsHost ) return;
+
+        // string steamId = channel.SteamId.ToString();
+        string steamId = channel.GetUniqueId();
+
+        SaveEventBus.NotifyChange( SaveEventBus.SaveReason.PlayerDisconnect, $"Player {channel.DisplayName} disconnected", steamId );
+
+        var playerBay = AllBays.FirstOrDefault( b => b.Owners.Contains( channel ) );
+        playerBay?.RemoveOwner( channel );
+
+        if ( SaveManager.Get( Scene ) != null && SaveManager.Get( Scene ).ActivePlayers.ContainsKey( steamId ) )
+        {
+            SaveManager.Get( Scene ).ActivePlayers.Remove( steamId );
+        }
+
+        Log.Info( $"[GameState] Player {channel.DisplayName} disconnected. Save triggered and removed from bay." );
     }
 }

@@ -1,0 +1,127 @@
+// ============================================================================
+// Seller Component Styles
+// ============================================================================
+@import "../_design-system.scss";
+@import "../_mixins.scss";
+@import "../_animations.scss";
+
+root {
+    justify-content: center;
+    align-items: center;
+    font-family: $font-body;
+}
+
+.seller-panel {
+    background-color: $bg-hud-overlay;
+    border: 2px solid $border-subtle;
+    border-radius: 20px;
+    padding: $spacing-xl;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: $spacing-md;
+}
+
+.seller-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.seller-title {
+    font-size: $fs-display-lg;
+    font-weight: $fw-h1;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: $font-heading;
+}
+
+.seller-counter-group {
+    flex-direction: row;
+    align-items: center;
+    gap: $spacing-sm;
+}
+
+.seller-count {
+    font-size: $fs-display-xl;
+    font-weight: $fw-stat-numbers;
+    color: $text-primary;
+    font-family: $font-mono;
+}
+
+.seller-separator-slash {
+    font-size: $fs-display-lg;
+    font-weight: $fw-h1;
+    color: $text-secondary;
+    font-family: $font-mono;
+}
+
+.seller-max {
+    font-size: $fs-display-lg;
+    color: $text-secondary;
+    font-family: $font-body;
+    font-weight: $fw-h4;
+}
+
+.seller-separator {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.seller-bar-track {
+    height: 6px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.seller-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 200ms ease-out;
+
+    /* Dynamic color based on capacity */
+    &.status-ok {
+        background-color: $status-success;
+    }
+
+    &.status-warning {
+        background-color: $status-warning;
+    }
+
+    &.status-critical {
+        background-color: $status-critical;
+    }
+}
+
+// ============================================================================
+// Seller Stats Row (ETA & SPS)
+// ============================================================================
+.seller-stats-row {
+    flex-direction: row;
+    gap: $spacing-lg;
+    justify-content: space-between;
+}
+
+.seller-stat-item {
+    flex-direction: column;
+    gap: $spacing-xs;
+    flex: 1;
+}
+
+.seller-stat-label {
+    font-size: $fs-body-sm;
+    font-weight: $fw-h4;
+    color: $text-tertiary;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: $font-heading;
+}
+
+.seller-stat-value {
+    font-size: $fs-body-lg;
+    font-weight: $fw-stat-numbers;
+    color: $text-primary;
+    font-family: $font-mono;
+}

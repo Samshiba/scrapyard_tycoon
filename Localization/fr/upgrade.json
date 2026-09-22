@@ -1,0 +1,20 @@
+{
+    "upgrade.root_node.name": "Noyau Central",
+    "upgrade.root_node.description": "Le cœur de votre système. Débloque les 4 voies principales.",
+    "upgrade.backpack_capacity_1.name": "Capacité de Sac à Dos I",
+    "upgrade.backpack_capacity_1.description": "Augmente la capacité de votre sac à dos de 5.",
+    "upgrade.seller_value_1.name": "Valeur de Vente I",
+    "upgrade.seller_value_1.description": "Augmente la valeur de vente de tous les objets de 5%.",
+    "upgrade.seller_queue_1.name": "File d'Attente I",
+    "upgrade.seller_queue_1.description": "Augmente la taille de la file d'attente de la machine de vente de 5.",
+    "upgrade.seller_speed_1.name": "Vitesse de Vente I",
+    "upgrade.seller_speed_1.description": "Augmente la vitesse de vente de la machine de 10%.",
+    "upgrade.physical_damage_1.name": "Dégâts Physiques I",
+    "upgrade.physical_damage_1.description": "Augmente les dégâts physiques de 5%.",
+    "upgrade.weapon_attack_rate_1.name": "Vitesse d'Attaque I",
+    "upgrade.weapon_attack_rate_1.description": "Augmente la vitesse d'attaque de 5%.",
+    "upgrade.auto_spawn_unlocked.name": "Apparition Automatique I",
+    "upgrade.auto_spawn_unlocked.description": "Active l'apparition automatique des objets.",
+    "upgrade.auto_spawn_1.name": "Apparition Automatique II",
+    "upgrade.auto_spawn_1.description": "Augmente la vitesse d'apparition de 5%."
+}

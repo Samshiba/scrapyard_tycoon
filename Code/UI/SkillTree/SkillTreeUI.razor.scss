@@ -1,0 +1,292 @@
+// ============================================================================
+// SkillTree Component Styles
+// ============================================================================
+// Complex UI panel with node graph, state management, and tooltips
+@import '../_design-system.scss';
+@import '../_mixins.scss';
+@import '../_animations.scss';
+
+
+.skill-tree-bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: $bg-modal;
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+}
+
+.skill-tree-window {
+    background: $bg-primary;
+    border: 2px solid $border-heavy;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.skt-header {
+    display: flex;
+    align-items: center;
+    padding: $spacing-lg $spacing-2xl;
+    background: $bg-secondary;
+    border-bottom: 2px solid $border-heavy;
+    gap: $spacing-xl;
+    z-index: 10;
+
+    .skt-title {
+        flex: 1;
+        font-size: $fs-h2;
+        color: $text-primary;
+        font-weight: $fw-h2;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        font-family: $font-heading;
+    }
+
+    .skt-wallet {
+        color: $currency-gibs;
+        font-size: $fs-ui-label;
+        font-weight: 800;
+        background: $bg-tertiary;
+        padding: $spacing-sm $spacing-lg;
+        border-radius: $radius-sm;
+        border: 1px solid $border-standard;
+        font-family: $font-mono;
+
+        .wallet-amount {
+            font-size: $fs-stat-numbers;
+        }
+
+        .wallet-currency {
+            margin-left: $spacing-md;
+        }
+    }
+
+    .skt-close {
+        color: $text-tertiary;
+        cursor: pointer;
+        font-size: $fs-icon-lg;
+        padding: $spacing-xs $spacing-sm;
+        transition: color 100ms ease-out;
+
+        &:hover {
+            color: $status-critical;
+        }
+    }
+}
+
+.skt-graph {
+    flex: 1;
+    position: relative;
+    background-color: $bg-primary;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1%, transparent 1%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1%, transparent 1%);
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+.skt-canvas {
+    position: absolute;
+    transform-origin: 0 0;
+}
+
+// ============================================================================
+// SKILL TREE LINES
+// ============================================================================
+.skt-line {
+    position: absolute;
+    transform-origin: 0 0;
+    pointer-events: none;
+    z-index: 1;
+    transition: background-color 200ms ease-out, box-shadow 200ms ease-out;
+
+    &.line-active {
+        background-color: $text-primary;
+        box-shadow: 0 0 12px rgba(17, 211, 245, 0.4);
+        z-index: 2;
+    }
+
+    &.line-locked {
+        background-color: $text-muted !important;
+        background-image: none !important;
+        opacity: 0.6;
+    }
+}
+
+// ============================================================================
+// SKILL TREE NODES
+// ============================================================================
+.skt-node {
+    position: absolute;
+    border-radius: $radius-md;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 100ms ease-out, border-color 100ms ease-out, box-shadow 100ms ease-out;
+    border: 2px solid transparent;
+    z-index: 2;
+
+    .node-icon {
+        margin-bottom: $spacing-xs;
+        pointer-events: none;
+    }
+
+    .node-lvl {
+        color: $text-secondary; /* Changed from $text-tertiary for better visibility */
+        background-color: rgba(0, 0, 0, 0.6);
+        font-weight: 700;
+        border-radius: $radius-sm;
+        pointer-events: none;
+        letter-spacing: 1px;
+        font-size: $fs-badge;
+    }
+
+    // Locked state
+    &.node-locked {
+        background-color: $bg-secondary;
+        border-color: $border-standard;
+        color: $blue-slate;
+        cursor: not-allowed;
+    }
+
+    // Unlocked state (available but not buyable)
+    &.node-unlocked {
+        background-color: $bg-tertiary;
+        border-color: $blue-slate;
+    }
+
+    // Buyable state (primary interactive)
+    &.node-buyable {
+        background-color: #082f49;
+        border-color: #0ea5e9;
+
+        &:hover {
+            transform: scale(1.08);
+            border-color: $orange-copper-hover;
+            @include metal-glow(#0ea5e9);
+            background-color: lighten(#082f49, 5%);
+        }
+    }
+
+    // Maxed state (secondary interactive)
+    &.node-maxed {
+        background-color: #431407;
+        border-color: $orange-copper;
+        @include metal-glow($orange-copper);
+    }
+
+    // Unknown state
+    &.node-unknown {
+        background-color: $bg-primary;
+        border-color: $border-standard;
+        cursor: default;
+
+        .node-icon {
+            color: $text-secondary; /* Changed from $text-tertiary for better visibility */
+            font-weight: 700;
+        }
+
+        .node-lvl {
+            background-color: transparent;
+            color: $text-muted;
+        }
+    }
+}
+
+// ============================================================================
+// SKILL TREE TOOLTIP
+// ============================================================================
+.skt-tooltip {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    background-color: $bg-primary;
+    border: 1px solid $border-standard;
+    border-left: 5px solid $orange-copper;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9);
+    border-radius: $radius-md;
+    padding: $spacing-xl;
+    min-width: 320px;
+    max-width: 450px;
+    pointer-events: none;
+    z-index: 100;
+
+    .tt-name {
+        color: $text-primary;
+        font-size: $fs-h3;
+        font-weight: $fw-h2;
+        margin-bottom: $spacing-md;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        white-space: nowrap;
+        font-family: $font-heading;
+    }
+
+    .tt-desc {
+        color: $text-secondary; /* Changed from $text-tertiary for better visibility */
+        font-size: $fs-body-lg;
+        line-height: 24px;
+        margin-bottom: $spacing-lg;
+        padding-bottom: $spacing-lg;
+        border-bottom: 1px solid $bg-secondary;
+        white-space: normal;
+        font-family: $font-body;
+    }
+
+    .tt-level {
+        color: $text-secondary;
+        font-size: $fs-body;
+        font-weight: 600;
+        font-family: $font-body;
+    }
+
+    .tt-cost {
+        color: $currency-gibs;
+        font-size: $fs-body-lg;
+        font-weight: 800;
+        margin-top: $spacing-lg;
+        background-color: $bg-tertiary;
+        border: 1px solid $border-standard;
+        padding: $spacing-sm $spacing-lg;
+        border-radius: $radius-sm;
+        align-self: flex-start;
+        font-family: $font-mono;
+    }
+
+    .tt-maxed {
+        color: $orange-copper;
+        font-size: $fs-body;
+        font-weight: 800;
+        margin-top: $spacing-lg;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-family: $font-heading;
+    }
+
+    .tt-locked {
+        color: $status-critical;
+        font-size: $fs-body;
+        font-weight: 800;
+        margin-top: $spacing-lg;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-family: $font-heading;
+    }
+}

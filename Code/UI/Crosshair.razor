@@ -1,6 +1,11 @@
-@using Sandbox;
-@using Sandbox.UI;
+@using Sandbox
+@using Sandbox.UI
+@using Sandbox.Utils
+@using System
+@using System.Collections.Generic
+@using System.Linq
 @inherits PanelComponent
+@namespace Sandbox
 
 <root>
 	<div class="dot"></div>
@@ -17,9 +22,29 @@
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		width: 8px;
-		height: 8px;
-		background-color: rgba(255, 255, 255, 0.5);
+		width: @GetSize()px;
+		height: @GetSize()px;
+		background-color: @GetColor();
 		border-radius: 50%;
 	}
 </style>
+
+@code {
+	private string GetColor()
+	{
+		return GameSettings.Instance?.UI.CrosshairColor ?? Color.White.ToString();
+	}
+
+	private float GetSize()
+	{
+		return GameSettings.Instance?.UI.CrosshairSize ?? 8.0f;
+	}
+
+	protected override int BuildHash()
+	{
+		return HashCode.Combine(
+			GetColor(),
+			GetSize()
+		);
+	}
+}

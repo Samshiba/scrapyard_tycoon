@@ -1,0 +1,54 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using Sandbox.Utils;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@inherits Panel
+@namespace Sandbox
+
+<link rel="stylesheet" href="SettingsUI.razor.scss" />
+
+<div class="stat-line">
+    <div class="stat-header">
+        <span class="stat-label">@Label</span>
+        <NumberEntry MinValue=@MinValue MaxValue=@MaxValue Value:bind=@InternalValue class="industrial-input" />
+    </div>
+    <div class="slider-wrapper">
+        <IndustrialSlider MinValue=@MinValue MaxValue=@MaxValue Step=@Step Value:bind=@InternalValue />
+    </div>
+    @if (!string.IsNullOrEmpty(Hint))
+    {
+        <div class="stat-hint">@Hint</div>
+    }
+</div>
+
+@code {
+    public string Label { get; set; } = "Setting Name";
+    public string Hint { get; set; } = "";
+    
+    public float MinValue { get; set; } = 0f;
+    public float MaxValue { get; set; } = 1f;
+    public float Step { get; set; } = 0.1f;
+    
+    public float Value { get; set; }
+    
+    public Action<float> ValueChanged { get; set; }
+
+
+    public float InternalValue
+    {
+        get => Value;
+        set
+        {
+            var clamped = Math.Clamp(value, MinValue, MaxValue);
+            
+            if (Value != clamped)
+            {
+                Value = clamped;
+                ValueChanged?.Invoke(Value);
+                GameSettings.Save();
+            }
+        }
+    }
+}

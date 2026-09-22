@@ -1,0 +1,64 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using System;
+@using System.Linq;
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+    @if (GameSettings.Instance?.UI.ShowEnergyBar ?? true)
+    {
+        var stats = GetPlayerStats();
+        var weapon = ActiveWeapon;
+        
+        float energy = 1f;
+        bool show = false;
+        bool exhausted = false;
+
+        if (stats != null)
+        {
+            energy = stats.MaxEnergy > 0 ? stats.CurrentEnergy / stats.MaxEnergy : 0f;
+            exhausted = stats.IsExhausted;
+            
+            show = weapon?.Data?.UsesEnergy == true &&
+                   (stats.CurrentEnergy < stats.MaxEnergy || exhausted || stats.TimeSinceLastAttack < 1f);
+        }
+
+        <div class="energy-container @(show ? "" : "hidden") @(exhausted ? "exhausted" : "")">
+            <div class="energy-track">
+                <div class="energy-fill" style="width: @(energy * 100)%;"></div>
+            </div>
+        </div>
+
+    }
+</root>
+
+@code {
+    public static EnergyBarUI Local { get; private set; }
+
+    PlayerInventory GetLocalInventory()
+    {
+        return Scene.GetAllComponents<PlayerInventory>().FirstOrDefault(x => !x.IsProxy);
+    }
+
+    PlayerStats GetPlayerStats()
+    {
+        return Scene.GetAllComponents<PlayerStats>().FirstOrDefault(x => !x.IsProxy);
+    }
+
+    WeaponComponent ActiveWeapon => GetLocalInventory()?.ActiveWeapon;
+
+    protected override int BuildHash()
+    {
+        var stats = GetPlayerStats();
+        if (stats is null) return 0;
+
+        return HashCode.Combine(
+            stats.CurrentEnergy,
+            stats.IsExhausted,
+            ActiveWeapon?.Data?.UsesEnergy,
+            stats.TimeSinceLastAttack < 1f,
+            GameSettings.Instance?.UI.ShowEnergyBar
+        );
+    }
+}

@@ -1,3 +1,10 @@
+// ============================================================================
+// InteractionHud Component Styles
+// ============================================================================
+@import '../_design-system.scss';
+@import '../_mixins.scss';
+@import '../_animations.scss';
+
 .tooltip-anchor {
 	position: absolute;
 	left: 32px;
@@ -5,23 +12,22 @@
 
 	display: flex;
 	flex-direction: column-reverse;
-	/* les nouveaux éléments poussent vers le haut */
 	align-items: flex-start;
-	gap: 6px;
+	gap: $spacing-sm;
 }
 
 .tooltip-row {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	gap: 10px;
+	gap: $spacing-md;
 
-	background-color: rgba(0, 0, 0, 0.45);
-	border-radius: 4px;
+	background-color: $bg-hud-overlay;
+	border-radius: $radius-sm;
 	padding: 5px 12px 5px 6px;
 
-	/* slide-in depuis la gauche */
-	animation: tooltip-in 0.15s ease-out;
+	animation: slide-in-left 300ms ease-out;
+	font-family: $font-body;
 }
 
 .tooltip-key {
@@ -31,34 +37,25 @@
 
 	background-color: rgba(255, 255, 255, 0.15);
 	border: 1px solid rgba(255, 255, 255, 0.35);
-	border-radius: 3px;
+	border-radius: $radius-sm;
 	border-bottom-width: 2px;
-	/* effet "keycap" */
+	/* keycap effect */
 
 	display: flex;
 	align-items: center;
 	justify-content: center;
 
-	font-size: 13px;
-	font-weight: bold;
-	color: white;
+	font-size: $fs-ui-label;
+	font-weight: $fw-ui-label;
+	color: $text-primary;
 	text-transform: uppercase;
+	font-family: $font-body;
+	line-height: 24px; /* Changed from: line-height: 1 */
 }
 
 .tooltip-desc {
-	font-size: 13px;
-	color: rgba(255, 255, 255, 0.85);
+	font-size: $fs-ui-label;
+	color: $text-primary;
 	text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.8);
-}
-
-@keyframes tooltip-in {
-	from {
-		opacity: 0;
-		transform: translateX(-8px);
-	}
-
-	to {
-		opacity: 1;
-		transform: translateX(0);
-	}
+	font-family: $font-body;
 }

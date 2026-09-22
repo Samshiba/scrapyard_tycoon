@@ -1,0 +1,691 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using Sandbox.Utils;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@inherits PanelComponent
+@namespace Sandbox
+
+<root>
+    @if (IsOpen)
+    {
+        <div class="codex-bg">
+            <div class="codex-window">
+
+                <div class="codex-header">
+                    <span class="codex-title">#ui.codex.title</span>
+                    
+                    <div class="codex-tabs">
+                        <div class="nav-hint left-hint" onclick=@(() => NavigateTabs(-1))>
+                            <Image Texture="@Input.GetGlyph( "TabLeft", InputGlyphSize.Large, true )" class="ui-glyph" />
+                        </div>
+                        <div class="tab-btn @(ActiveTab == CodexTab.Armory ? "active" : "")" onclick=@(() => ActiveTab = CodexTab.Armory)>#ui.codex.tab.armory</div>
+                        <div class="tab-btn @(ActiveTab == CodexTab.Targets ? "active" : "")" onclick=@(() => ActiveTab = CodexTab.Targets)>#ui.codex.tab.targets</div>
+                        <div class="tab-btn @(ActiveTab == CodexTab.Effects ? "active" : "")" onclick=@(() => ActiveTab = CodexTab.Effects)>#ui.codex.tab.effects</div>
+                        <div class="tab-btn @(ActiveTab == CodexTab.Stats ? "active" : "")" onclick=@(() => ActiveTab = CodexTab.Stats)>#ui.codex.tab.stats</div>
+                        <div class="tab-btn @(ActiveTab == CodexTab.Settings ? "active" : "")" onclick=@(() => ActiveTab = CodexTab.Settings)>#ui.codex.tab.settings</div>
+                        <div class="nav-hint right-hint" onclick=@(() => NavigateTabs(1))>
+                            <Image Texture="@Input.GetGlyph( "TabRight", InputGlyphSize.Large, true )" class="ui-glyph" />
+                        </div>
+                    </div>
+
+                    <div class="codex-close" onclick=@CloseMenu>#ui.codex.button.close</div>
+                </div>
+
+                <div class="codex-body">
+                    
+                    @if (ActiveTab == CodexTab.Armory)
+                    {
+                        <div class="col-grid" candragscroll="false">
+                            <div class="grid-container">
+                                @foreach (var weapon in AllWeapons)
+                                {
+                                    bool isUnlocked = CodexStatsProvider.IsWeaponUnlocked(weapon.Id);
+                                    bool isSelected = SelectedWeapon == weapon;
+                                    
+                                    string itemClass = "grid-item";
+                                    if (isUnlocked) itemClass += " item-accessible";
+                                    else itemClass += " item-locked";
+                                    if (isSelected) itemClass += " item-selected";
+
+                                    <div class="@itemClass" onclick=@(() => SelectedWeapon = weapon)>
+                                        <div class="item-img-box @(!isUnlocked ? "silhouette" : "")">
+                                            @if (!string.IsNullOrEmpty(weapon.IconPath))
+                                            {
+                                                <img src="@weapon.IconPath" alt="icon" />
+                                            }
+                                        </div>
+                                        <div class="item-name">
+                                            <span>@(isUnlocked? weapon.LocalizationKeyName: "???")</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-inspect">
+                            @if (SelectedWeapon != null)
+                            {
+                                bool isUnlocked = CodexStatsProvider.IsWeaponUnlocked(SelectedWeapon.Id);
+
+                                <div class="inspect-header">
+                                    <div class="inspect-name">
+                                        <span>@(isUnlocked? SelectedWeapon.LocalizationKeyName: "???")</span>
+                                    </div>
+                                    
+                                    @if (isUnlocked)
+                                    {
+                                        <div class="inspect-tags">
+                                            <span class="tag tag-cat">TIER @SelectedWeapon.RequiredSpawnerTier</span>
+                                            <span class="tag tag-cat">@SelectedWeapon.Category.CategoryToLocalizedString()</span>
+                                            <span
+                                            class="tag tag-dmg tag-@SelectedWeapon.DamageType.ToString().ToLower()">@SelectedWeapon.DamageType.DamageTypeToLocalizedString()</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="inspect-scroll" candragscroll="false">
+                                    @if (isUnlocked)
+                                    {
+                                        <div class="inspect-desc"><span>@SelectedWeapon.LocalizationKeyDescription</span></div>
+                                        
+                                        <div class="section-title">#ui.codex.armory.section.stats</div>
+                                        
+                                        <div class="power-breakdown-box">
+                                            @{
+                                                WeaponStatFormula dmgFormula = WeaponStatsCalculator.GetStatFormula(SelectedWeapon, WeaponStatTarget.Damage);
+                                                WeaponStatFormula rateFormula = WeaponStatsCalculator.GetStatFormula(SelectedWeapon, WeaponStatTarget.AttackRate);
+                                                WeaponStatFormula critChanceFormula = WeaponStatsCalculator.GetStatFormula(SelectedWeapon, WeaponStatTarget.CriticalChance);
+                                                WeaponStatFormula critDmgFormula = WeaponStatsCalculator.GetStatFormula(SelectedWeapon, WeaponStatTarget.CriticalDamage);
+                                                WeaponStatFormula rangeFormula = WeaponStatsCalculator.GetStatFormula(SelectedWeapon, WeaponStatTarget.Range);
+                                                float dps = WeaponStatsCalculator.GetDPS(SelectedWeapon);
+                                            }
+
+                                            <div class="stat-line">
+                                                <div class="stat-header">
+                                                    <span class="stat-label">#ui.codex.armory.stat.damage</span>
+                                                    <span class="stat-final">@(Math.Round(dmgFormula.FinalValue, 2))</span>
+                                                </div>
+                                                <div class="stat-math">
+                                                    <span class="formula">@dmgFormula.GetCleanFormulaString(2)</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="stat-line">
+                                                <div class="stat-header">
+                                                    <span class="stat-label">#ui.codex.armory.stat.firerate</span>
+                                                    <span class="stat-final">@(Math.Round(rateFormula.FinalValue, 2)) /s</span>
+                                                </div>
+                                                <div class="stat-math">
+                                                    <span class="formula">@rateFormula.GetCleanFormulaString(2)</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="stat-line">
+                                                <div class="stat-header">
+                                                    <span class="stat-label">#ui.codex.armory.stat.crit.chance</span>
+                                                    <span class="stat-final">@(Math.Round(critChanceFormula.FinalValue, 2))%</span>
+                                                </div>
+                                                <div class="stat-math">
+                                                    <span class="formula">@critChanceFormula.GetCleanFormulaString(2)</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="stat-line">
+                                                <div class="stat-header">
+                                                    <span class="stat-label">#ui.codex.armory.stat.crit.damage</span>
+                                                    <span class="stat-final">@(Math.Round(critDmgFormula.FinalValue, 2))x</span>
+                                                </div>
+                                                <div class="stat-math">
+                                                    <span class="formula">@critDmgFormula.GetCleanFormulaString(2)</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="stat-line">
+                                                <div class="stat-header">
+                                                    <span class="stat-label">#ui.codex.armory.stat.range</span>
+                                                    <span class="stat-final">@(Math.Round(rangeFormula.FinalValue, 2))m</span>
+                                                </div>
+                                                <div class="stat-math">
+                                                    <span class="formula">@rangeFormula.GetCleanFormulaString(2)</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="stat-dps">
+                                                <span>#ui.codex.armory.stat.dps</span>
+                                                <span class="dps-val">@(Math.Round(dps, 1))</span>
+                                            </div>
+                                        </div>
+
+                                                            <div class="section-title" style="margin-top: 24px;">#ui.codex.armory.section.vanity</div>
+                                                            <div class="vanity-stats-box">
+                                                                <div class="v-stat"><span>#ui.codex.armory.vanity.kills</span>
+                                                                    <b>@CodexStatsProvider.GetWeaponKills(SelectedWeapon.Id)</b>
+                                                                </div>
+                                                                <div class="v-stat"><span>#ui.codex.armory.vanity.damagedealt</span> 
+                                                                    <b>@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetWeaponDamageDealt(SelectedWeapon.Id), 1)</b>
+                                                                </div>
+                                                                <div class="v-stat"><span>#ui.codex.armory.vanity.maxhit</span> 
+                                                                    <b>@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetWeaponHighestDamageHit(SelectedWeapon.Id), 1)</b>
+                                                                </div>
+                                                                <div class="v-stat"><span>#ui.codex.armory.vanity.crits</span>
+                                                                    <b>@CodexStatsProvider.GetWeaponCriticalHits(SelectedWeapon.Id)</b>
+                                                                </div>
+                                                                <div class="v-stat"><span>#ui.codex.armory.vanity.targetsdestroyed</span>
+                                                                    <b>@CodexStatsProvider.GetWeaponTargetsDestroyed(SelectedWeapon.Id)</b>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                    else
+                                                        {
+                                                            <div class="inspect-empty">#ui.codex.locked.weapon</div>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+
+                                        @if (ActiveTab == CodexTab.Targets)
+                                        {
+                                            <div class="col-grid" candragscroll="false">
+                                                <div class="grid-container">
+                                                    @foreach (var prop in AllProps)
+                                                    {
+                                                        bool isSeen = CodexStatsProvider.IsPropSeen(prop.PropID);
+                                                        bool isSelected = SelectedProp == prop;
+
+                                                        string itemClass = "grid-item";
+                                                        if (isSeen) itemClass += " item-accessible";
+                                                        else itemClass += " item-locked";
+                                                        if (isSelected) itemClass += " item-selected";
+
+                                                        <div class="@itemClass" onclick=@(() => SelectedProp = prop)>
+                                                            <div class="item-img-box @(!isSeen ? "silhouette" : "")">
+                                                                @if (!string.IsNullOrEmpty(prop.IconPath))
+                                                                {
+                                                                    <img src="@prop.IconPath" alt="icon" />
+                                                                }
+                                                            </div>
+                                                            <div class="item-name">
+                                                                <span>@(isSeen? prop.DisplayName: "???")</span>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <div class="col-inspect">
+                                                @if (SelectedProp != null)
+                                                {
+                                                    bool isSeen = CodexStatsProvider.IsPropSeen(SelectedProp.PropID);
+
+                                                    <div class="inspect-header">
+                                                        <div class="inspect-name">
+                                                            <span>@(isSeen? SelectedProp.DisplayName : "???")</span>
+                                                        </div>
+                                                        @if (isSeen)
+                                                        {
+                                                            <div class="inspect-tags">
+                                                                <span class="tag tag-cat">TIER @SelectedProp.Tier</span>
+                                                            </div>
+                                                        }
+                                                    </div>
+
+                                                    <div class="inspect-scroll" candragscroll="false">
+                                                        @if (isSeen)
+                                                        {
+                                                            <div class="section-title">#ui.codex.targets.section.info</div>
+                                        
+                                                            <div class="power-breakdown-box">
+                                                                <div class="stat-line">
+                                                                    <div class="stat-header">
+                                                                        <span class="stat-label">#ui.codex.targets.stat.health</span>
+                                                                        <span
+                                                                            class="stat-final text-critical">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetPropHP(SelectedProp),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            1) HP</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    
+
+                                                                        <div class="stat-line">
+                                                                            <div class="stat-header">
+                                                                                <span class="stat-label">#ui.codex.targets.stat.gibcount</span>
+                                                                                <span class="stat-final">@CodexStatsProvider.GetPropGibCount(SelectedProp)</span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="stat-line">
+                                                                            <div class="stat-header">
+                                                                                <span class="stat-label">#ui.codex.targets.stat.gibvalue</span>
+                                                                                <span
+                                                                                    class="stat-final">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetPropValuePerGib(SelectedProp),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            1)</span>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div class="stat-dps" style="border-bottom: 1px solid #2d333f;">
+                                                                                <span>#ui.codex.targets.stat.totalvalue</span>
+                                                                                <span class="dps-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetPropTotalValue(SelectedProp),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        1)</span>
+                                                                                </div>
+
+                                                                                <div class="stat-line">
+                                                                                    <div class="stat-header">
+                                                                                        <span class="stat-label">#ui.codex.targets.stat.sellermultiplier</span>
+                                                                                        <span
+                                                                                            class="stat-final"><label>x</label>@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetSellerMultiplier(),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            2)</span>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <div class="stat-dps">
+                                                                                        <span>#ui.codex.targets.stat.finalprice</span>
+                                                                                        <span class="dps-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetPropFinalValue(SelectedProp),
+                                                                                                                                                                                                                                                                                                                                                                                                                    1)</span>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    @if (SelectedProp.SubProps != null && SelectedProp.SubProps.Count > 0)
+                                                                                    {
+                                                                                        <div class="section-title" style="margin-top: 24px;">#ui.codex.targets.section.subprops</div>
+                                                                                        <div class="power-breakdown-box">
+                                                                                            @foreach (var drop in SelectedProp.SubProps)
+                                                                                            {
+                                                                                                if (drop.Prop == null) continue;
+
+                                                                                                <div class="stat-line">
+                                                                                                    <div class="stat-header">
+                                                                                                        <span class="stat-label">@drop.Prop.DisplayName</span>
+                                                                                                        <span class="stat-final text-muted">x@(drop.Count)</span>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            }
+                                                                                        </div>
+                                                                                    }
+
+                                                                                    <div class="section-title" style="margin-top: 24px;">#ui.codex.targets.section.vanity</div>
+                                                                                    <div class="vanity-stats-box">
+                                                                                        <div class="v-stat"><span>#ui.codex.targets.vanity.destroyed</span> <b>@CodexStatsProvider.GetPropDestroyedCount(SelectedProp.PropID)</b></div>
+                                                                                        <div class="v-stat"><span>#ui.codex.targets.vanity.scrapdropped</span> <b>@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetPropScrapDropped(SelectedProp.PropID), 1)</b></div>
+                                                                                        <div class="v-stat"><span>#ui.codex.targets.vanity.gibsdropped</span> <b>@CodexStatsProvider.GetPropGibsDropped(SelectedProp.PropID)</b></div>
+                                                                                    </div>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <div class="inspect-empty">#ui.codex.locked.target</div>
+                                                                                }
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                }
+
+                                                                @if (ActiveTab == CodexTab.Effects)
+                                                                {
+                                                                    <div class="col-grid" style="align-items: center; justify-content: center;" candragscroll="false">
+                                                                        <h2 style="color: #64748b; font-family: 'IBM Plex Sans';">#ui.codex.wip</h2>
+                                                                    </div>
+                                                                }
+
+                                                                @if (ActiveTab == CodexTab.Stats)
+                                                                {
+                                                                    <div class="empire-dashboard" candragscroll="false">
+
+                                                                        <div class="dashboard-section">
+                                                                            <div class="section-title">#ui.codex.stats.section.factory_meta</div>
+                                                                            <div class="kpi-grid">
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-small buff">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.tier</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetFactoryTier()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small magic">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.times_prestiged</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetFactoryTimesPrestiged()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small info">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.playtime</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.FormatPlaytime(CodexStatsProvider.GetFactoryPlaytime())</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small magic">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.prestige_points</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetFactoryPrestigePoints()</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="dashboard-section">
+                                                                            <div class="section-title">#ui.codex.stats.section.factory_economy</div>
+                                                                            <div class="kpi-grid">
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-large gold">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.scrapsession</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetFactoryScrapGained(), 1)</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-large gold">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.scrapperseconde</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetScrapPerSecond(), 1) /s</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-small info">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.moneyspent</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetFactoryMoneySpent(), 1)</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small gold">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.peakgain</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetFactoryLargestScrapGain(), 1)</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small info">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.gibssession</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetFactoryGibsDropped()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small gold">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.largestpurchase</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetFactoryLargestPurchase(), 1)</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="dashboard-section">
+                                                                            <div class="section-title">#ui.codex.stats.section.factory_combat</div>
+                                                                            <div class="kpi-grid">
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-large combat">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.totaldamage</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetFactoryTotalDamage(), 1)</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-large combat">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.maxdamagehit</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetFactoryHighestDamageHit(), 1)</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-small combat">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.totalattacks</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetFactoryTotalAttacks()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small combat">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.crithits</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetFactoryTotalCriticalHits()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small combat">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.critdamage</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetFactoryCriticalDamage(), 1)</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.propsdestroyed</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetFactoryTargetsDestroyed()</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-medium buff">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.weaponsbought</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetFactoryWeaponsBought()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-medium buff">
+                                                                                        <div class="kpi-label">#ui.codex.stats.factory.upgradesbought</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetFactoryUpgradesBought()</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+
+                                                                        <div class="dashboard-section">
+                                                                            <div class="section-title">#ui.codex.stats.section.lifetime_meta</div>
+                                                                            <div class="kpi-grid">
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-medium magic">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.prestiges</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetTimesPrestiged()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-medium magic">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.prestigepoints</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetPrestigePoints()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-medium info">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.playtime</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.FormatPlaytime(CodexStatsProvider.GetLifetimePlaytime())</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="dashboard-section">
+                                                                            <div class="section-title">#ui.codex.stats.section.lifetime_economy</div>
+                                                                            <div class="kpi-grid">
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-large gold">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.totalscrap</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetTotalScrapCollected(), 1)</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-large info">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.moneyspent</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetTotalMoneySpent(), 1)</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-medium gold">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.highestpeak</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetHighestPeakScrap(), 1)</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-medium info">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.totalgibs</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetTotalGibsDropped(), 1)</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-medium gold">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.largestpurchase</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetLargestSinglePurchase(), 1)</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="dashboard-section">
+                                                                            <div class="section-title">#ui.codex.stats.section.lifetime_combat</div>
+                                                                            <div class="kpi-grid">
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-large combat">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.totaldamage</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetTotalDamageDealt(), 1)</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-large combat">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.maxhit</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetHighestDamageHit(), 1)</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-small combat">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.totalattack</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetTotalAttacks()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small combat">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.crithits</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetTotalCriticalHits()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small combat">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.critdamage</div>
+                                                                                        <div class="kpi-val">@NumberFormatter.FormatWithSuffix(CodexStatsProvider.GetCriticalDamage(), 1)</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-small">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.totalpropsdestroyed</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetTargetsDestroyed()</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="kpi-row">
+                                                                                    <div class="kpi-card kpi-medium buff">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.weaponsbought</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetTotalWeaponsBought()</div>
+                                                                                    </div>
+                                                                                    <div class="kpi-card kpi-medium buff">
+                                                                                        <div class="kpi-label">#ui.codex.stats.lifetime.upgradesbought</div>
+                                                                                        <div class="kpi-val">@CodexStatsProvider.GetTotalUpgradesBought()</div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                    </div>
+                                                                }
+
+                                                                @if (ActiveTab == CodexTab.Settings)
+                                                                {
+                                                                    <div class="empire-dashboard" candragscroll="false">
+                                                                        <SettingsUI IsInGame="@true" IsSandbox="@(FactoryDataSyncer.Get(Scene)?.isSandbox ?? false)" />
+                                                                    </div>
+                                                                }
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </root>
+
+@code {
+    public static CodexUI Local { get; private set; }
+
+    // --- États de l'UI ---
+    public bool IsOpen { get; set; } = false;
+    TimeSince TimeSinceOpened;
+    TimeSince TimeSinceClosed = 10f;
+    
+    public enum CodexTab { Armory, Targets, Effects, Stats, Settings }
+    public CodexTab ActiveTab { get; set; } = CodexTab.Armory;
+
+    // Data lists
+    public List<WeaponDefinition> AllWeapons { get; set; } = new();
+    public WeaponDefinition SelectedWeapon { get; set; }
+    
+    public List<PropDefinition> AllProps { get; set; } = new();
+    public PropDefinition SelectedProp { get; set; }
+
+    protected override void OnAwake()
+    {
+    
+        Local = this;
+
+        CodexStatsProvider.SetScene( Scene );
+
+        // Fetch and sort Weapons
+        AllWeapons = ResourceLibrary.GetAll<WeaponDefinition>()
+            .OrderBy(w => w.RequiredSpawnerTier)
+            .ThenBy(w => w.UnlockCost)
+            .ToList();
+            
+        // Fetch and sort Props
+        AllProps = ResourceLibrary.GetAll<PropDefinition>()
+            .OrderBy(p => p.Tier)
+            .ToList();
+    }
+
+    // --- Actions ---
+    public void OpenMenu()
+    {
+        if (IsOpen || TimeSinceClosed < 0.2f) return;
+        
+        if (SkillTreeUI.Local != null)
+            SkillTreeUI.Local.CloseMenu();
+
+        if (WeaponShopUI.Local != null)
+            WeaponShopUI.Local.CloseMenu();
+
+        if (PrestigeShopUI.Local != null)
+            PrestigeShopUI.Local.CloseMenu();
+
+        if (SelectedWeapon == null && AllWeapons.Any())
+            SelectedWeapon = AllWeapons.First();
+            
+        if (SelectedProp == null && AllProps.Any())
+            SelectedProp = AllProps.First();
+
+        Mouse.Visibility = MouseVisibility.Visible;
+        Panel.Style.PointerEvents = PointerEvents.All;
+        
+        IsOpen = true;
+        Mouse.Position = new Vector2(Screen.Width / 2f, Screen.Height / 2f);
+        TimeSinceOpened = 0;
+        StateHasChanged();
+    }
+
+    public void CloseMenu()
+    {
+        Panel.Style.PointerEvents = PointerEvents.None;
+    
+        if (SkillTreeUI.Local == null || !SkillTreeUI.Local.IsOpen)
+        {
+            Mouse.Visibility = MouseVisibility.Hidden;
+        }
+        if (WeaponShopUI.Local == null || !WeaponShopUI.Local.IsOpen)
+        {
+            Mouse.Visibility = MouseVisibility.Hidden;
+        }
+            
+        IsOpen = false;
+        TimeSinceClosed = 0;
+        StateHasChanged();
+    }
+
+    protected override void OnUpdate()
+    {
+        base.OnUpdate();
+
+        if (Input.Pressed("codex") && TimeSinceClosed > 0.1f)
+        {
+            if (IsOpen)
+                CloseMenu();
+            else
+                OpenMenu();
+        }
+
+        if (IsOpen && TimeSinceOpened > 0.1f)
+        {
+            // Handle Close
+            if (Input.Pressed("codex") || Input.EscapePressed)
+            {
+                Input.EscapePressed = false;
+                CloseMenu();
+            }
+
+            // Handle Tabs Navigation 
+            if (Input.Pressed("SlotPrev") || Input.Pressed("TabLeft")) 
+            {
+                NavigateTabs(-1);
+            }
+            if (Input.Pressed("SlotNext") || Input.Pressed("TabRight")) 
+            {
+                NavigateTabs(1);
+            }
+        }
+    }
+
+    private void NavigateTabs(int direction)
+    {
+        int tabCount = Enum.GetNames(typeof(CodexTab)).Length;
+        int current = (int)ActiveTab;
+        
+        int nextTab = (current + direction + tabCount) % tabCount;
+        ActiveTab = (CodexTab)nextTab;
+        
+        StateHasChanged();
+    }
+
+    protected override int BuildHash()
+    {
+        var h = new System.HashCode();
+        h.Add(IsOpen);
+        h.Add(ActiveTab);
+        h.Add(SelectedWeapon);
+        h.Add(SelectedProp);
+        
+        if (SaveManager.Get( Scene )?.CurrentFactory != null)
+        {
+            h.Add(SaveManager.Get( Scene ).CurrentFactory.UnlockedWeapons?.Count);
+            h.Add(SaveManager.Get( Scene ).CurrentFactory.Tier);
+        }
+        
+        return h.ToHashCode();
+    }
+}

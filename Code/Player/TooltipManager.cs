@@ -1,13 +1,18 @@
 using Sandbox;
 using System.Collections.Generic;
+using System.Linq;
 
 public sealed class TooltipManager : Component
 {
-    public static TooltipManager Local { get; private set; }
     public List<TooltipEntry> ActiveTooltips { get; private set; } = new();
 
     private PlayerController _player;
     private PlayerInventory _inventory;
+
+    public static TooltipManager Get( Scene scene )
+    {
+        return scene.GetAllComponents<TooltipManager>().FirstOrDefault();
+    }
 
     protected override void OnStart()
     {
@@ -19,8 +24,6 @@ public sealed class TooltipManager : Component
             Enabled = false;
             return;
         }
-
-        Local = this;
     }
 
     protected override void OnUpdate()

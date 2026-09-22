@@ -1,3 +1,10 @@
+// ============================================================================
+// HotBar Component Styles
+// ============================================================================
+@import '../_design-system.scss';
+@import '../_mixins.scss';
+@import '../_animations.scss';
+
 .hotbar {
 	position: absolute;
 	bottom: 32px;
@@ -6,7 +13,7 @@
 
 	display: flex;
 	flex-direction: row;
-	gap: 8px;
+	gap: $spacing-sm;
 	align-items: flex-end;
 }
 
@@ -16,14 +23,14 @@
 	height: 64px;
 	border-radius: 10px;
 
-	background-color: rgba(0, 0, 0, 0.5);
-	border: 2px solid rgba(255, 255, 255, 0.15);
+	background-color: $bg-hud-overlay;
+	border: 2px solid $border-subtle;
 
 	display: flex;
 	align-items: center;
 	justify-content: center;
 
-	transition: border-color 0.1s ease, background-color 0.1s ease, transform 0.1s ease;
+	transition: border-color 100ms ease-out, background-color 100ms ease-out, transform 100ms ease-out;
 }
 
 /* Slot actif */
@@ -31,7 +38,6 @@
 	border-color: rgba(255, 255, 255, 0.85);
 	background-color: rgba(255, 255, 255, 0.12);
 	transform: translateY(-4px);
-	/* remonte légèrement */
 }
 
 /* Slot vide, un peu plus discret */
@@ -44,9 +50,10 @@
 	position: absolute;
 	top: 4px;
 	left: 7px;
-	font-size: 10px;
+	font-size: $fs-tiny;
+	font-weight: 700;
 	color: rgba(255, 255, 255, 0.5);
-	font-weight: bold;
+	font-family: $font-mono;
 }
 
 .slot-icon {
@@ -57,9 +64,9 @@
 
 /* Fallback si pas d'icône */
 .slot-name {
-	font-size: 9px;
+	font-size: $fs-badge;
+	font-family: $font-body;
 	color: rgba(255, 255, 255, 0.7);
 	text-align: center;
 	padding: 4px;
-	word-break: break-word;
 }

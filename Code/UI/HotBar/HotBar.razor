@@ -8,10 +8,10 @@
 		@for (int i = 0; i < 4; i++)
 		{
 			var index = i;
-			var weapon = Inventory?.EquippedWeapons.Length > index
-				? Inventory.EquippedWeapons[index]
+			var weapon = GetLocalInventory()?.EquippedWeapons.Length > index
+				? GetLocalInventory().EquippedWeapons[index]
 				: null;
-			var isActive = Inventory?.ActiveSlotIndex == index && ActiveWeaponObject != null;
+			var isActive = GetLocalInventory()?.ActiveSlotIndex == index && ActiveWeaponObject != null;
 
 			<div class="hotbar-slot @(isActive ? "active" : "") @(weapon == null ? "empty" : "")">
 				<span class="slot-number">@(index + 1)</span>
@@ -24,7 +24,7 @@
 					}
 					else
 					{
-						<span class="slot-name">@weapon.WeaponName</span>
+						<span class="slot-name">@weapon.LocalizationKeyName</span>
 					}
 				}
 			</div>
@@ -33,29 +33,25 @@
 </root>
 
 @code {
-	PlayerInventory Inventory;
-	GameObject ActiveWeaponObject => Inventory?.ActiveWeapon?.GameObject;
+	GameObject ActiveWeaponObject => GetLocalInventory()?.ActiveWeapon?.GameObject;
 
-	protected override void OnStart()
+	PlayerInventory GetLocalInventory()
 	{
-		Inventory = Scene.GetAllComponents<PlayerInventory>()
-			.FirstOrDefault(x => !x.IsProxy);
+		return Scene.GetAllComponents<PlayerInventory>().FirstOrDefault(x => !x.IsProxy);
 	}
 
 	protected override void OnUpdate()
 	{
-		if (Inventory == null)
-		{
-			Inventory = Scene.GetAllComponents<PlayerInventory>()
-				.FirstOrDefault(x => !x.IsProxy);
-		}
+		StateHasChanged();
 	}
 
 	protected override int BuildHash()
 	{
 		return System.HashCode.Combine(
-			Inventory?.ActiveSlotIndex,
-			Inventory?.ActiveWeapon
+			GetLocalInventory()?.ActiveSlotIndex,
+			GetLocalInventory()?.ActiveWeapon,
+			GetLocalInventory()?.EquippedWeapons != null ? string.Join(",", GetLocalInventory()?.EquippedWeapons.Select(w =>
+w?.Id ?? "null")) : "null"
 		);
 	}
 }

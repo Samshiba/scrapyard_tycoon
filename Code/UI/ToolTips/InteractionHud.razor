@@ -26,7 +26,7 @@
 
 	protected override void OnUpdate()
 	{
-		ActiveTooltips = TooltipManager.Local?.ActiveTooltips ?? new();
+		ActiveTooltips = TooltipManager.Get(Scene)?.ActiveTooltips ?? new();
 	}
 
 	protected override int BuildHash()

@@ -1,0 +1,32 @@
+@using Sandbox;
+@using Sandbox.UI;
+@using Sandbox.Utils;
+@using System;
+@using System.Collections.Generic;
+@using System.Linq;
+@inherits Panel
+@namespace Sandbox
+
+<link rel="stylesheet" href="SettingsUI.razor.scss" />
+
+<div class="stat-line">
+    <div class="stat-header">
+        <span class="stat-label">@Label</span>
+        <div class="toggle-switch @(Value ? "active" : "")" onclick=@OnToggle>
+            <div class="toggle-knob"></div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public string Label { get; set; } = "Setting Name";
+    public bool Value { get; set; }
+    public Action<bool> ValueChanged { get; set; }
+
+    public void OnToggle()
+    {
+        Value = !Value;
+        ValueChanged?.Invoke(Value);
+        GameSettings.Save();
+    }
+}

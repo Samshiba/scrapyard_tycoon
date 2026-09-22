@@ -1,0 +1,578 @@
+@import "../_design-system.scss";
+@import "../_mixins.scss";
+@import "../_animations.scss";
+
+// ============================================================================
+// STRUCTURE PRINCIPALE (Identique au Codex)
+// ============================================================================
+.prst-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: $bg-modal; // Gris flouté standard
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+}
+
+.prst-window {
+    background-color: $bg-primary; // Gris foncé industriel standard
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.prst-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 $spacing-2xl;
+    background-color: $bg-secondary;
+    border-bottom: 1px solid $border-standard;
+    min-height: 80px;
+    flex-shrink: 0;
+
+    .prst-title {
+        font-family: $font-heading;
+        font-size: $fs-h2;
+        color: $text-primary;
+        font-weight: $fw-h2;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+    }
+
+    .prst-close {
+        color: $text-tertiary;
+        cursor: pointer;
+        font-size: $fs-icon-md;
+        font-weight: 700;
+        transition: color 100ms ease-out;
+
+        &:hover {
+            color: $status-critical;
+        }
+    }
+}
+
+.prst-body {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    overflow: visible;
+}
+
+// ============================================================================
+// COLONNE GAUCHE (Terminal)
+// ============================================================================
+.col-terminal {
+    width: 32%;
+    min-width: 400px;
+    background-color: $bg-secondary;
+    border-right: 1px solid $border-standard;
+    display: flex;
+    flex-direction: column;
+    // On a retiré le padding global pour permettre au header et footer de toucher les bords
+    overflow: hidden;
+
+    // EN-TÊTE FIXE
+    .inspect-header {
+        padding: $spacing-xl $spacing-2xl;
+        border-bottom: 1px solid $border-standard;
+        background-color: $bg-secondary;
+        flex-shrink: 0;
+
+        .inspect-name {
+            font-size: $fs-h2;
+            color: $text-primary;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-family: $font-heading;
+        }
+    }
+
+    // ZONE SCROLLABLE
+    .inspect-scroll {
+        flex: 1;
+        overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-2xl;
+        padding: $spacing-2xl;
+    }
+
+    // LES BLOCS CATÉGORIES (Lore, Core, Projection)
+    .inspect-stats-box {
+        background-color: $bg-primary; // Contraste avec le fond secondary
+        border: 1px solid $border-standard;
+        border-radius: $radius-md;
+        padding: $spacing-xl;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-md;
+        flex-shrink: 0;
+        border-left: 4px solid $tag-magical;
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            color: $text-primary;
+            font-size: $fs-body-lg;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: $spacing-xs;
+            font-family: $font-heading;
+
+            i {
+                color: $tag-magical;
+            }
+        }
+
+        .section-divider {
+            color: $text-muted;
+            font-size: $fs-badge;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: $font-heading;
+            margin-top: $spacing-sm;
+            border-bottom: 1px solid rgba($border-standard, 0.5);
+            padding-bottom: $spacing-xs;
+        }
+
+        .lore-text {
+            color: $text-secondary;
+            font-size: $fs-body;
+            font-family: $font-body;
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-md;
+
+            p {
+                margin: 0;
+                padding: 0;
+                white-space: normal;
+            }
+
+            .text-success {
+                color: $status-success;
+                font-weight: 700;
+            }
+
+            .text-critical {
+                color: $status-critical;
+                font-weight: 700;
+            }
+        }
+
+        // ALIGNEMENT PARFAIT DES GROS CHIFFRES
+        .core-amount {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            margin-bottom: $spacing-sm;
+            font-family: $font-mono;
+            white-space: nowrap;
+            flex-shrink: 0;
+
+            .sign {
+                font-size: $fs-h2;
+                color: $status-success;
+                font-weight: 900;
+            }
+            .val {
+                font-size: $fs-display-xl; // Taille harmonisée
+                font-weight: 900;
+                color: $tag-magical;
+                font-family: $font-mono;
+            }
+            .cur {
+                font-size: $fs-h3;
+                color: $text-secondary;
+                font-weight: 800;
+                font-family: $font-heading;
+                letter-spacing: 1px;
+            }
+        }
+
+        .stat-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: $spacing-md;
+            padding: $spacing-sm 0;
+            font-family: $font-body;
+            border-bottom: 1px solid rgba($border-standard, 0.3);
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            .stat-label {
+                color: $text-secondary;
+                font-size: $fs-body;
+                font-weight: 600;
+                flex: 1;
+            }
+            .stat-value {
+                color: $text-primary;
+                font-size: $fs-body-lg;
+                font-weight: 700;
+                font-family: $font-mono;
+                white-space: nowrap;
+            }
+        }
+
+        // BARRE DOPA
+        .dopa-container {
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-xs;
+
+            .dopa-labels {
+                display: flex;
+                justify-content: space-between;
+                font-size: $fs-body-sm;
+                color: $text-secondary;
+                font-family: $font-mono;
+            }
+
+            .dopa-bar-track {
+                position: relative;
+                height: 24px;
+                background-color: $bg-secondary;
+                border: 1px solid $border-standard;
+                border-radius: $radius-sm;
+                overflow: hidden;
+
+                .dopa-bar-fill {
+                    height: 100%;
+                    background-color: $tag-magical;
+                    transition: width 300ms ease-out;
+                }
+
+                .dopa-pct-text {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: 900;
+                    font-family: $font-mono;
+                    font-size: $fs-body;
+                    text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.9);
+                    pointer-events: none;
+                }
+            }
+        }
+    }
+
+    // PIED DE PAGE FIXE (Boutons)
+    .action-section {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-lg;
+        background-color: $bg-primary; // Fond différent pour montrer que ça ne scroll pas
+        padding: $spacing-xl $spacing-2xl;
+        border-top: 1px solid $border-standard;
+
+        .btn-respec {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(217, 119, 6, 0.05);
+            border: 1px solid rgba(217, 119, 6, 0.3);
+            padding: $spacing-md $spacing-lg;
+            border-radius: $radius-md;
+            cursor: pointer;
+            transition: all 200ms ease-out;
+
+            .respec-info {
+                display: flex;
+                flex-direction: column;
+                .title {
+                    color: $text-secondary;
+                    font-weight: 700;
+                    font-family: $font-body;
+                    font-size: $fs-body;
+                }
+                .respec-cost {
+                    display: flex;
+                    gap: $spacing-xs;
+                    margin-top: 4px;
+                }
+                .cost {
+                    color: $orange-copper;
+                    font-weight: 800;
+                    font-family: $font-mono;
+                    font-size: $fs-body-sm;
+                }
+            }
+
+            i {
+                color: $orange-copper;
+                font-size: $fs-icon-md;
+                transition: transform 200ms ease-out;
+            }
+
+            &:hover:not(.locked) {
+                background-color: rgba(217, 119, 6, 0.15);
+                border-color: $orange-copper;
+                i {
+                    transform: rotate(-90deg);
+                }
+            }
+
+            &.locked {
+                opacity: 0.5;
+                cursor: not-allowed;
+                filter: grayscale(100%);
+                &:hover {
+                    background-color: rgba(217, 119, 6, 0.05);
+                    border-color: rgba(217, 119, 6, 0.3);
+                    i {
+                        transform: none;
+                    }
+                }
+            }
+        }
+
+        .btn-ascension {
+            position: relative;
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 2px solid $status-critical;
+            border-radius: $radius-md;
+            padding: $spacing-xl;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 150ms ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .content {
+                position: relative;
+                z-index: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+
+                .btn-title {
+                    color: $status-critical;
+                    font-size: $fs-h2;
+                    font-weight: 900;
+                    font-family: $font-heading;
+                    letter-spacing: 4px;
+                    text-transform: uppercase;
+                }
+
+                .btn-sub {
+                    color: $text-secondary;
+                    font-size: $fs-body-sm;
+                    font-family: $font-body;
+                    margin-top: $spacing-sm;
+                }
+            }
+
+            &:hover {
+                background-color: $status-critical;
+                transform: scale(1.02);
+
+                .btn-title {
+                    color: $bg-primary;
+                }
+                .btn-sub {
+                    color: rgba(0, 0, 0, 0.8);
+                }
+            }
+
+            &.locked {
+                border-color: $border-standard;
+                background-color: $bg-secondary;
+                cursor: not-allowed;
+                .btn-title {
+                    color: $text-muted;
+                    font-size: $fs-h3;
+                    letter-spacing: 1px;
+                }
+                &:hover {
+                    transform: none;
+                    background-color: $bg-secondary;
+                }
+            }
+        }
+    }
+}
+
+// ============================================================================
+// COLONNE DROITE (Graphe)
+// ============================================================================
+.col-graph {
+    flex: 1;
+    background-color: $bg-primary; // Harmonisé avec le reste du jeu
+    position: relative;
+    overflow: hidden;
+}
+
+.prst-graph {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1%, transparent 1%),
+        linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 1%,
+        transparent 1%
+    ); // Même grille que le skill tree
+    cursor: grab;
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+.prst-canvas {
+    position: absolute;
+    transform-origin: 0 0;
+}
+
+// ============================================================================
+// NOEUDS DU GRAPHE
+// ============================================================================
+.prst-node {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 200ms ease-out;
+    z-index: 2;
+    border: 2px solid transparent;
+
+    .node-icon {
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    &.node-expensive {
+        background-color: $bg-secondary;
+        border-color: $border-standard;
+        color: $blue-slate;
+        opacity: 0.6;
+    }
+
+    &.node-buyable {
+        background-color: #3b0764; // Purple base
+        border-color: $tag-magical;
+        color: white;
+
+        &:hover {
+            transform: scale(1.15);
+            background-color: lighten(#3b0764, 10%);
+        }
+    }
+
+    &.node-owned {
+        background-color: #431407; // Gold/Brown base
+        border-color: $currency-gibs;
+        color: $currency-gibs;
+    }
+}
+
+// ============================================================================
+// TOOLTIP (Harmonisé avec le SkillTree)
+// ============================================================================
+.prst-tooltip {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    background-color: $bg-primary;
+    border: 1px solid $border-standard;
+    border-left: 5px solid $tag-magical;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9);
+    border-radius: $radius-md;
+    padding: $spacing-xl;
+    min-width: 320px;
+    max-width: 450px;
+    pointer-events: none;
+    z-index: 100;
+
+    .tt-header {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        margin-bottom: $spacing-md;
+
+        .tt-icon {
+            font-size: $fs-h2;
+            color: $tag-magical;
+        }
+        .tt-name {
+            color: $text-primary;
+            font-size: $fs-h3;
+            font-weight: $fw-h2;
+            text-transform: uppercase;
+            font-family: $font-heading;
+        }
+    }
+
+    .tt-desc {
+        color: $text-secondary;
+        font-size: $fs-body-lg;
+        margin-bottom: $spacing-lg;
+        padding-bottom: $spacing-lg;
+        border-bottom: 1px solid $bg-secondary;
+        font-family: $font-body;
+    }
+
+    .tt-footer {
+        display: flex;
+        justify-content: flex-start;
+
+        .tag-owned {
+            color: $currency-gibs;
+            font-size: $fs-body;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: $font-heading;
+        }
+
+        .tt-price {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            background-color: $bg-tertiary;
+            border: 1px solid $border-standard;
+            padding: $spacing-sm $spacing-lg;
+            border-radius: $radius-sm;
+            font-family: $font-mono;
+            font-weight: 800;
+
+            .lbl {
+                display: none;
+            } // Caché pour coller au style SkillTree
+            .val {
+                color: $currency-gibs;
+                font-size: $fs-body-lg;
+            }
+            .cur {
+                color: $text-secondary;
+                font-size: $fs-body-lg;
+            }
+        }
+    }
+}

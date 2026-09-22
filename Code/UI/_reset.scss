@@ -1,0 +1,448 @@
+// ============================================================================
+// RESET — Scrapyard Tycoon Industrial/Tycoon UI
+// ============================================================================
+// CSS reset and normalization for s&box-specific quirks
+// Import this file first (before other files)
+// ============================================================================
+
+// ============================================================================
+// UNIVERSAL RESET
+// ============================================================================
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+// ============================================================================
+// HTML & BODY
+// ============================================================================
+html {
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: $bg-primary;
+  color: $text-primary;
+  font-family: $font-body;
+  overflow-x: hidden;
+}
+
+// ============================================================================
+// TEXT ELEMENTS
+// ============================================================================
+p {
+  margin: 0;
+  padding: 0;
+}
+
+strong, b {
+  font-weight: 600;
+}
+
+em, i {
+  font-style: italic;
+}
+
+small {
+  font-size: 0.875em;
+}
+
+// ============================================================================
+// HEADINGS
+// ============================================================================
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+  font-weight: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+// ============================================================================
+// LISTS
+// ============================================================================
+ul, ol, dl {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  list-style: none;
+}
+
+dt {
+  font-weight: 600;
+}
+
+dd {
+  margin: 0;
+}
+
+// ============================================================================
+// LINKS
+// ============================================================================
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  background-color: transparent;
+  
+  &:visited {
+    color: inherit;
+  }
+  
+  &:focus-visible {
+    outline: 2px solid $orange-copper;
+    outline-offset: 2px;
+  }
+}
+
+// ============================================================================
+// FORM ELEMENTS
+// ============================================================================
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  &:focus-visible {
+    outline: 2px solid $orange-copper;
+    outline-offset: 2px;
+  }
+}
+
+input, select, textarea {
+  &:focus {
+    outline: none;
+  }
+  
+  &:focus-visible {
+    outline: 2px solid $orange-copper;
+    outline-offset: 2px;
+  }
+  
+  &::placeholder {
+    color: $text-muted;
+  }
+}
+
+input[type='text'],
+input[type='password'],
+input[type='email'],
+input[type='search'],
+input[type='number'],
+select,
+textarea {
+  background: $bg-secondary;
+  border: 1px solid $border-standard;
+  color: $text-primary;
+  padding: $spacing-md;
+  border-radius: $radius-sm;
+  
+  &:hover {
+    border-color: $border-heavy;
+  }
+  
+  &:focus {
+    border-color: $orange-copper;
+    background: $bg-tertiary;
+  }
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23cbd5e1' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+  cursor: pointer;
+}
+
+// ============================================================================
+// TABLE ELEMENTS
+// ============================================================================
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+
+thead {
+  background: $bg-secondary;
+}
+
+tbody tr {
+  &:nth-child(odd) {
+    background: $bg-tertiary;
+  }
+  
+  &:hover {
+    background: $bg-tertiary;
+  }
+}
+
+th, td {
+  padding: $spacing-md;
+  text-align: left;
+  border-bottom: 1px solid $border-standard;
+}
+
+th {
+  font-weight: 600;
+  color: $text-secondary;
+  background: $bg-secondary;
+}
+
+// ============================================================================
+// MEDIA ELEMENTS
+// ============================================================================
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* picture {
+} */
+
+// ============================================================================
+// VIDEO & IFRAME
+// ============================================================================
+video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+embed, object {
+  max-width: 100%;
+}
+
+// ============================================================================
+// CODE ELEMENTS
+// ============================================================================
+code, pre {
+  font-family: $font-mono;
+  font-size: 0.875em;
+  background: $bg-secondary;
+  color: $currency-gibs;
+  border-radius: $radius-sm;
+}
+
+code {
+  padding: 2px 6px;
+}
+
+pre {
+  padding: $spacing-md;
+  overflow-x: auto;
+  
+  code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
+}
+
+// ============================================================================
+// BLOCKQUOTE
+// ============================================================================
+blockquote {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+// ============================================================================
+// HORIZONTAL RULE
+// ============================================================================
+hr {
+  border: none;
+  border-top: 1px solid $border-standard;
+  margin: $spacing-lg 0;
+  height: 0;
+  overflow: visible;
+}
+
+// ============================================================================
+// ABBREVIATION
+// ============================================================================
+abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+// ============================================================================
+// DETAILS & SUMMARY
+// ============================================================================
+details {
+  cursor: pointer;
+  
+  summary {
+    list-style: none;
+    
+    /* &::-webkit-details-marker {
+      display: none;
+    } */
+    
+    &::before {
+      content: '▶ ';
+      margin-right: $spacing-sm;
+      display: inline-block;
+      transition: transform 200ms ease-out;
+    }
+  }
+  
+  &[open] summary::before {
+    transform: rotate(90deg);
+  }
+}
+
+// ============================================================================
+// SCROLLBAR STYLING (s&box specific)
+// ============================================================================
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: $bg-secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $border-heavy;
+  border-radius: 4px;
+  
+  &:hover {
+    background: $border-heavy;
+    opacity: 0.8;
+  }
+}
+
+// Firefox scrollbar
+* {
+  scrollbar-width: thin;
+  scrollbar-color: $border-heavy $bg-secondary;
+}
+
+// ============================================================================
+// S&BOX TEXT CUTTING FIX — Critical workaround for s&box rendering issues
+// ============================================================================
+// s&box has a known issue where text gets cut off at top/bottom of elements
+// Fix: Use fixed line-height in pixels (not percentages or relative values)
+// Apply .text-no-cut class to problematic text elements, or use line-height: 24px globally
+// ============================================================================
+
+// Global fix for all labels and text elements
+label,
+span,
+p,
+div {
+  /* Prevent text cutting by using fixed line-height in pixels */
+  line-height: 24px;
+}
+
+// Apply to specific problem areas
+.text-no-cut,
+.label,
+.ui-label,
+.stat-label,
+.weapon-name,
+.item-name,
+[class*="title"],
+[class*="label"] {
+  line-height: 24px !important;
+  min-height: 24px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ============================================================================
+// SELECTION
+// ============================================================================
+::selection {
+  background: $orange-copper;
+  color: $bg-primary;
+}
+
+::-moz-selection {
+  background: $orange-copper;
+  color: $bg-primary;
+}
+
+// ============================================================================
+// DISABLED STATE
+// ============================================================================
+:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  color: $text-muted;
+}
+
+// ============================================================================
+// S&BOX SPECIFIC QUIRKS
+// ============================================================================
+
+// Fix for s&box text cutting issue (mentioned in SkillTree tooltip)
+// Applied selectively where needed
+.text-no-cut {
+  line-height: 1.6;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  overflow: visible;
+}
+
+// Fix for line-height rendering in s&box
+.line-height-fix {
+  line-height: 24px;
+}
+
+// Prevent double-tap zoom on mobile-like interactions
+html {
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}
+
+// ============================================================================
+// UTILITY: CLEARFIX
+// ============================================================================
+.clearfix::after {
+  content: '';
+  display: table;
+  clear: both;
+}

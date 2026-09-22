@@ -1,0 +1,775 @@
+// ============================================================================
+// MainMenu Component Styles
+// ============================================================================
+// Multi-tab menu (Play / Server Browser / Options)
+@import "../_design-system.scss";
+@import "../_mixins.scss";
+@import "../_animations.scss";
+
+.menu-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: $bg-primary;
+    backdrop-filter: blur(8px);
+    flex-direction: row;
+    font-family: $font-body;
+    color: $text-primary;
+}
+
+// ============================================================================
+// NAVIGATION BAR (Left Side)
+// ============================================================================
+.nav-bar {
+    width: 250px;
+    background-color: rgba(0, 0, 0, 0.5);
+    flex-direction: column;
+    padding: $spacing-2xl;
+    border-right: 1px solid $border-subtle;
+
+    .logo {
+        font-size: $fs-h2;
+        font-weight: 900;
+        color: $orange-copper;
+        margin-bottom: $spacing-3xl;
+        font-family: $font-heading;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .nav-buttons {
+        flex-direction: column;
+        gap: $spacing-lg;
+        flex-grow: 1;
+    }
+
+    .btn {
+        padding: $spacing-md $spacing-lg;
+        font-size: $fs-body-lg;
+        color: $text-secondary; /* Changed from $text-tertiary for better visibility */
+        cursor: pointer;
+        transition: all 200ms ease-out;
+        border-radius: $radius-sm;
+        font-family: $font-body;
+        font-weight: 600;
+
+        &:hover {
+            color: $text-primary;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        &.active {
+            color: $text-primary;
+            background-color: rgba($orange-copper, 0.15);
+            border-left: 4px solid $orange-copper;
+            padding-left: calc($spacing-lg - 4px);
+        }
+
+        &.quit {
+            color: $status-critical;
+
+            &:hover {
+                background-color: rgba($status-critical, 0.1);
+                border-left: 4px solid $status-critical;
+                padding-left: calc($spacing-lg - 4px);
+            }
+        }
+    }
+}
+
+// ============================================================================
+// MAIN CONTENT AREA
+// ============================================================================
+.main-content {
+    flex-grow: 1;
+    flex-direction: row;
+    padding: $spacing-3xl;
+    gap: $spacing-2xl;
+}
+
+// ============================================================================
+// TAB 1: PLAY (Master/Detail Layout)
+// ============================================================================
+
+.master-list {
+    width: 350px;
+    flex-direction: column;
+    gap: $spacing-lg;
+
+    .btn-new {
+        flex-shrink: 0;
+        background-color: $status-success;
+        color: $text-primary;
+        padding: $spacing-lg;
+        border-radius: $radius-md;
+        justify-content: center;
+        align-items: center;
+        font-weight: 700;
+        font-size: $fs-body-lg;
+        cursor: pointer;
+        transition: transform 100ms ease-out, background-color 100ms ease-out;
+        font-family: $font-body;
+
+        &:hover {
+            background-color: lighten($status-success, 10%);
+            transform: scale(1.02);
+        }
+    }
+
+    .save-list {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+        overflow-y: scroll;
+        padding-right: $spacing-md; // <--- C'est ça qui empêche le bord droit de disparaître au hover
+        padding-left: $spacing-xs;
+
+        .loading {
+            padding: $spacing-xl;
+            color: $text-muted;
+            display: flex;
+            justify-content: center;
+            font-family: $font-body;
+        }
+
+        .save-card {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            background-color: $bg-hud-overlay;
+            padding: $spacing-lg;
+            border-radius: $radius-md;
+            cursor: pointer;
+            border: 1px solid $border-subtle;
+            transition: all 200ms ease-out;
+            font-family: $font-body;
+            gap: $spacing-md;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+                border-color: rgba(255, 255, 255, 0.15);
+                transform: translateX(4px);
+            }
+
+            &.selected {
+                background-color: rgba($orange-copper, 0.1);
+                border: 1px solid $orange-copper;
+                @include metal-glow($orange-copper);
+                transform: translateX(8px);
+            }
+
+            .card-header {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: baseline;
+
+                .save-name {
+                    font-weight: 700;
+                    font-size: $fs-body-lg;
+                    color: $text-primary;
+                    @include text-truncate();
+                    max-width: 60%;
+                }
+
+                .save-date {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 4px;
+                    font-size: $fs-tiny;
+                    color: $text-tertiary;
+                    font-family: $font-mono;
+
+                    .time-val {
+                        color: $text-secondary;
+                        font-weight: 700;
+                    }
+                }
+            }
+
+            .card-stats {
+                display: flex;
+                flex-direction: row;
+                gap: $spacing-sm;
+                flex-wrap: wrap;
+
+                .stat-pill {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    background-color: $bg-tertiary;
+                    padding: $spacing-xs $spacing-sm;
+                    border-radius: $radius-sm;
+                    gap: $spacing-xs;
+                    border: 1px solid $border-standard;
+
+                    i {
+                        font-size: $fs-icon-sm;
+                        color: $text-secondary;
+                    }
+                    span {
+                        font-size: $fs-extra-small;
+                        font-weight: 600;
+                        color: $text-primary;
+                        font-family: $font-mono;
+                    }
+
+                    &.scrap i {
+                        color: $currency-gibs;
+                    }
+                    &.prestige i {
+                        color: $currency-xp;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.detail-view {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1.5;
+    background-color: $bg-hud-overlay;
+    border-radius: $radius-md;
+    border: 1px solid $border-subtle;
+    padding: $spacing-2xl;
+    gap: $spacing-xl;
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+        color: $text-secondary;
+        gap: $spacing-md;
+
+        i {
+            font-size: $fs-display-2xl;
+            opacity: 0.2;
+        }
+        span {
+            font-size: $fs-body-lg;
+            font-weight: 800;
+            letter-spacing: 2px;
+            font-family: $font-heading;
+            text-transform: uppercase;
+        }
+    }
+
+    .detail-header {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        gap: $spacing-md;
+
+        .input-name {
+            font-size: $fs-h1;
+            background-color: transparent;
+            border: none;
+            border-bottom: 2px solid $border-subtle;
+            color: $text-primary;
+            padding: $spacing-sm 0;
+            width: 100%;
+            font-family: $font-heading;
+            font-weight: 900;
+            &:focus {
+                border-bottom: 2px solid $orange-copper;
+                outline: none;
+            }
+        }
+
+        .section-tag {
+            font-size: $fs-body;
+            font-family: $font-heading;
+            font-weight: 800;
+            color: $orange-copper;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .title-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: $spacing-md;
+
+            .factory-title {
+                font-size: $fs-display-xl;
+                font-weight: 900;
+                font-family: $font-heading;
+                color: $text-primary;
+            }
+
+            .version-tag {
+                background-color: $bg-tertiary;
+                padding: 4px 8px;
+                border-radius: $radius-sm;
+                font-size: $fs-body-sm;
+                font-weight: 700;
+                color: $orange-copper;
+                font-family: $font-mono;
+            }
+        }
+
+        .sandbox-warning {
+            display: flex;
+            flex-direction: row;
+            background-color: rgba($status-critical, 0.15);
+            border: 1px solid $status-critical;
+            color: $status-critical;
+            padding: $spacing-md $spacing-lg;
+            border-radius: $radius-sm;
+            font-weight: 700;
+            align-items: center;
+            gap: $spacing-sm;
+            font-family: $font-body;
+            font-size: $fs-body;
+        }
+    }
+
+    .detail-body {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        gap: $spacing-xl;
+        overflow-y: scroll;
+
+        // --- SECTION KPI (SCALÉE COMME LE CODEX) ---
+        .kpi-row {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            gap: $spacing-md;
+
+            .kpi-card {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                background-color: $bg-tertiary;
+                border: 1px solid $border-standard;
+                border-radius: $radius-md;
+                padding: $spacing-lg;
+                justify-content: center;
+
+                .kpi-label {
+                    font-size: $fs-badge;
+                    text-transform: uppercase;
+                    color: $text-secondary;
+                    font-weight: 800;
+                    font-family: $font-heading;
+                    margin-bottom: $spacing-sm;
+                }
+
+                .kpi-val {
+                    font-size: $fs-display-lg;
+                    font-weight: 900;
+                    color: $text-primary;
+                    font-family: $font-mono;
+                }
+
+                &.gold {
+                    border-color: $currency-gibs;
+                    background-color: rgba(212, 175, 55, 0.05);
+                    .kpi-val {
+                        color: $currency-gibs;
+                    }
+                }
+            }
+        }
+
+        // --- SECTIONS INFOS (ANALYTICS ET SETTINGS) ---
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid $border-subtle;
+            border-radius: $radius-sm;
+            padding: $spacing-lg;
+
+            .section-header {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: $spacing-sm;
+                margin-bottom: $spacing-md;
+
+                i {
+                    font-size: $fs-icon-md;
+                    color: $orange-copper;
+                }
+                span {
+                    font-family: $font-heading;
+                    font-size: $fs-body;
+                    font-weight: 800;
+                    color: $text-secondary;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+            }
+
+            .info-row {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: $spacing-sm 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+                &:last-child {
+                    border-bottom: none;
+                    padding-bottom: 0;
+                }
+
+                .row-label {
+                    font-family: $font-body;
+                    font-size: $fs-body;
+                    color: $text-secondary;
+                    font-weight: 500;
+                }
+                .row-val {
+                    font-family: $font-mono;
+                    font-size: $fs-body-lg;
+                    color: $text-primary;
+                    font-weight: 700;
+                }
+
+                // Pour la partie Settings
+                .mock-dropdown {
+                    background-color: $bg-tertiary;
+                    padding: $spacing-md $spacing-xl;
+                    border-radius: $radius-sm;
+                    cursor: pointer;
+                    font-weight: 700;
+                    font-family: $font-body;
+                    color: $text-primary;
+                    border: 1px solid $border-standard;
+                    transition: background-color 200ms ease-out;
+
+                    &:hover {
+                        background-color: $blue-slate-dark;
+                        border-color: $blue-slate;
+                    }
+                }
+
+                .player-selector {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+                    gap: $spacing-sm;
+                    background-color: $bg-tertiary;
+                    border-radius: $radius-sm;
+                    border: 1px solid $border-standard;
+
+                    .btn-adjust {
+                        padding: $spacing-xs $spacing-xl;
+                        cursor: pointer;
+                        font-weight: 700;
+                        font-size: $fs-icon-md;
+                        color: $text-primary;
+                        font-family: $font-body;
+                        transition: background-color 200ms ease-out;
+
+                        &:hover {
+                            background-color: $blue-slate-dark;
+                        }
+                    }
+
+                    .val {
+                        flex: 1;
+                        text-align: center;
+                        font-weight: 900;
+                        font-size: $fs-h3;
+                        color: $text-primary;
+                        font-family: $font-mono;
+                        padding-left: $spacing-sm;
+                        padding-right: $spacing-sm;
+                    }
+                }
+            }
+        }
+    }
+
+    .detail-footer {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        flex-shrink: 0;
+        padding-top: $spacing-md;
+
+        .btn-launch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: $orange-copper;
+            color: $bg-primary;
+            padding: $spacing-lg $spacing-2xl;
+            font-size: $fs-body-lg;
+            font-weight: 900;
+            border-radius: $radius-md;
+            cursor: pointer;
+            font-family: $font-heading;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition:
+                transform 100ms ease-out,
+                background-color 100ms ease-out,
+                opacity 100ms ease-out;
+
+            &:hover {
+                transform: scale(1.05);
+                background-color: $orange-copper-hover;
+            }
+
+            &.disabled {
+                background-color: $bg-tertiary;
+                color: $text-secondary;
+                opacity: 0.6;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+        }
+    }
+}
+// ============================================================================
+// TAB 2: SERVER BROWSER
+// ============================================================================
+.server-browser {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: $bg-hud-overlay;
+    border-radius: $radius-md;
+    border: 1px solid $border-subtle;
+    padding: $spacing-2xl;
+
+    .browser-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: $spacing-2xl;
+        border-bottom: 1px solid $border-subtle;
+        padding-bottom: $spacing-lg;
+
+        h2 {
+            font-size: $fs-h1;
+            margin: 0;
+            color: $text-primary;
+            font-weight: 900;
+            font-family: $font-heading;
+        }
+
+        .btn-refresh {
+            background-color: $bg-tertiary;
+            padding: $spacing-md $spacing-xl;
+            border-radius: $radius-sm;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 200ms ease-out;
+            border: 1px solid $border-standard;
+            color: $text-primary;
+            font-family: $font-body;
+
+            &:hover {
+                background-color: $blue-slate-dark;
+                border-color: $blue-slate;
+            }
+        }
+    }
+
+    .lobby-list {
+        flex-direction: column;
+        gap: $spacing-md;
+        overflow-y: scroll;
+
+        .lobby-card {
+            flex-shrink: 0;
+            flex-direction: row;
+            align-items: center;
+            background-color: $bg-secondary;
+            padding: $spacing-lg $spacing-xl;
+            border-radius: $radius-md;
+            border: 1px solid $border-standard;
+            transition: border-color 200ms ease-out;
+            font-family: $font-body;
+
+            &:hover {
+                border-color: $orange-copper;
+            }
+
+            .lobby-name {
+                font-size: $fs-body-lg;
+                font-weight: 700;
+                flex-grow: 1;
+                color: $text-primary;
+            }
+
+            .lobby-players {
+                color: $text-secondary; /* Changed from $text-tertiary */
+                margin-right: $spacing-2xl;
+                font-size: $fs-body-lg;
+                font-family: $font-mono;
+            }
+
+            .btn-join {
+                background-color: $status-success;
+                color: $text-primary;
+                padding: $spacing-md $spacing-2xl;
+                font-size: $fs-body-lg;
+                font-weight: 700;
+                border-radius: $radius-sm;
+                cursor: pointer;
+                transition:
+                    transform 100ms ease-out,
+                    background-color 100ms ease-out;
+                font-family: $font-body;
+
+                &:hover {
+                    background-color: lighten($status-success, 10%);
+                    transform: scale(1.05);
+                }
+            }
+        }
+    }
+}
+
+// ============================================================================
+// EMPIRE DASHBOARD (Stats)
+// ============================================================================
+.empire-dashboard {
+    flex: 1;
+    padding: $spacing-3xl;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-3xl;
+    overflow-y: scroll;
+    background-color: $bg-primary;
+
+    .dashboard-section {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-lg;
+        flex-shrink: 0;
+
+        .section-title {
+            font-size: $fs-h3;
+            color: $text-tertiary;
+            font-weight: 800;
+            letter-spacing: 2px;
+            font-family: $font-heading;
+            text-transform: uppercase;
+            border-bottom: 1px solid $border-standard;
+            padding-bottom: $spacing-md;
+        }
+
+        // Le conteneur principal vertical
+        .kpi-grid {
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-xl; // Espace vertical entre les lignes
+        }
+
+        // Chaque ligne horizontale
+        .kpi-row {
+            display: flex;
+            flex-direction: row;
+            gap: $spacing-xl; // Espace horizontal entre les cartes
+            // PLUS DE FLEX-WRAP !
+
+            .kpi-card {
+                flex: 1; // Magie absolue : s&box partage l'espace équitablement
+
+                background: $bg-secondary;
+                border: 1px solid $border-standard;
+                border-radius: $radius-md;
+                display: flex;
+                flex-direction: column;
+                gap: $spacing-md;
+                transition: transform 200ms ease-out;
+
+                &:hover {
+                    transform: translateY(-2px);
+                }
+
+                .kpi-label {
+                    color: $text-secondary;
+                    font-size: $fs-body-lg;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    font-family: $font-body;
+                }
+
+                .kpi-val {
+                    color: $text-primary;
+                    font-size: $fs-display-icon;
+                    font-weight: 900;
+                    font-family: $font-mono;
+                }
+
+                // Les classes de taille ne gèrent plus que le padding et la police
+                &.kpi-large {
+                    padding: $spacing-2xl;
+                    .kpi-val {
+                        font-size: $fs-display-xl;
+                    }
+                }
+
+                &.kpi-medium {
+                    padding: $spacing-2xl;
+                }
+
+                &.kpi-small {
+                    padding: $spacing-xl;
+                    .kpi-label {
+                        font-size: $fs-body-sm;
+                    }
+                    .kpi-val {
+                        font-size: $fs-display-md;
+                    }
+                }
+
+                // ==============================
+                // THÈMES
+                // ==============================
+                &.gold {
+                    border-color: $currency-gibs;
+                    background-color: rgba(212, 175, 55, 0.05);
+                    .kpi-val {
+                        color: $currency-gibs;
+                    }
+                }
+
+                &.buff {
+                    border-left: 4px solid $status-success;
+                    .kpi-val {
+                        color: $status-success;
+                    }
+                }
+
+                &.combat {
+                    border-left: 4px solid $status-critical;
+                    .kpi-val {
+                        color: $status-critical;
+                    }
+                }
+
+                &.info {
+                    border-left: 4px solid $currency-xp;
+                    .kpi-val {
+                        color: $currency-xp;
+                    }
+                }
+
+                &.magic {
+                    border-left: 4px solid $tag-magical;
+                    .kpi-val {
+                        color: $tag-magical;
+                    }
+                }
+            }
+        }
+    }
+}

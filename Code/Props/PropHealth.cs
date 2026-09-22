@@ -1,10 +1,9 @@
-using Microsoft.VisualBasic;
 using Sandbox;
 using System;
 
 public sealed class PropHealth : Component, Component.IDamageable
 {
-    [Sync] public float CurrentHealth { get; set; }
+    [Property] public float CurrentHealth { get; set; }
     [Property] public float TotalValue { get; set; }
     [Property] public int FinalGibCount { get; set; }
     [Property] public float ValuePerGib { get; set; }
@@ -15,82 +14,170 @@ public sealed class PropHealth : Component, Component.IDamageable
 
     [Property] public BalanceConfig config { get; set; }
 
-    public void Initialize(PropDefinition data)
+    private bool _isFlashing = false;
+
+    // Track last attacker for stats
+    private string _lastAttackerSteamId = "";
+    private string _lastWeaponId = "";
+
+    protected override void OnAwake()
+    {
+        if ( GameSettings.Instance != null )
+        {
+            GameSettings.Instance.OnSettingsChanged += OnSettingsChanged;
+        }
+    }
+
+    protected override void OnDestroy()
+    {
+        if ( GameSettings.Instance != null )
+        {
+            GameSettings.Instance.OnSettingsChanged -= OnSettingsChanged;
+        }
+    }
+
+    public void Initialize( PropDefinition data )
     {
         config = BalanceConfig.Instance;
-        if (config == null)
+        if ( config == null )
         {
-            Log.Error("Aucun fichier BalanceConfig trouvé dans les assets !");
+            Log.Error( "[PropHealth] ERROR: BalanceConfig not found. Ensure BalanceConfig.asset is in your project and loaded." );
             return;
         }
         Data = data;
         GibPrefab = config.GibPrefab;
 
-        // 1. HP Calcul : (base_hp * (hp_mult^(tier-1))) * rarity_mod
-        float rawHP = config.BaseHP * MathF.Pow(config.HPMult, data.Tier - 1) * data.RarityMod;
-        CurrentHealth = MathF.Round(rawHP);
-
-        // 2. Value Calcul : (base_value * (value_mult^(tier-1))) * rarity_mod * jackpot_bonus
-        float jackpot = data.RarityMod >= 3 ? config.JackpotBonus : 1.0f;
-        float rawValue = config.BaseValue * MathF.Pow(config.ValueMult, data.Tier - 1) * (data.RarityMod * jackpot);
-        TotalValue = MathF.Round(rawValue);
-
-        // 3. Gib Count Calcul : base_gibs + ((tier-1) * gibs_per_tier), clamped at max_gibs
-        int desiredGibs = config.BaseGibs + ((data.Tier - 1) * config.GibsPerTier);
-        FinalGibCount = Math.Clamp(desiredGibs, 0, config.MaxGibs);
-
-        // 4. Value per Gib : TotalValue / FinalGibCount (with safety check)
-        ValuePerGib = FinalGibCount > 0 ? (float)Math.Round(TotalValue / FinalGibCount, 2) : TotalValue;
+        CurrentHealth = PropStatsCalculator.GetHealth( data );
+        TotalValue = PropStatsCalculator.GetValue( data );
+        FinalGibCount = PropStatsCalculator.GetGibCount( data );
+        ValuePerGib = PropStatsCalculator.GetValuePerGib( data );
     }
 
-    public void OnDamage(in DamageInfo damage)
+    public void OnDamage( in DamageInfo damage )
     {
-        if (!damage.Tags.Has("player") && !damage.Tags.Has("machine"))
+        if ( !damage.Tags.Has( "player" ) && !damage.Tags.Has( "machine" ) && !damage.Tags.Has( "explosion" ) && !damage.Tags.Has( "piercing" ) )
         {
             return;
         }
-        Log.Info($"PropHealth: Received {damage.Damage} damage. Tags = {string.Join(", ", damage.Tags)}");
+        Log.Info( $"[PropHealth] Damage received: {damage.Damage} from tags: {string.Join( ", ", damage.Tags )}" );
+        if ( damage.Damage <= 0 ) return;
+        if ( GameStats.CanSendToSbox( Scene ) && damage.Damage >= 10f * CurrentHealth )
+        {
+            Sandbox.Services.Achievements.Unlock( "scrt_overkill" );
+        }
         CurrentHealth -= damage.Damage;
-        FlashWhite();
-        if (CurrentHealth <= 0) OnBreak();
+        FlashDamage();
+        if ( CurrentHealth <= 0 ) OnBreak();
     }
 
-    public async void FlashWhite()
+    public void OnDamageDealt( string steamId, string weaponId, double damage, bool isCrit )
     {
-        var renderer = GameObject.Components.Get<ModelRenderer>(FindMode.EverythingInSelfAndDescendants);
-        if (renderer == null) return;
+        _lastAttackerSteamId = steamId;
+        _lastWeaponId = weaponId;
+
+        // Call stats immediately for damage dealt event, passing isCrit info
+        GameStats.OnDamageDealt( Scene, steamId, weaponId, damage, isCrit );
+    }
+
+    private Color GetFlashColor()
+    {
+
+        if ( Data.IsJackpot || Data.RarityMod >= 10 ) return (Color)Color.Parse( "#ffde23" );
+
+        if ( Data.RarityMod > 6 ) return (Color)Color.Parse( "#ff0000" );
+
+        if ( Data.RarityMod > 3 ) return (Color)Color.Parse( "#002fff" );
+
+        return (Color)Color.Parse( "#FFFFFF" );
+
+    }
+
+    private Color GetDarkFlashColor()
+    {
+        if ( Data.IsJackpot || Data.RarityMod >= 10 ) return (Color)Color.Parse( "#78680c" );
+
+        if ( Data.RarityMod > 6 ) return (Color)Color.Parse( "#5c0000" );
+
+        if ( Data.RarityMod > 3 ) return (Color)Color.Parse( "#0b1a5e" );
+
+        return (Color)Color.Parse( "#000000" );
+    }
+
+    public async void FlashDamage()
+    {
+        if ( !GameSettings.Instance?.Gameplay.EnablePropHitFlashes ?? true ) return;
+        if ( _isFlashing ) return;
+
+        var renderer = GameObject.Components.Get<ModelRenderer>( FindMode.EverythingInSelfAndDescendants );
+        if ( renderer == null ) return;
+
+        _isFlashing = true;
 
         var originalMat = renderer.MaterialOverride;
-        renderer.MaterialOverride = Material.Load("materials/dev/primary_white.vmat");
-        await Task.DelayRealtime(50);
+        var originalTint = renderer.Tint;
+
+        renderer.MaterialOverride = Material.Load( "materials/dev/primary_white.vmat" );
+        if ( GameSettings.Instance?.Gameplay.EnableDarkPropHitFlashes ?? false )
+        {
+            renderer.Tint = GetDarkFlashColor();
+        }
+        else
+        {
+            renderer.Tint = GetFlashColor();
+        }
+
+        await Task.DelayRealtime( 50 );
+
+        if ( !renderer.IsValid() || !GameObject.IsValid() ) return;
+
         renderer.MaterialOverride = originalMat;
+        renderer.Tint = originalTint;
+        _isFlashing = false;
+    }
+
+    private void OnSettingsChanged()
+    {
+        // Settings changed - no immediate action needed for PropHealth
+        // Flash behavior will use updated settings on next damage
     }
 
     private void OnBreak()
     {
-        // 1. Check if there are SubProps to spawn instead of gibs
-        if (Data.SubProps != null && Data.SubProps.Count > 0)
+        // Achievements
+        if ( GameStats.CanSendToSbox( Scene ) )
         {
-            foreach (var drop in Data.SubProps)
+            Sandbox.Services.Achievements.Unlock( "first_blood" );
+            if ( Data.IsJackpot )
             {
-                if (drop.Prop == null) continue;
+                Sandbox.Services.Achievements.Unlock( "scrt_jackpot" );
+            }
+        }
 
-                for (int i = 0; i < drop.Count; i++)
+        // Check if there are SubProps to spawn instead of gibs
+        if ( Data.SubProps != null && Data.SubProps.Count > 0 )
+        {
+            foreach ( var drop in Data.SubProps )
+            {
+                if ( drop.Prop == null ) continue;
+
+                for ( int i = 0; i < drop.Count; i++ )
                 {
-                    SpawnChild(drop.Prop);
+                    SpawnChild( drop.Prop );
                 }
             }
         }
-        // 2. Else, break into gibs
+        // Else, break into gibs
         else
         {
             BreakIntoGibs();
         }
 
+        GameStats.OnPropDestroyed( Scene, _lastAttackerSteamId, Data.PropID, _lastWeaponId, TotalValue, FinalGibCount );
+
         GameObject.Destroy();
     }
 
-    private void SpawnChild(PropDefinition childData)
+    private void SpawnChild( PropDefinition childData )
     {
         var childGo = new GameObject();
         childGo.WorldPosition = WorldPosition + Vector3.Random * 15f;
@@ -105,40 +192,87 @@ public sealed class PropHealth : Component, Component.IDamageable
 
         // Rigidbody
         var rb = childGo.AddComponent<Rigidbody>();
-        rb.Velocity = Vector3.Random * Game.Random.Float(50f, 150f) + Vector3.Up * Game.Random.Float(50f, 100f);
+        rb.Velocity = Vector3.Random * Game.Random.Float( 50f, 150f ) + Vector3.Up * Game.Random.Float( 50f, 100f );
 
         // PropHealth
         var health = childGo.AddComponent<PropHealth>();
-        health.Initialize(childData);
+        health.Initialize( childData );
         health.GibPrefab = config.GibPrefab;
     }
 
     private void BreakIntoGibs()
     {
-        if (GibPrefab == null)
+        if ( GibPrefab == null )
         {
-            Log.Warning($"PropHealth: GibPrefab is not set on {GameObject.Name}, skipping gib spawn.");
+            Log.Warning( $"[PropHealth] WARNING: GibPrefab not set on {GameObject.Name}. Gib spawning disabled." );
             return;
         }
 
-        for (int i = 0; i < FinalGibCount; i++)
+        Color gibColor = GetFlashColor();
+
+        for ( int i = 0; i < FinalGibCount; i++ )
         {
+            // Check if we've reached max gibs limit
+            if ( !( GibsManager.Instance?.CanSpawnGib() ?? true ) )
+            {
+                Log.Warning( $"[PropHealth] Max gibs count reached ({GibsManager.Instance?.CurrentGibCount}/{GibsManager.Instance?.MaxGibsCount}). Stopping gib spawns." );
+                break;
+            }
+
             var randomDir = new Vector3(
-                Game.Random.Float(-1f, 1f),
-                Game.Random.Float(-1f, 1f),
-                Game.Random.Float(0f, 0.4f)
+                Game.Random.Float( -1f, 1f ),
+                Game.Random.Float( -1f, 1f ),
+                Game.Random.Float( 0f, 0.4f )
             ).Normal;
 
-            var spawnOffset = randomDir * Game.Random.Float(5f, 15f) + Vector3.Up * Game.Random.Float(5f, 15f);
-            var gib = GibPrefab.Clone(WorldPosition + spawnOffset);
+            float explosionForce = Data.IsJackpot ? 3.0f : 1.0f;
+            var spawnOffset = randomDir * Game.Random.Float( 5f, 15f ) * explosionForce + Vector3.Up * Game.Random.Float( 5f, 15f ) * explosionForce;
 
-            var scrapItem = gib.Components.Get<ResourceGib>(FindMode.EverythingInSelfAndDescendants);
-            if (scrapItem == null) continue;
+            var gib = GibPrefab.Clone( WorldPosition + spawnOffset );
 
-            scrapItem.Initialize(ResourceType.Scrap, ValuePerGib, randomDir);
+            var renderer = gib.Components.Get<ModelRenderer>( FindMode.EverythingInSelfAndDescendants );
+            if ( renderer != null )
+            {
+                renderer.Tint = gibColor;
+            }
 
+            var scrapItem = gib.Components.Get<ResourceGib>( FindMode.EverythingInSelfAndDescendants );
+            if ( scrapItem == null ) continue;
+
+            var randomResourceType = Data.Types.Count > 0 ? Data.Types[Game.Random.Int( 0, Data.Types.Count - 1 )] : ResourceType.Wood;
+
+            scrapItem.Initialize( randomResourceType, ValuePerGib, randomDir );
+        }
+
+        if ( Data.IsJackpot )
+        {
+            TriggerJackpotEffects();
         }
 
         GameObject.Destroy();
+    }
+
+    private void TriggerJackpotEffects()
+    {
+        // 1. LE SON (KACHING !)
+        // Joue un son très distinctif, fort, et satisfaisant.
+        // Remplace "ui.coins" par le nom d'un son de ta bibliothèque S&box.
+        Sound.Play( "ui.coins", WorldPosition );
+        Sound.Play( "explosion.small", WorldPosition ); // Un petit boom pour le côté impact
+
+        // 2. LES PARTICULES (Feu d'artifice)
+        // Spawn un système de particules (des étincelles dorées ou des confettis)
+        // Assure-toi d'avoir un petit prefab de particules prêt dans tes assets.
+        /* var vfx = ParticlePrefab.Clone(WorldPosition);
+        vfx.DestroyAsync(2f); // Se détruit tout seul après 2 secondes
+        */
+
+        // 3. LE TEXTE FLOTTANT (La cerise sur le gâteau)
+        // Montre au joueur COMBIEN il vient de faire exploser d'un coup.
+        float displayValue = PropStatsCalculator.GetValue( Data );
+        Log.Info( $"[JACKPOT] {Data.PropID} destroyed for {displayValue} Scrap!" );
+
+        // Si tu as un système de Floating Text :
+        // FloatingText.Spawn(WorldPosition + Vector3.Up * 30f, $"JACKPOT! {displayValue}", Color.Parse("#FFD700"));
     }
 }
